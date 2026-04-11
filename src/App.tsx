@@ -367,7 +367,7 @@ const Hero = () => {
       <div className="absolute bottom-16 left-16 hidden lg:block">
         <div className="border border-white/10 p-6 flex flex-col gap-3">
           <span className="text-[9px] uppercase tracking-[0.5em] opacity-30">Est. 2022</span>
-          <span className="text-[10px] font-mono opacity-50 tracking-widest">09.58.12 // KERALA</span>
+          <span className="text-[10px] font-mono opacity-50 tracking-widest">09/04/2026 // KERALA</span>
         </div>
       </div>
     </ScrollSection>
