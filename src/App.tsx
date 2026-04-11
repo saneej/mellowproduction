@@ -130,7 +130,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
         <a href="#" className="flex items-center group">
           <img 
-            src="https://i.postimg.cc/R6fB2rQ5/header.png" 
+            src="https://i.postimg.cc/j250f7G7/logo-white.png" 
             alt="Mellow Production" 
             className="h-8 md:h-10 w-auto object-contain"
             referrerPolicy="no-referrer"
@@ -673,7 +673,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center">
           <img 
-            src="https://i.postimg.cc/R6fB2rQ5/header.png" 
+            src="https://i.postimg.cc/j250f7G7/logo-white.png" 
             alt="Mellow Production" 
             className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
             referrerPolicy="no-referrer"
