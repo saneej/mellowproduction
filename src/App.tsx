@@ -8,7 +8,8 @@ import {
   CheckCircle2, 
   ChevronRight,
   Menu,
-  X
+  X,
+  Phone
 } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 
@@ -676,6 +677,12 @@ const Contact = () => {
                 <Mail size={18} />
               </div>
               <span className="text-lg md:text-xl font-bold">hello@mellowproduction.in</span>
+            </a>
+            <a href="tel:+919633384858" className="flex items-center gap-4 group">
+              <div className="w-10 h-10 md:w-12 md:h-12 border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-brand-red transition-all">
+                <Phone size={18} />
+              </div>
+              <span className="text-lg md:text-xl font-bold">+91 96 33 38 48 58</span>
             </a>
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 border border-white/20 flex items-center justify-center">
