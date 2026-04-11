@@ -148,9 +148,10 @@ const Navbar = () => {
           ))}
           <a 
             href="#contact" 
-            className="text-[10px] font-bold uppercase tracking-[0.4em] px-8 py-3 border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
+            className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
+            aria-label="Contact"
           >
-            Contact
+            <Mail size={16} />
           </a>
         </div>
 
@@ -266,21 +267,21 @@ const Hero = () => {
             hidden: { opacity: 0, y: 20 },
             visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
           }}
-          className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center"
+          className="flex gap-4 justify-center items-center"
         >
           <a 
             href="#contact" 
-            className="w-full sm:w-auto group flex items-center justify-center gap-4 px-10 py-5 bg-white text-brand-red font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-transparent hover:text-white border border-white transition-all duration-500"
+            className="w-14 h-14 group flex items-center justify-center bg-white text-brand-red hover:bg-transparent hover:text-white border border-white transition-all duration-500"
+            aria-label="Contact Us"
           >
-            Contact Us
-            <ArrowRight className="group-hover:translate-x-2 transition-transform" size={14} />
+            <Mail size={20} />
           </a>
           <a 
             href="#works" 
-            className="w-full sm:w-auto flex items-center justify-center gap-4 px-10 py-5 border border-white/20 font-bold uppercase tracking-[0.3em] text-[10px] hover:border-white transition-all duration-500"
+            className="w-14 h-14 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
+            aria-label="View Works"
           >
-            View Works
-            <Play size={12} fill="currentColor" />
+            <Play size={18} fill="currentColor" />
           </a>
         </motion.div>
       </motion.div>
@@ -458,10 +459,10 @@ const Portfolio = () => {
             href="https://www.instagram.com/mellow.production_/" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="flex items-center gap-3 text-lg font-bold uppercase tracking-widest hover:opacity-60 transition-opacity"
+            className="w-16 h-16 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
+            aria-label="Instagram"
           >
-            <Instagram size={24} />
-            @mellow.production_
+            <Instagram size={32} />
           </a>
         </motion.div>
       </div>
@@ -648,12 +649,15 @@ const Contact = () => {
               ></textarea>
             </div>
 
-            <button 
-              type="submit"
-              className="w-full py-5 bg-white text-brand-red font-extrabold uppercase tracking-widest hover:bg-transparent hover:text-white border border-white transition-all"
-            >
-              Send via WhatsApp
-            </button>
+            <div className="flex justify-end">
+              <button 
+                type="submit"
+                className="w-16 h-16 bg-white text-brand-red flex items-center justify-center hover:bg-transparent hover:text-white border border-white transition-all"
+                aria-label="Send via WhatsApp"
+              >
+                <ArrowRight size={24} />
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -668,9 +672,8 @@ const Footer = () => {
         <div className="text-xl font-extrabold tracking-tighter">MELLOW PRODUCTION</div>
         
         <div className="flex gap-8">
-          <a href="https://www.instagram.com/mellow.production_/" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity flex items-center gap-2">
+          <a href="https://www.instagram.com/mellow.production_/" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity" aria-label="Instagram">
             <Instagram size={20} />
-            <span className="text-[10px] uppercase tracking-widest font-bold">Instagram</span>
           </a>
         </div>
         
