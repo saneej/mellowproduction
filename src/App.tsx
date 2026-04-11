@@ -15,6 +15,29 @@ import React, { useState, useRef, useEffect } from "react";
 
 // --- Components ---
 
+const AnimatedStroke = ({ 
+  className = "", 
+  direction = "horizontal", 
+  delay = 0, 
+  duration = 1.5 
+}: { 
+  className?: string; 
+  direction?: "horizontal" | "vertical"; 
+  delay?: number; 
+  duration?: number;
+}) => {
+  return (
+    <motion.div
+      initial={direction === "horizontal" ? { scaleX: 0 } : { scaleY: 0 }}
+      whileInView={direction === "horizontal" ? { scaleX: 1 } : { scaleY: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration, delay, ease: [0.16, 1, 0.3, 1] }}
+      style={{ originX: 0, originY: 0 }}
+      className={`bg-white/10 pointer-events-none ${className}`}
+    />
+  );
+};
+
 const Magnetic: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -105,8 +128,8 @@ const WipeText = ({ text, className = "" }: { text: string; className?: string }
         whileInView={{ width: "0%" }}
         viewport={{ once: true }}
         transition={{
-          delay: 2.5,
-          duration: 2,
+          delay: 1.5,
+          duration: 1.5,
           ease: [0.645, 0.045, 0.355, 1]
         }}
       >
@@ -127,8 +150,8 @@ const WipeText = ({ text, className = "" }: { text: string; className?: string }
         whileInView={{ width: "0%" }}
         viewport={{ once: true }}
         transition={{
-          delay: 1,
-          duration: 2,
+          delay: 0.5,
+          duration: 1.5,
           ease: [0.645, 0.045, 0.355, 1]
         }}
       >
@@ -145,15 +168,14 @@ const ScrollSection = ({ children, id, className = "" }: { children: React.React
     offset: ["start start", "end start"]
   });
 
-  const blur = useTransform(scrollYProgress, [0, 1], ["0px", "10px"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
 
   return (
     <motion.section
       id={id}
       ref={ref}
-      style={{ filter: `blur(${blur})`, opacity, scale }}
+      style={{ opacity, scale }}
       className={`relative ${className}`}
     >
       {children}
@@ -192,6 +214,7 @@ const Navbar = () => {
             alt="Mellow Production" 
             className="w-[54px] h-[44px] object-contain"
             referrerPolicy="no-referrer"
+            decoding="async"
           />
         </a>
 
@@ -377,7 +400,8 @@ const Hero = () => {
 
 const About = () => {
   return (
-    <ScrollSection id="about" className="py-20 md:py-40 px-6 border-t border-white/5">
+    <ScrollSection id="about" className="py-20 md:py-40 px-6 border-t border-white/5 relative">
+      <AnimatedStroke className="absolute top-0 left-0 w-full h-px bg-white/20" delay={0.2} />
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -422,7 +446,12 @@ const About = () => {
 
 const Story = () => {
   return (
-    <ScrollSection id="story" className="py-20 md:py-40 px-6 bg-white text-brand-red border-t border-brand-red/5">
+    <ScrollSection id="story" className="py-20 md:py-40 px-6 bg-white text-brand-red border-t border-brand-red/5 relative">
+      <AnimatedStroke 
+        direction="vertical" 
+        className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-32 bg-brand-red/10" 
+        delay={0.5} 
+      />
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
           <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">02 // Our Story</h2>
@@ -478,7 +507,8 @@ const Services = () => {
   ];
 
   return (
-    <ScrollSection id="services" className="py-20 md:py-40 px-6 bg-white text-brand-red">
+    <ScrollSection id="services" className="py-20 md:py-40 px-6 bg-white text-brand-red relative">
+      <AnimatedStroke className="absolute top-0 left-0 w-full h-px bg-brand-red/10" delay={0.1} />
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row justify-between lg:items-end mb-16 md:mb-24 gap-8">
           <div>
@@ -780,6 +810,8 @@ const Footer = () => {
               alt="Mellow Production" 
               className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
               referrerPolicy="no-referrer"
+              loading="lazy"
+              decoding="async"
             />
           </Magnetic>
         </div>
@@ -816,7 +848,7 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000);
+    const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -841,6 +873,7 @@ export default function App() {
                 alt="Mellow Production" 
                 className="h-12 w-auto object-contain"
                 referrerPolicy="no-referrer"
+                decoding="async"
               />
             </motion.div>
           </motion.div>
@@ -874,11 +907,41 @@ export default function App() {
       <Footer />
       
       {/* Global Stroke Accents */}
-      <div className="fixed top-0 left-6 w-px h-full bg-white/5 pointer-events-none z-0" />
-      <div className="fixed top-0 right-6 w-px h-full bg-white/5 pointer-events-none z-0" />
-      <div className="fixed top-1/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" />
-      <div className="fixed top-2/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" />
-      <div className="fixed top-3/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" />
+      <motion.div 
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+        style={{ originY: 0 }}
+        className="fixed top-0 left-6 w-px h-full bg-white/5 pointer-events-none z-0" 
+      />
+      <motion.div 
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+        style={{ originY: 0 }}
+        className="fixed top-0 right-6 w-px h-full bg-white/5 pointer-events-none z-0" 
+      />
+      <motion.div 
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+        style={{ originX: 0 }}
+        className="fixed top-1/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" 
+      />
+      <motion.div 
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+        style={{ originX: 0 }}
+        className="fixed top-2/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" 
+      />
+      <motion.div 
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{ duration: 2, ease: [0.16, 1, 0.3, 1], delay: 0.8 }}
+        style={{ originX: 0 }}
+        className="fixed top-3/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" 
+      />
     </div>
   );
 }
