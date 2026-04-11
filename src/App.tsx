@@ -14,6 +14,72 @@ import React, { useState, useRef, useEffect } from "react";
 
 // --- Components ---
 
+const WipeText = ({ text, className = "" }: { text: string; className?: string }) => {
+  return (
+    <span className={`relative inline-block ${className}`} style={{ color: "inherit" }}>
+      {/* Base Stroke Layer (Always Visible) */}
+      <span 
+        className="block select-none relative" 
+        style={{ 
+          WebkitTextStroke: "1px currentColor",
+          WebkitTextFillColor: "transparent",
+          color: "inherit",
+          zIndex: 1,
+          opacity: 1,
+          visibility: "visible"
+        }}
+        aria-hidden="true"
+      >
+        {text}
+      </span>
+      
+      {/* Fill Layer 1 (50% Opacity) - Wipes from right to left to reveal stroke */}
+      <motion.div 
+        className="absolute inset-0 select-none pointer-events-none opacity-50 overflow-hidden whitespace-nowrap"
+        style={{ 
+          WebkitTextFillColor: "currentColor",
+          color: "inherit",
+          zIndex: 2,
+          direction: "rtl", // Wipe from right to left
+          textAlign: "left"
+        }}
+        initial={{ width: "100%" }}
+        whileInView={{ width: "0%" }}
+        viewport={{ once: true }}
+        transition={{
+          delay: 2.5,
+          duration: 2,
+          ease: [0.645, 0.045, 0.355, 1]
+        }}
+      >
+        <span style={{ direction: "ltr", display: "block" }}>{text}</span>
+      </motion.div>
+
+      {/* Fill Layer 2 (Top Layer, 100% Opacity) - Wipes from right to left */}
+      <motion.div 
+        className="absolute inset-0 select-none pointer-events-none overflow-hidden whitespace-nowrap"
+        style={{ 
+          WebkitTextFillColor: "currentColor",
+          color: "inherit",
+          zIndex: 3,
+          direction: "rtl",
+          textAlign: "left"
+        }}
+        initial={{ width: "100%" }}
+        whileInView={{ width: "0%" }}
+        viewport={{ once: true }}
+        transition={{
+          delay: 1,
+          duration: 2,
+          ease: [0.645, 0.045, 0.355, 1]
+        }}
+      >
+        <span style={{ direction: "ltr", display: "block" }}>{text}</span>
+      </motion.div>
+    </span>
+  );
+};
+
 const ScrollSection = ({ children, id, className = "" }: { children: React.ReactNode, id?: string, className?: string }) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -177,28 +243,12 @@ const Hero = () => {
           </motion.span>
           <motion.span 
             variants={{
-              hidden: { opacity: 0, y: 20, color: "rgba(255, 255, 255, 0)" },
-              visible: { 
-                opacity: 1, 
-                y: 0, 
-                color: "rgba(255, 255, 255, 1)",
-                transition: { 
-                  opacity: { duration: 1, ease: [0.16, 1, 0.3, 1] },
-                  y: { duration: 1, ease: [0.16, 1, 0.3, 1] },
-                  color: { 
-                    delay: 1.2, 
-                    duration: 2, 
-                    ease: "easeInOut",
-                    repeat: Infinity,
-                    repeatType: "reverse"
-                  }
-                } 
-              }
+              hidden: { opacity: 0, y: 20 },
+              visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
             }}
-            className="block" 
-            style={{ WebkitTextStroke: "1px white" }}
+            className="block"
           >
-            Visual
+            <WipeText text="Visual" />
           </motion.span>
           <motion.span 
             variants={{
@@ -259,7 +309,7 @@ const About = () => {
         >
           <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-6 md:mb-10 opacity-30">01 // Who we are</h2>
           <h3 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-[-0.05em] uppercase leading-[0.9] break-words">
-            What is <br /> Mellow <br /> Production?
+            What is <br /> <WipeText text="Mellow" /> <br /> Production?
           </h3>
           <div className="absolute -top-16 -left-16 w-64 h-64 border border-white/[0.02] pointer-events-none hidden md:block" />
         </motion.div>
@@ -298,7 +348,7 @@ const Story = () => {
         <div className="mb-16 md:mb-24">
           <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">02 // Our Story</h2>
           <h3 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
-            The <br /> Journey
+            The <br /> <WipeText text="Journey" />
           </h3>
         </div>
 
@@ -434,7 +484,7 @@ const Process = () => {
         <div className="mb-16 md:mb-24">
           <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">05 // Workflow</h2>
           <h3 className="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase leading-none">
-            The <br /> Process
+            The <br /> <WipeText text="Process" />
           </h3>
         </div>
 
