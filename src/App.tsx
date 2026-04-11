@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from "motion/react";
+import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from "motion/react";
 import { 
   ArrowRight, 
   Play, 
@@ -13,6 +13,112 @@ import {
 import React, { useState, useRef, useEffect } from "react";
 
 // --- Components ---
+
+const CustomCursor = () => {
+  const cursorDotRef = useRef<HTMLDivElement>(null);
+  const cursorOutlineRef = useRef<HTMLDivElement>(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const moveCursor = (e: MouseEvent) => {
+      if (cursorDotRef.current && cursorOutlineRef.current) {
+        const { clientX, clientY } = e;
+        cursorDotRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
+        cursorOutlineRef.current.style.transform = `translate3d(${clientX - 20}px, ${clientY - 20}px, 0)`;
+      }
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'A' || 
+        target.tagName === 'BUTTON' || 
+        target.closest('a') || 
+        target.closest('button') ||
+        target.classList.contains('cursor-pointer')
+      ) {
+        setIsHovering(true);
+      } else {
+        setIsHovering(false);
+      }
+    };
+
+    window.addEventListener('mousemove', moveCursor);
+    window.addEventListener('mouseover', handleMouseOver);
+
+    return () => {
+      window.removeEventListener('mousemove', moveCursor);
+      window.removeEventListener('mouseover', handleMouseOver);
+    };
+  }, []);
+
+  return (
+    <>
+      <div ref={cursorDotRef} className="cursor-dot hidden md:block" />
+      <div 
+        ref={cursorOutlineRef} 
+        className={`cursor-outline hidden md:block ${isHovering ? 'cursor-hover' : ''}`} 
+      />
+    </>
+  );
+};
+
+const Magnetic: React.FC<{ children: React.ReactElement }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const springX = useSpring(x, { stiffness: 150, damping: 15 });
+  const springY = useSpring(y, { stiffness: 150, damping: 15 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = ref.current.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    const distanceX = clientX - centerX;
+    const distanceY = clientY - centerY;
+    
+    x.set(distanceX * 0.35);
+    y.set(distanceY * 0.35);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{ x: springX, y: springY }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+const Reveal = ({ children, width = "fit-content" }: { children: React.ReactNode; width?: "fit-content" | "100%" }) => {
+  return (
+    <div style={{ position: "relative", width, overflow: "hidden" }}>
+      <motion.div
+        variants={{
+          hidden: { opacity: 0, y: 75 },
+          visible: { opacity: 1, y: 0 },
+        }}
+        initial="hidden"
+        whileInView="visible"
+        transition={{ duration: 0.5, delay: 0.25 }}
+        viewport={{ once: true }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+};
 
 const WipeText = ({ text, className = "" }: { text: string; className?: string }) => {
   return (
@@ -132,7 +238,7 @@ const Navbar = () => {
           <img 
             src="https://i.postimg.cc/j250f7G7/logo-white.png" 
             alt="Mellow Production" 
-            className="h-8 md:h-10 w-auto object-contain"
+            className="w-[54px] h-[44px] object-contain"
             referrerPolicy="no-referrer"
           />
         </a>
@@ -140,21 +246,24 @@ const Navbar = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-16">
           {navLinks.map((link) => (
-            <a 
-              key={link.name} 
-              href={link.href} 
-              className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-60 hover:opacity-100 transition-opacity"
-            >
-              {link.name}
-            </a>
+            <Magnetic key={link.name}>
+              <a 
+                href={link.href} 
+                className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-60 hover:opacity-100 transition-opacity"
+              >
+                {link.name}
+              </a>
+            </Magnetic>
           ))}
-          <a 
-            href="#contact" 
-            className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
-            aria-label="Contact"
-          >
-            <Mail size={16} />
-          </a>
+          <Magnetic>
+            <a 
+              href="#contact" 
+              className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
+              aria-label="Contact"
+            >
+              <Mail size={16} />
+            </a>
+          </Magnetic>
         </div>
 
         {/* Mobile Toggle */}
@@ -271,20 +380,24 @@ const Hero = () => {
           }}
           className="flex gap-4 justify-center items-center"
         >
-          <a 
-            href="#contact" 
-            className="w-14 h-14 group flex items-center justify-center bg-white text-brand-red hover:bg-transparent hover:text-white border border-white transition-all duration-500"
-            aria-label="Contact Us"
-          >
-            <Mail size={20} />
-          </a>
-          <a 
-            href="#works" 
-            className="w-14 h-14 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
-            aria-label="View Works"
-          >
-            <Play size={18} fill="currentColor" />
-          </a>
+          <Magnetic>
+            <a 
+              href="#contact" 
+              className="w-14 h-14 group flex items-center justify-center bg-white text-brand-red hover:bg-transparent hover:text-white border border-white transition-all duration-500"
+              aria-label="Contact Us"
+            >
+              <Mail size={20} />
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a 
+              href="#works" 
+              className="w-14 h-14 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
+              aria-label="View Works"
+            >
+              <Play size={18} fill="currentColor" />
+            </a>
+          </Magnetic>
         </motion.div>
       </motion.div>
 
@@ -416,10 +529,28 @@ const Services = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-brand-red/5 border border-brand-red/5">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-brand-red/5 border border-brand-red/5"
+        >
           {services.map((service) => (
             <motion.div 
               key={service.id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+              }}
               whileHover={{ backgroundColor: "rgba(249, 1, 2, 0.02)" }}
               className="bg-white p-8 md:p-12 transition-colors duration-700 group cursor-pointer border border-brand-red/5"
             >
@@ -431,7 +562,7 @@ const Services = () => {
               </div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </ScrollSection>
   );
@@ -457,15 +588,17 @@ const Portfolio = () => {
           <p className="text-xl md:text-3xl font-light tracking-tight mb-8 max-w-2xl">
             Our portfolio is updating, check our Instagram page for the latest work.
           </p>
-          <a 
-            href="https://www.instagram.com/mellow.production_/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="w-16 h-16 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
-            aria-label="Instagram"
-          >
-            <Instagram size={32} />
-          </a>
+          <Magnetic>
+            <a 
+              href="https://www.instagram.com/mellow.production_/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-16 h-16 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
+              aria-label="Instagram"
+            >
+              <Instagram size={32} />
+            </a>
+          </Magnetic>
         </motion.div>
       </div>
     </ScrollSection>
@@ -672,18 +805,22 @@ const Footer = () => {
     <footer className="py-12 px-6 border-t border-white/10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center">
-          <img 
-            src="https://i.postimg.cc/j250f7G7/logo-white.png" 
-            alt="Mellow Production" 
-            className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
-            referrerPolicy="no-referrer"
-          />
+          <Magnetic>
+            <img 
+              src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+              alt="Mellow Production" 
+              className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+              referrerPolicy="no-referrer"
+            />
+          </Magnetic>
         </div>
         
         <div className="flex gap-8">
-          <a href="https://www.instagram.com/mellow.production_/" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity" aria-label="Instagram">
-            <Instagram size={20} />
-          </a>
+          <Magnetic>
+            <a href="https://www.instagram.com/mellow.production_/" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity" aria-label="Instagram">
+              <Instagram size={20} />
+            </a>
+          </Magnetic>
         </div>
         
         <div className="flex flex-col items-center md:items-end gap-2">
@@ -694,7 +831,7 @@ const Footer = () => {
             href="https://instagram.com/heysaneej" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="text-[9px] uppercase tracking-[0.3em] opacity-20 hover:opacity-100 transition-opacity font-medium"
+            className="bg-brand-red border border-white font-bold text-[10px] text-white px-4 py-2 rounded-full uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-brand-red"
           >
             Built by Saneejified
           </a>
@@ -707,8 +844,41 @@ const Footer = () => {
 // --- Main App ---
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="min-h-screen selection:bg-white selection:text-brand-red overflow-x-hidden relative">
+    <div className="min-h-screen selection:bg-white selection:text-brand-red overflow-x-hidden relative noise">
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[20000] bg-brand-red flex items-center justify-center"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center"
+            >
+              <img 
+                src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+                alt="Mellow Production" 
+                className="h-12 w-auto object-contain"
+                referrerPolicy="no-referrer"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <CustomCursor />
       {/* Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03] mix-blend-overlay">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
