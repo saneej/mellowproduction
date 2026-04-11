@@ -128,11 +128,13 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
-        <a href="#" className="text-xl font-display font-extrabold tracking-[-0.05em] flex items-center gap-3 group">
-          <div className="w-6 h-6 border border-white flex items-center justify-center group-hover:bg-white group-hover:text-brand-red transition-all duration-500">
-            <span className="text-[10px]">M</span>
-          </div>
-          <span className="tracking-widest text-sm uppercase">Mellow</span>
+        <a href="#" className="flex items-center group">
+          <img 
+            src="https://i.postimg.cc/R6fB2rQ5/header.png" 
+            alt="Mellow Production" 
+            className="h-8 md:h-10 w-auto object-contain"
+            referrerPolicy="no-referrer"
+          />
         </a>
 
         {/* Desktop Nav */}
@@ -323,7 +325,7 @@ const About = () => {
           className="space-y-8 md:space-y-10 lg:mt-24 w-full lg:w-1/2"
         >
           <p className="text-lg md:text-xl font-light leading-relaxed tracking-tight opacity-70">
-            Mellow Production is a creative digital media production studio specializing in ads, event coverage, reels, and brand films, designed to elevate brands with impactful visuals.
+            Mellow Production is a premier creative digital media production studio based in Kerala, serving Malappuram, Calicut, and Valanchery. We specialize in high-impact ads, professional event coverage, reels, and cinematic brand films designed to elevate your brand with impactful visuals.
           </p>
           
           <div className="grid grid-cols-2 gap-8 md:gap-12 pt-10 md:pt-12 border-t border-white/5">
@@ -391,12 +393,12 @@ const Story = () => {
 
 const Services = () => {
   const services = [
-    { id: "01", title: "Ads", desc: "High-conversion commercial spots." },
-    { id: "02", title: "Event Coverage", desc: "Capturing the essence of your moments." },
-    { id: "03", title: "Reels", desc: "Viral-ready short form content." },
-    { id: "04", title: "Brand Films", desc: "Cinematic storytelling for your identity." },
-    { id: "05", title: "Creative Direction", desc: "Visionary guidance for your brand." },
-    { id: "06", title: "Content Production", desc: "End-to-end visual solutions." },
+    { id: "01", title: "Ads", desc: "High-conversion commercial ad films and promotional videos for brands in Kerala." },
+    { id: "02", title: "Event Coverage", desc: "Professional cinematic coverage for weddings, corporate events, and launches in Malappuram and Calicut." },
+    { id: "03", title: "Reels", desc: "Viral-ready short-form video content and social media marketing reels." },
+    { id: "04", title: "Brand Films", desc: "Cinematic storytelling and corporate films that define your brand identity." },
+    { id: "05", title: "Creative Direction", desc: "Visionary guidance and concept development for visual storytelling." },
+    { id: "06", title: "Content Production", desc: "End-to-end digital media production solutions for modern businesses." },
   ];
 
   return (
@@ -584,7 +586,7 @@ const Contact = () => {
               <div className="w-10 h-10 md:w-12 md:h-12 border border-white/20 flex items-center justify-center">
                 <MapPin size={18} />
               </div>
-              <span className="text-lg md:text-xl font-bold">Kerala, India</span>
+              <span className="text-lg md:text-xl font-bold">Malappuram | Calicut | Valanchery, Kerala</span>
             </div>
           </div>
         </div>
@@ -669,7 +671,14 @@ const Footer = () => {
   return (
     <footer className="py-12 px-6 border-t border-white/10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="text-xl font-display font-extrabold tracking-tighter">MELLOW PRODUCTION</div>
+        <div className="flex items-center">
+          <img 
+            src="https://i.postimg.cc/R6fB2rQ5/header.png" 
+            alt="Mellow Production" 
+            className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+            referrerPolicy="no-referrer"
+          />
+        </div>
         
         <div className="flex gap-8">
           <a href="https://www.instagram.com/mellow.production_/" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity" aria-label="Instagram">

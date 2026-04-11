@@ -5,7 +5,7 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --color-brand-red: #F90102;
+  --color-brand-red: #b90003;
 }
 
 @layer base {
@@ -20,7 +20,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #F90102;
+  background: #b90003;
 }
 
 ::-webkit-scrollbar-thumb {
