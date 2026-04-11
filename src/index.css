@@ -14,40 +14,7 @@
   }
   body {
     @apply bg-brand-red text-white font-sans antialiased selection:bg-white selection:text-brand-red overflow-x-hidden;
-    cursor: none;
   }
-  a, button {
-    cursor: none;
-  }
-}
-
-/* Custom Cursor */
-.cursor-dot {
-  width: 8px;
-  height: 8px;
-  background-color: white;
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  transition: transform 0.1s ease-out;
-}
-
-.cursor-outline {
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transition: transform 0.15s ease-out, background-color 0.3s ease, border-color 0.3s ease;
-}
-
-.cursor-hover {
-  transform: scale(1.5);
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: white;
 }
 
 /* Noise Texture Overlay */

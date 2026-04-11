@@ -14,55 +14,6 @@ import React, { useState, useRef, useEffect } from "react";
 
 // --- Components ---
 
-const CustomCursor = () => {
-  const cursorDotRef = useRef<HTMLDivElement>(null);
-  const cursorOutlineRef = useRef<HTMLDivElement>(null);
-  const [isHovering, setIsHovering] = useState(false);
-
-  useEffect(() => {
-    const moveCursor = (e: MouseEvent) => {
-      if (cursorDotRef.current && cursorOutlineRef.current) {
-        const { clientX, clientY } = e;
-        cursorDotRef.current.style.transform = `translate3d(${clientX}px, ${clientY}px, 0)`;
-        cursorOutlineRef.current.style.transform = `translate3d(${clientX - 20}px, ${clientY - 20}px, 0)`;
-      }
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'A' || 
-        target.tagName === 'BUTTON' || 
-        target.closest('a') || 
-        target.closest('button') ||
-        target.classList.contains('cursor-pointer')
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    window.addEventListener('mousemove', moveCursor);
-    window.addEventListener('mouseover', handleMouseOver);
-
-    return () => {
-      window.removeEventListener('mousemove', moveCursor);
-      window.removeEventListener('mouseover', handleMouseOver);
-    };
-  }, []);
-
-  return (
-    <>
-      <div ref={cursorDotRef} className="cursor-dot hidden md:block" />
-      <div 
-        ref={cursorOutlineRef} 
-        className={`cursor-outline hidden md:block ${isHovering ? 'cursor-hover' : ''}`} 
-      />
-    </>
-  );
-};
-
 const Magnetic: React.FC<{ children: React.ReactElement }> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
@@ -396,6 +347,17 @@ const Hero = () => {
               aria-label="View Works"
             >
               <Play size={18} fill="currentColor" />
+            </a>
+          </Magnetic>
+          <Magnetic>
+            <a 
+              href="https://www.instagram.com/mellow.production_/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-14 h-14 flex items-center justify-center border border-white/20 hover:border-white transition-all duration-500"
+              aria-label="Instagram"
+            >
+              <Instagram size={20} />
             </a>
           </Magnetic>
         </motion.div>
@@ -831,7 +793,7 @@ const Footer = () => {
             href="https://instagram.com/heysaneej" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-brand-red border border-white font-bold text-[10px] text-white px-4 py-2 rounded-full uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-brand-red"
+            className="bg-brand-red/20 border border-white/10 font-bold text-[10px] text-white/40 px-4 py-2 rounded-full uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-brand-red hover:text-white/100 hover:border-white"
           >
             Built by Saneejified
           </a>
@@ -878,7 +840,6 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <CustomCursor />
       {/* Grain Overlay */}
       <div className="fixed inset-0 pointer-events-none z-[9999] opacity-[0.03] mix-blend-overlay">
         <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
@@ -908,6 +869,9 @@ export default function App() {
       {/* Global Stroke Accents */}
       <div className="fixed top-0 left-6 w-px h-full bg-white/5 pointer-events-none z-0" />
       <div className="fixed top-0 right-6 w-px h-full bg-white/5 pointer-events-none z-0" />
+      <div className="fixed top-1/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" />
+      <div className="fixed top-2/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" />
+      <div className="fixed top-3/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" />
     </div>
   );
 }
