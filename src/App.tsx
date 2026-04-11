@@ -128,7 +128,7 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
-        <a href="#" className="text-xl font-extrabold tracking-[-0.05em] flex items-center gap-3 group">
+        <a href="#" className="text-xl font-display font-extrabold tracking-[-0.05em] flex items-center gap-3 group">
           <div className="w-6 h-6 border border-white flex items-center justify-center group-hover:bg-white group-hover:text-brand-red transition-all duration-500">
             <span className="text-[10px]">M</span>
           </div>
@@ -232,7 +232,7 @@ const Hero = () => {
         }}
         className="text-center z-10 w-full max-w-4xl mx-auto"
       >
-        <h1 className="text-5xl sm:text-7xl md:text-[8vw] lg:text-[6vw] font-extrabold leading-[1] tracking-[-0.05em] uppercase mb-12">
+        <h1 className="text-5xl sm:text-7xl md:text-[8vw] lg:text-[6vw] font-display font-extrabold leading-[1] tracking-[-0.05em] uppercase mb-12">
           <motion.span 
             variants={{
               hidden: { opacity: 0, y: 20 },
@@ -309,7 +309,7 @@ const About = () => {
           className="relative z-10 w-full lg:w-1/2"
         >
           <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-6 md:mb-10 opacity-30">01 // Who we are</h2>
-          <h3 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-[-0.05em] uppercase leading-[0.9] break-words">
+          <h3 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.9] break-words">
             What is <br /> <WipeText text="Mellow" /> <br /> Production?
           </h3>
           <div className="absolute -top-16 -left-16 w-64 h-64 border border-white/[0.02] pointer-events-none hidden md:block" />
@@ -328,11 +328,11 @@ const About = () => {
           
           <div className="grid grid-cols-2 gap-8 md:gap-12 pt-10 md:pt-12 border-t border-white/5">
             <div>
-              <span className="block text-4xl md:text-5xl font-extrabold mb-2 tracking-tighter">100+</span>
+              <span className="block text-4xl md:text-5xl font-display font-extrabold mb-2 tracking-tighter">100+</span>
               <span className="text-[10px] uppercase tracking-[0.4em] opacity-30">Projects Delivered</span>
             </div>
             <div>
-              <span className="block text-4xl md:text-5xl font-extrabold mb-2 tracking-tighter">50+</span>
+              <span className="block text-4xl md:text-5xl font-display font-extrabold mb-2 tracking-tighter">50+</span>
               <span className="text-[10px] uppercase tracking-[0.4em] opacity-30">Happy Clients</span>
             </div>
           </div>
@@ -348,14 +348,14 @@ const Story = () => {
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
           <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">02 // Our Story</h2>
-          <h3 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
+          <h3 className="text-5xl sm:text-6xl md:text-8xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
             The <br /> <WipeText text="Journey" />
           </h3>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
           <div className="w-full lg:w-5/12">
-            <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-[1.1] uppercase mb-8 md:mb-10">
+            <p className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold tracking-tight leading-[1.1] uppercase mb-8 md:mb-10">
               Mellow Production didn’t start as a company. It started as a one-person journey.
             </p>
             <div className="w-24 h-px bg-brand-red opacity-20" />
@@ -371,7 +371,7 @@ const Story = () => {
             <p>
               What started as freelance work slowly evolved into something more structured. Better systems, better quality, clearer direction.
             </p>
-            <p className="font-bold uppercase tracking-tighter text-xl sm:text-2xl md:text-3xl opacity-100">
+            <p className="font-display font-bold uppercase tracking-tighter text-xl sm:text-2xl md:text-3xl opacity-100">
               That’s how Mellow Production was built.
             </p>
             <p>
@@ -405,7 +405,7 @@ const Services = () => {
         <div className="flex flex-col lg:flex-row justify-between lg:items-end mb-16 md:mb-24 gap-8">
           <div>
             <h2 className="text-xs font-mono uppercase tracking-[0.6em] mb-6 md:mb-8 opacity-40">03 // Expertise</h2>
-            <h3 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
+            <h3 className="text-5xl sm:text-6xl md:text-8xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
               Our <br /> Services
             </h3>
           </div>
@@ -422,7 +422,7 @@ const Services = () => {
               className="bg-white p-8 md:p-12 transition-colors duration-700 group cursor-pointer border border-brand-red/5"
             >
               <span className="block font-mono text-[10px] mb-8 md:mb-12 opacity-30 tracking-widest">{service.id}</span>
-              <h4 className="text-3xl md:text-4xl font-extrabold uppercase tracking-tighter mb-4 md:mb-6">{service.title}</h4>
+              <h4 className="text-3xl md:text-4xl font-display font-extrabold uppercase tracking-tighter mb-4 md:mb-6">{service.title}</h4>
               <p className="text-sm opacity-50 group-hover:opacity-80 transition-opacity leading-relaxed">{service.desc}</p>
               <div className="mt-8 md:mt-12 opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
                 <ArrowRight strokeWidth={1.5} />
@@ -441,7 +441,7 @@ const Portfolio = () => {
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
           <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">04 // Portfolio</h2>
-          <h3 className="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase leading-none">
+          <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
             Selected <br /> Works
           </h3>
         </div>
@@ -484,7 +484,7 @@ const Process = () => {
       <div className="max-w-7xl mx-auto relative">
         <div className="mb-16 md:mb-24">
           <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">05 // Workflow</h2>
-          <h3 className="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase leading-none">
+          <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
             The <br /> <WipeText text="Process" />
           </h3>
         </div>
@@ -505,7 +505,7 @@ const Process = () => {
               >
                 <div className="flex items-center gap-8 md:w-1/3">
                   <span className="text-sm font-mono opacity-30">0{idx + 1}</span>
-                  <h4 className="text-3xl md:text-5xl font-extrabold uppercase tracking-tighter group-hover:translate-x-4 transition-transform duration-500">
+                  <h4 className="text-3xl md:text-5xl font-display font-extrabold uppercase tracking-tighter group-hover:translate-x-4 transition-transform duration-500">
                     {step.title}
                   </h4>
                 </div>
@@ -528,18 +528,18 @@ const WhyChooseUs = () => {
   return (
     <ScrollSection className="py-20 md:py-40 px-6 bg-white text-brand-red border-t border-brand-red/5">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-xs font-mono uppercase tracking-[0.6em] mb-16 opacity-40 text-center">Why Mellow?</h2>
+        <h2 className="text-sm font-display font-extrabold uppercase tracking-[0.6em] mb-16 opacity-40 text-center">Why Mellow?</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-brand-red/5">
           <div className="p-12 md:p-16 bg-white border border-brand-red/5">
-            <h3 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter mb-6">Creativity</h3>
+            <h3 className="text-2xl md:text-3xl font-display font-extrabold uppercase tracking-tighter mb-6">Creativity</h3>
             <p className="text-sm opacity-60 leading-relaxed">Pushing boundaries with unique visual concepts that stand out in a crowded digital landscape.</p>
           </div>
           <div className="p-12 md:p-16 bg-white border border-brand-red/5">
-            <h3 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter mb-6">Quality</h3>
+            <h3 className="text-2xl md:text-3xl font-display font-extrabold uppercase tracking-tighter mb-6">Quality</h3>
             <p className="text-sm opacity-60 leading-relaxed">Uncompromising standards in production and post-production for a premium final result.</p>
           </div>
           <div className="p-12 md:p-16 bg-white border border-brand-red/5">
-            <h3 className="text-2xl md:text-3xl font-extrabold uppercase tracking-tighter mb-6">Storytelling</h3>
+            <h3 className="text-2xl md:text-3xl font-display font-extrabold uppercase tracking-tighter mb-6">Storytelling</h3>
             <p className="text-sm opacity-60 leading-relaxed">We don't just film; we tell stories that resonate with your audience on a deeper level.</p>
           </div>
         </div>
@@ -569,7 +569,7 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-20">
         <div>
           <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">06 // Contact</h2>
-          <h3 className="text-5xl md:text-7xl font-extrabold tracking-tighter uppercase leading-none mb-12">
+          <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none mb-12">
             Let's <br /> Create <br /> Magic.
           </h3>
           
@@ -669,7 +669,7 @@ const Footer = () => {
   return (
     <footer className="py-12 px-6 border-t border-white/10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-        <div className="text-xl font-extrabold tracking-tighter">MELLOW PRODUCTION</div>
+        <div className="text-xl font-display font-extrabold tracking-tighter">MELLOW PRODUCTION</div>
         
         <div className="flex gap-8">
           <a href="https://www.instagram.com/mellow.production_/" target="_blank" rel="noopener noreferrer" className="opacity-50 hover:opacity-100 transition-opacity" aria-label="Instagram">
@@ -677,8 +677,18 @@ const Footer = () => {
           </a>
         </div>
         
-        <div className="text-[10px] uppercase tracking-widest opacity-30">
-          © 2026 Mellow Production. All rights reserved.
+        <div className="flex flex-col items-center md:items-end gap-2">
+          <div className="text-[10px] uppercase tracking-widest opacity-30">
+            © 2026 Mellow Production. All rights reserved.
+          </div>
+          <a 
+            href="https://instagram.com/heysaneej" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[9px] uppercase tracking-[0.3em] opacity-20 hover:opacity-100 transition-opacity font-medium"
+          >
+            Built by Saneejified
+          </a>
         </div>
       </div>
     </footer>
