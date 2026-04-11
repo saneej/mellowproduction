@@ -318,37 +318,11 @@ const Hero = () => {
             }
           }
         }}
-        className="text-center z-10 w-full max-w-4xl mx-auto"
+        className="text-center z-10 w-full max-w-5xl mx-auto"
       >
-        <h1 className="text-5xl sm:text-7xl md:text-[8vw] lg:text-[6vw] font-display font-extrabold leading-[1] tracking-[-0.05em] uppercase mb-12">
-          <span className="sr-only">Creative Video Production Studio in Kerala | Mellow Production</span>
-          <motion.span 
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
-            }}
-            className="block"
-          >
-            Crafting
-          </motion.span>
-          <motion.span 
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
-            }}
-            className="block"
-          >
-            <WipeText text="Visual" />
-          </motion.span>
-          <motion.span 
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              visible: { opacity: 1, y: 0, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
-            }}
-            className="block"
-          >
-            Impact
-          </motion.span>
+        <h1 className="text-4xl sm:text-6xl md:text-[6vw] lg:text-[5vw] font-display font-extrabold leading-[1.1] tracking-[-0.05em] uppercase mb-12 px-4">
+          Video Production Company in Kerala <br /> 
+          <span className="text-brand-red bg-white px-4 inline-block mt-2">Creating Cinematic Brand Films</span>
         </h1>
         
         <motion.div 
@@ -413,7 +387,7 @@ const About = () => {
           transition={{ duration: 1 }}
           className="relative z-10 w-full lg:w-1/2"
         >
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-6 md:mb-10 opacity-30">01 // Our Story</h2>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-6 md:mb-10 opacity-30">01 // Our Video Production Services</h2>
           <h3 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.9] break-words">
             What is <br /> <WipeText text="Mellow" /> <br /> Production?
           </h3>
@@ -474,30 +448,39 @@ const Story = () => {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 items-start">
           <div className="w-full lg:w-5/12">
             <p className="text-2xl sm:text-3xl md:text-4xl font-display font-extrabold tracking-tight leading-[1.1] uppercase mb-8 md:mb-10">
-              Mellow Production didn’t start as a company. It started as a one-person journey.
+              Mellow Production is a leading video production company in Kerala.
             </p>
             <div className="w-24 h-px bg-brand-red opacity-20" />
+            
+            <div className="mt-12 space-y-6 text-sm opacity-60 leading-relaxed">
+              <p>
+                As a specialized <strong>video production company in Kerala</strong>, we understand the local market dynamics while maintaining international quality standards. Our expertise in <strong>brand films Kerala</strong> has helped numerous businesses establish a strong visual identity.
+              </p>
+              <p>
+                From <strong>cinematic ads</strong> that capture attention to <strong>event coverage</strong> that preserves memories, we offer comprehensive media solutions. Our <strong>reels production</strong> services are optimized for the modern digital landscape, ensuring your brand stays relevant and engaging.
+              </p>
+            </div>
           </div>
           
           <div className="w-full lg:w-7/12 space-y-8 md:space-y-10 text-lg md:text-xl font-light leading-relaxed opacity-80">
             <p>
-              Back in 2022, I began working independently — taking up small projects, experimenting with visuals, and learning everything hands-on. There was no big setup, no team, no roadmap. Just curiosity, consistency, and a strong interest in creating content that actually connects.
+              Our approach to <strong>video production Kerala</strong> is rooted in storytelling. We believe that every brand has a unique voice, and our mission is to amplify it through high-quality visuals. Whether you are a startup or an established enterprise, our <strong>creative studio Kerala</strong> provides the tools and talent needed to succeed.
             </p>
             <p>
-              Each project became a stepping stone. Ads, reels, event coverage — every experience shaped the way I approached storytelling. Over time, the focus shifted from just creating visuals to creating impact. Not just content, but purposeful visuals that elevate brands.
+              We specialize in <strong>brand films</strong> that go beyond simple promotion. We create narratives that build trust and emotional connection with your audience. Our team of directors, cinematographers, and editors work in harmony to deliver <strong>cinematic ads</strong> that drive results.
             </p>
             <p>
-              What started as freelance work slowly evolved into something more structured. Better systems, better quality, clearer direction.
+              In the age of social media, <strong>reels production</strong> has become essential. We create viral-ready content that helps you stand out on platforms like Instagram and TikTok. Our <strong>event coverage</strong> services ensure that your corporate or personal events are documented with the highest level of professionalism.
             </p>
             <p className="font-display font-bold uppercase tracking-tighter text-xl sm:text-2xl md:text-3xl opacity-100">
-              That’s how Mellow Production was built.
+              Experience the best video production in Kerala.
             </p>
             <p>
-              Today, it stands as a creative digital media production studio focused on ads, event coverage, reels, and brand films — designed to help brands communicate with clarity and impact.
+              Mellow Production is more than just a studio; it's a partner in your brand's growth. We are committed to delivering excellence in every project, ensuring that your investment in video content yields maximum returns.
             </p>
             <div className="pt-8 md:pt-10 border-t border-brand-red/10">
               <p className="italic">
-                The journey is still evolving. But the core remains the same — keep it simple, keep it meaningful, and make every visual count.
+                Explore our <a href="#services" className="text-brand-red font-bold hover:underline">video production services in Kerala</a> or <a href="#works" className="text-brand-red font-bold hover:underline">view our portfolio</a> to see our latest work.
               </p>
             </div>
           </div>
@@ -523,13 +506,13 @@ const Services = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row justify-between lg:items-end mb-16 md:mb-24 gap-8">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-[0.6em] mb-6 md:mb-8 opacity-40">03 // Our Services</h2>
+            <h2 className="text-xs font-mono uppercase tracking-[0.6em] mb-6 md:mb-8 opacity-40">03 // Our Video Production Services</h2>
             <h3 className="text-5xl sm:text-6xl md:text-8xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
               Our <br /> Services
             </h3>
             {/* SEO H2s */}
             <h2 className="sr-only">Event & Wedding Coverage</h2>
-            <h2 className="sr-only">Viral Reels & Social Media Content</h2>
+            <h2 className="sr-only">Social Media & Viral Reels</h2>
           </div>
           <div className="max-w-md space-y-4 text-lg md:text-xl font-light opacity-70 leading-relaxed">
             <p>
@@ -585,7 +568,7 @@ const Portfolio = () => {
     <ScrollSection id="works" className="py-20 md:py-40 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
-          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">04 // Our Work / Portfolio</h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">04 // Our Portfolio</h2>
           <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
             Selected <br /> Works
           </h3>
@@ -676,7 +659,7 @@ const WhyChooseUs = () => {
     <ScrollSection id="why-us" className="py-20 md:py-40 px-6 bg-white text-brand-red border-t border-brand-red/5">
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">05 // Why Choose Us</h2>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">05 // Why Choose Mellow Production</h2>
           <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
             Why <br /> Mellow?
           </h3>
@@ -728,7 +711,7 @@ const Contact = () => {
     <section id="contact" className="py-20 md:py-40 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-20">
         <div>
-          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">06 // Contact / Get a Quote</h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">06 // Get a Quote</h2>
           <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none mb-12">
             Let's <br /> Create <br /> Magic.
           </h3>
@@ -833,9 +816,9 @@ const Contact = () => {
 
 const Footer = () => {
   const internalLinks = [
-    { name: "Our Services", href: "#services" },
-    { name: "Portfolio", href: "#works" },
-    { name: "Contact Us", href: "#contact" }
+    { name: "video production services in Kerala", href: "#services" },
+    { name: "view our portfolio", href: "#works" },
+    { name: "contact our creative team", href: "#contact" }
   ];
 
   return (
