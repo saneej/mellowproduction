@@ -202,78 +202,80 @@ const Navbar = () => {
   ];
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-700 ${
-        scrolled ? "bg-brand-red/95 backdrop-blur-xl py-6 border-b border-white/5" : "bg-transparent py-10 border-b border-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
-        <a href="#" className="flex items-center group">
-          <img 
-            src="https://i.postimg.cc/j250f7G7/logo-white.png" 
-            alt="Mellow Production" 
-            className="w-[54px] h-[44px] object-contain"
-            referrerPolicy="no-referrer"
-            decoding="async"
-          />
-        </a>
+    <header className="fixed top-0 left-0 w-full z-50">
+      <nav 
+        className={`transition-all duration-700 ${
+          scrolled ? "bg-brand-red/95 backdrop-blur-xl py-6 border-b border-white/5" : "bg-transparent py-10 border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-8 flex justify-between items-center">
+          <a href="#" className="flex items-center group">
+            <img 
+              src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+              alt="Mellow Production" 
+              className="w-[54px] h-[44px] object-contain"
+              referrerPolicy="no-referrer"
+              decoding="async"
+            />
+          </a>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-16">
-          {navLinks.map((link) => (
-            <Magnetic key={link.name}>
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-16">
+            {navLinks.map((link) => (
+              <Magnetic key={link.name}>
+                <a 
+                  href={link.href} 
+                  className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-60 hover:opacity-100 transition-opacity"
+                >
+                  {link.name}
+                </a>
+              </Magnetic>
+            ))}
+            <Magnetic>
               <a 
+                href="#contact" 
+                className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
+                aria-label="Contact"
+              >
+                <Mail size={16} />
+              </a>
+            </Magnetic>
+          </div>
+
+          {/* Mobile Toggle */}
+          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+            {isOpen ? <X /> : <Menu />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute top-full left-0 w-full bg-brand-red border-b border-white/10 p-8 flex flex-col gap-6 md:hidden"
+          >
+            {navLinks.map((link) => (
+              <a 
+                key={link.name} 
                 href={link.href} 
-                className="text-[10px] font-bold tracking-[0.4em] uppercase opacity-60 hover:opacity-100 transition-opacity"
+                onClick={() => setIsOpen(false)}
+                className="text-2xl font-bold uppercase tracking-tighter"
               >
                 {link.name}
               </a>
-            </Magnetic>
-          ))}
-          <Magnetic>
+            ))}
             <a 
               href="#contact" 
-              className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
-              aria-label="Contact"
-            >
-              <Mail size={16} />
-            </a>
-          </Magnetic>
-        </div>
-
-        {/* Mobile Toggle */}
-        <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
-          {isOpen ? <X /> : <Menu />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isOpen && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-full left-0 w-full bg-brand-red border-b border-white/10 p-8 flex flex-col gap-6 md:hidden"
-        >
-          {navLinks.map((link) => (
-            <a 
-              key={link.name} 
-              href={link.href} 
               onClick={() => setIsOpen(false)}
-              className="text-2xl font-bold uppercase tracking-tighter"
+              className="text-2xl font-bold uppercase tracking-tighter text-white/50"
             >
-              {link.name}
+              Contact
             </a>
-          ))}
-          <a 
-            href="#contact" 
-            onClick={() => setIsOpen(false)}
-            className="text-2xl font-bold uppercase tracking-tighter text-white/50"
-          >
-            Contact
-          </a>
-        </motion.div>
-      )}
-    </nav>
+          </motion.div>
+        )}
+      </nav>
+    </header>
   );
 };
 
@@ -319,6 +321,7 @@ const Hero = () => {
         className="text-center z-10 w-full max-w-4xl mx-auto"
       >
         <h1 className="text-5xl sm:text-7xl md:text-[8vw] lg:text-[6vw] font-display font-extrabold leading-[1] tracking-[-0.05em] uppercase mb-12">
+          <span className="sr-only">Creative Video Production Studio in Kerala | Mellow Production</span>
           <motion.span 
             variants={{
               hidden: { opacity: 0, y: 20 },
@@ -410,7 +413,7 @@ const About = () => {
           transition={{ duration: 1 }}
           className="relative z-10 w-full lg:w-1/2"
         >
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-6 md:mb-10 opacity-30">01 // Who we are</h2>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-6 md:mb-10 opacity-30">01 // Our Story</h2>
           <h3 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.9] break-words">
             What is <br /> <WipeText text="Mellow" /> <br /> Production?
           </h3>
@@ -424,9 +427,17 @@ const About = () => {
           transition={{ delay: 0.3, duration: 1 }}
           className="space-y-8 md:space-y-10 lg:mt-24 w-full lg:w-1/2"
         >
-          <p className="text-lg md:text-xl font-light leading-relaxed tracking-tight opacity-70">
-            Mellow Production is a premier creative digital media production studio based in Kerala, serving Malappuram, Calicut, and Valanchery. We specialize in high-impact ads, professional event coverage, reels, and cinematic brand films designed to elevate your brand with impactful visuals.
-          </p>
+          <div className="space-y-6 text-lg md:text-xl font-light leading-relaxed tracking-tight opacity-70">
+            <p>
+              Mellow Production is a premier creative digital media production studio based in Kerala, serving Malappuram, Calicut, and Valanchery. We specialize in high-impact ads, professional event coverage, reels, and cinematic brand films designed to elevate your brand with impactful visuals.
+            </p>
+            <p>
+              Our journey began with a simple vision: to bring world-class cinematography and storytelling to the heart of Kerala. Today, we are recognized as one of the best video production studios in the region, blending technical precision with an artistic flair that captures the essence of every brand we work with.
+            </p>
+            <p>
+              Whether it's a large-scale commercial ad film or an intimate brand story, our team of dedicated creators works tirelessly to ensure every frame tells a compelling narrative. We don't just produce videos; we craft visual experiences that resonate with audiences and drive real results for businesses.
+            </p>
+          </div>
           
           <div className="grid grid-cols-2 gap-8 md:gap-12 pt-10 md:pt-12 border-t border-white/5">
             <div>
@@ -454,7 +465,7 @@ const Story = () => {
       />
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">02 // Our Story</h2>
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">02 // Cinematic Ads & Brand Films</h2>
           <h3 className="text-5xl sm:text-6xl md:text-8xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
             The <br /> <WipeText text="Journey" />
           </h3>
@@ -498,12 +509,12 @@ const Story = () => {
 
 const Services = () => {
   const services = [
-    { id: "01", title: "Ads", desc: "High-conversion commercial ad films and promotional videos for brands in Kerala." },
-    { id: "02", title: "Event Coverage", desc: "Professional cinematic coverage for weddings, corporate events, and launches in Malappuram and Calicut." },
-    { id: "03", title: "Reels", desc: "Viral-ready short-form video content and social media marketing reels." },
-    { id: "04", title: "Brand Films", desc: "Cinematic storytelling and corporate films that define your brand identity." },
-    { id: "05", title: "Creative Direction", desc: "Visionary guidance and concept development for visual storytelling." },
-    { id: "06", title: "Content Production", desc: "End-to-end digital media production solutions for modern businesses." },
+    { id: "01", title: "Ads", desc: "High-conversion commercial ad films and promotional videos designed to capture attention and drive results for brands across Kerala." },
+    { id: "02", title: "Event Coverage", desc: "Professional cinematic coverage for weddings, corporate events, and product launches in Malappuram, Calicut, and beyond." },
+    { id: "03", title: "Reels", desc: "Viral-ready short-form video content and social media marketing reels optimized for engagement on Instagram and TikTok." },
+    { id: "04", title: "Brand Films", desc: "Cinematic storytelling and high-end corporate films that define your unique brand identity and build trust with your audience." },
+    { id: "05", title: "Creative Direction", desc: "Visionary guidance and concept development for visual storytelling, ensuring your project has a clear and impactful message." },
+    { id: "06", title: "Content Production", desc: "End-to-end digital media production solutions, from pre-production planning to final post-production and delivery." },
   ];
 
   return (
@@ -512,14 +523,22 @@ const Services = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row justify-between lg:items-end mb-16 md:mb-24 gap-8">
           <div>
-            <h2 className="text-xs font-mono uppercase tracking-[0.6em] mb-6 md:mb-8 opacity-40">03 // Expertise</h2>
+            <h2 className="text-xs font-mono uppercase tracking-[0.6em] mb-6 md:mb-8 opacity-40">03 // Our Services</h2>
             <h3 className="text-5xl sm:text-6xl md:text-8xl font-display font-extrabold tracking-[-0.05em] uppercase leading-[0.8]">
               Our <br /> Services
             </h3>
+            {/* SEO H2s */}
+            <h2 className="sr-only">Event & Wedding Coverage</h2>
+            <h2 className="sr-only">Viral Reels & Social Media Content</h2>
           </div>
-          <p className="max-w-md text-lg md:text-xl font-light opacity-70 leading-relaxed">
-            We blend technical precision with creative flair to deliver visuals that don't just look good—they perform.
-          </p>
+          <div className="max-w-md space-y-4 text-lg md:text-xl font-light opacity-70 leading-relaxed">
+            <p>
+              We blend technical precision with creative flair to deliver visuals that don't just look good—they perform. Our services are tailored to meet the unique needs of brands in Kerala and beyond.
+            </p>
+            <p className="text-sm opacity-60">
+              From viral social media content to corporate brand films, we provide end-to-end production solutions that help you stand out in a crowded digital landscape.
+            </p>
+          </div>
         </div>
 
         <motion.div 
@@ -566,7 +585,7 @@ const Portfolio = () => {
     <ScrollSection id="works" className="py-20 md:py-40 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-16 md:mb-24">
-          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">04 // Portfolio</h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">04 // Our Work / Portfolio</h2>
           <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
             Selected <br /> Works
           </h3>
@@ -600,18 +619,18 @@ const Portfolio = () => {
 
 const Process = () => {
   const steps = [
-    { title: "Discover", desc: "Understanding your brand DNA and goals." },
-    { title: "Concept", desc: "Crafting a unique visual narrative." },
-    { title: "Shoot", desc: "Capturing high-end cinematic visuals." },
-    { title: "Edit", desc: "Refining the story with precision." },
-    { title: "Deliver", desc: "Final assets ready for impact." },
+    { title: "Discover", desc: "We start by diving deep into your brand's DNA, understanding your core values, target audience, and specific project goals to ensure our creative direction aligns perfectly with your vision." },
+    { title: "Concept", desc: "Our creative team develops a unique visual narrative and storyboard, crafting a compelling story that will resonate with your audience and set your brand apart from the competition." },
+    { title: "Shoot", desc: "Using state-of-the-art equipment and professional lighting, we capture high-end cinematic visuals across Kerala, focusing on every detail to ensure the highest production quality." },
+    { title: "Edit", desc: "In the post-production phase, we refine the story with precision, incorporating professional color grading, sound design, and visual effects to create a polished and impactful final product." },
+    { title: "Deliver", desc: "We provide you with final assets optimized for various platforms, ensuring your content is ready to make a significant impact and drive engagement across all digital channels." },
   ];
 
   return (
     <ScrollSection id="process" className="py-20 md:py-40 px-6 border-y border-white/10 overflow-hidden">
       <div className="max-w-7xl mx-auto relative">
         <div className="mb-16 md:mb-24">
-          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">05 // Workflow</h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">05 // Our Production Process</h2>
           <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
             The <br /> <WipeText text="Process" />
           </h3>
@@ -654,9 +673,22 @@ const Process = () => {
 
 const WhyChooseUs = () => {
   return (
-    <ScrollSection className="py-20 md:py-40 px-6 bg-white text-brand-red border-t border-brand-red/5">
+    <ScrollSection id="why-us" className="py-20 md:py-40 px-6 bg-white text-brand-red border-t border-brand-red/5">
       <div className="max-w-7xl mx-auto">
-        <h2 className="text-sm font-display font-extrabold uppercase tracking-[0.6em] mb-16 opacity-40 text-center">Why Mellow?</h2>
+        <div className="mb-16 md:mb-24">
+          <h2 className="text-[10px] font-mono uppercase tracking-[0.6em] mb-8 md:mb-10 opacity-30">05 // Why Choose Us</h2>
+          <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none">
+            Why <br /> Mellow?
+          </h3>
+          <div className="mt-12 max-w-2xl text-lg opacity-60 font-light leading-relaxed">
+            <p>
+              Choosing the right video production partner is crucial for your brand's success. At Mellow Production, we combine years of experience in the Kerala media industry with a fresh, creative perspective. Our commitment to quality and storytelling has made us a trusted choice for businesses in Malappuram, Calicut, and beyond.
+            </p>
+            <p className="mt-4">
+              We understand that every project is unique, which is why we offer personalized solutions that align with your specific goals. Whether you're looking to create a viral reel or a cinematic brand film, we have the expertise and passion to bring your vision to life.
+            </p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-brand-red/5">
           <div className="p-12 md:p-16 bg-white border border-brand-red/5">
             <h3 className="text-2xl md:text-3xl font-display font-extrabold uppercase tracking-tighter mb-6">Creativity</h3>
@@ -696,7 +728,7 @@ const Contact = () => {
     <section id="contact" className="py-20 md:py-40 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-20">
         <div>
-          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">06 // Contact</h2>
+          <h2 className="text-sm font-mono uppercase tracking-[0.5em] mb-8 opacity-50">06 // Contact / Get a Quote</h2>
           <h3 className="text-5xl md:text-7xl font-display font-extrabold tracking-tighter uppercase leading-none mb-12">
             Let's <br /> Create <br /> Magic.
           </h3>
@@ -800,20 +832,48 @@ const Contact = () => {
 };
 
 const Footer = () => {
+  const internalLinks = [
+    { name: "Our Services", href: "#services" },
+    { name: "Portfolio", href: "#works" },
+    { name: "Contact Us", href: "#contact" }
+  ];
+
   return (
     <footer className="py-12 px-6 border-t border-white/10">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
         <div className="flex items-center">
           <Magnetic>
-            <img 
-              src="https://i.postimg.cc/j250f7G7/logo-white.png" 
-              alt="Mellow Production" 
-              className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              decoding="async"
-            />
+            <a href="/">
+              <img 
+                src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+                alt="Mellow Production" 
+                className="h-8 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
           </Magnetic>
+        </div>
+        
+        <div className="flex flex-wrap justify-center gap-8">
+          {internalLinks.map((link) => (
+            <a 
+              key={link.name} 
+              href={link.href} 
+              className="text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity font-bold"
+            >
+              {link.name}
+            </a>
+          ))}
+          <a 
+            href="https://www.premiumbeat.com/blog/category/video-production/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity font-bold"
+          >
+            Industry Insights
+          </a>
         </div>
         
         <div className="flex gap-8">
