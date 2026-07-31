@@ -13,6 +13,7 @@ export interface ToastMessage {
 
 interface ToastContextType {
   showToast: (title: string, description?: string, type?: ToastType) => void;
+  addToast: (title: string, descriptionOrType?: string, type?: ToastType) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -28,6 +29,25 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setToasts(prev => prev.filter(t => t.id !== id));
     }, 4000);
   }, []);
+
+  const addToast = useCallback((title: string, descriptionOrType?: string, type?: ToastType) => {
+    let finalDesc: string | undefined = undefined;
+    let finalType: ToastType = "info";
+
+    if (type) {
+      finalDesc = descriptionOrType;
+      finalType = type;
+    } else if (descriptionOrType) {
+      const validTypes: ToastType[] = ["success", "error", "info", "download", "favorite", "access_granted", "access_denied"];
+      if (validTypes.includes(descriptionOrType as ToastType)) {
+        finalType = descriptionOrType as ToastType;
+      } else {
+        finalDesc = descriptionOrType;
+      }
+    }
+
+    showToast(title, finalDesc, finalType);
+  }, [showToast]);
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
@@ -46,7 +66,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, addToast }}>
       {children}
 
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
