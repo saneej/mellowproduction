@@ -257,7 +257,7 @@ export const createProject = async (projectData: Partial<Project> & { title: str
     id: `proj-${Date.now()}`,
     title: projectData.title,
     clientName: projectData.clientName,
-    category: projectData.category || "wedding",
+    category: projectData.category || "",
     date: projectData.date || now.split("T")[0],
     coverImage: projectData.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1600",
     isPinProtected: projectData.isPinProtected || false,

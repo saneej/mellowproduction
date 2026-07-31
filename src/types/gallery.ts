@@ -1,15 +1,4 @@
-export type EventCategory = 
-  | 'wedding'
-  | 'nikah'
-  | 'reception'
-  | 'engagement'
-  | 'birthday'
-  | 'corporate'
-  | 'graduation'
-  | 'family'
-  | 'outdoor'
-  | 'other'
-  | 'custom';
+export type EventCategory = string;
 
 export type UserRole = 'owner' | 'admin' | 'editor';
 
@@ -89,7 +78,7 @@ export interface Project {
   clientEmail?: string;
   groomName?: string;
   brideName?: string;
-  category: EventCategory;
+  category?: string;
   date: string; // ISO string YYYY-MM-DD
   coverImage: string;
   coverMedia?: CoverMedia;

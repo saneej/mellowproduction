@@ -64,7 +64,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   const [brideName, setBrideName] = useState("");
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState(new Date().toISOString().split("T")[0]);
-  const [category, setCategory] = useState<EventCategory>("wedding");
+  const [category, setCategory] = useState("");
   const [slug, setSlug] = useState("");
   const [slugIsCustom, setSlugIsCustom] = useState(false);
   const [slugError, setSlugError] = useState<string | null>(null);
@@ -389,16 +389,14 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs uppercase text-white/70">Event Category</label>
-                  <select
+                  <label className="text-xs uppercase text-white/70">Event Category (Optional)</label>
+                  <input
+                    type="text"
                     value={category}
-                    onChange={e => setCategory(e.target.value as EventCategory)}
-                    className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-red"
-                  >
-                    {CATEGORIES.map(cat => (
-                      <option key={cat.value} value={cat.value}>{cat.label}</option>
-                    ))}
-                  </select>
+                    onChange={e => setCategory(e.target.value)}
+                    placeholder="e.g. Wedding, Reception, Haldi, Corporate (Optional)"
+                    className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-red placeholder:text-white/30"
+                  />
                 </div>
               </div>
 

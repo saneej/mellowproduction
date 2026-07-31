@@ -493,7 +493,24 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
             <h3 className="text-base font-bold uppercase text-white pb-3 border-b border-white/10">Project Controls</h3>
 
             <div className="space-y-4 text-xs">
-              <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <label className="text-white/70 uppercase">Event Category (Optional)</label>
+                <input
+                  type="text"
+                  value={project.category || ""}
+                  onChange={async e => {
+                    const val = e.target.value;
+                    setProject({ ...project, category: val });
+                  }}
+                  onBlur={async () => {
+                    await updateProject(project.id, { category: project.category || "" });
+                  }}
+                  placeholder="e.g. Wedding, Reception, Haldi, Corporate (Optional)"
+                  className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red placeholder:text-white/30"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
                 <span>Allow Client Downloads</span>
                 <input
                   type="checkbox"
