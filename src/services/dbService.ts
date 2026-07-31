@@ -161,17 +161,35 @@ let localLogsState: ActivityLog[] = loadStorage(STORAGE_LOGS, [
   }
 ]);
 
+export const ensureProjectSlug = (p: Project): Project => {
+  if (!p) return p;
+  if (!p.slug || p.slug === "undefined" || p.slug === "null" || p.slug.trim() === "") {
+    const raw = p.title || p.clientName || p.id || "project";
+    const clean = raw
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    p.slug = clean || p.id || `proj-${Date.now()}`;
+  }
+  return p;
+};
+
+// Initialize local projects with sanitized slugs
+localProjectsState = localProjectsState.map(ensureProjectSlug);
+
 // --- Database API Service Functions ---
 
 export const getProjects = async (): Promise<Project[]> => {
   try {
     const colRef = collection(db, PROJECTS_COL);
     const snap = await getDocs(colRef);
-    const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+    const docs = snap.docs.map(doc => ensureProjectSlug({ id: doc.id, ...doc.data() } as Project));
     
     // Auto-sync any unsynced local projects to Firestore
     const docIds = new Set(docs.map(d => d.id));
-    const unSyncedLocal = localProjectsState.filter(p => !docIds.has(p.id) && p.isSynced === false);
+    const unSyncedLocal = localProjectsState.filter(p => !docIds.has(p.id) && p.isSynced === false).map(ensureProjectSlug);
     if (unSyncedLocal.length > 0) {
       for (const p of unSyncedLocal) {
         try {
@@ -192,12 +210,15 @@ export const getProjects = async (): Promise<Project[]> => {
   } catch (err) {
     console.warn("Firestore fetch projects fallback to local storage:", err);
   }
+  localProjectsState = localProjectsState.map(ensureProjectSlug);
   return localProjectsState;
 };
 
 export const getProjectBySlug = async (slug: string): Promise<Project | null> => {
-  if (!slug) return null;
+  if (!slug || slug === "undefined" || slug === "null") return null;
   const cleanSlug = slug.toLowerCase().trim();
+
+  localProjectsState = localProjectsState.map(ensureProjectSlug);
 
   try {
     const colRef = collection(db, PROJECTS_COL);
@@ -211,7 +232,7 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
     
     if (!snap.empty) {
       const docData = snap.docs[0];
-      const p = { id: docData.id, ...docData.data() } as Project;
+      const p = ensureProjectSlug({ id: docData.id, ...docData.data() } as Project);
       const idx = localProjectsState.findIndex(existing => existing.id === p.id);
       if (idx >= 0) {
         localProjectsState[idx] = p;
@@ -227,7 +248,7 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
       const docRef = doc(db, PROJECTS_COL, slug);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        const p = { id: docSnap.id, ...docSnap.data() } as Project;
+        const p = ensureProjectSlug({ id: docSnap.id, ...docSnap.data() } as Project);
         const idx = localProjectsState.findIndex(existing => existing.id === p.id);
         if (idx >= 0) {
           localProjectsState[idx] = p;
@@ -244,15 +265,18 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
     console.warn("Firestore error, fallback slug match:", err);
   }
 
-  return localProjectsState.find(p => p.slug === slug || p.slug === cleanSlug || p.id === slug) || null;
+  const found = localProjectsState.find(p => p.slug === slug || p.slug === cleanSlug || p.id === slug);
+  return found ? ensureProjectSlug(found) : null;
 };
 
 export const getProjectById = async (id: string): Promise<Project | null> => {
+  if (!id || id === "undefined" || id === "null") return null;
+  localProjectsState = localProjectsState.map(ensureProjectSlug);
   try {
     const docRef = doc(db, PROJECTS_COL, id);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
-      const p = { id: snap.id, ...snap.data() } as Project;
+      const p = ensureProjectSlug({ id: snap.id, ...snap.data() } as Project);
       const idx = localProjectsState.findIndex(existing => existing.id === p.id);
       if (idx >= 0) {
         localProjectsState[idx] = p;
@@ -265,18 +289,24 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
   } catch (err) {
     // ignore
   }
-  return localProjectsState.find(p => p.id === id) || null;
+  const found = localProjectsState.find(p => p.id === id);
+  return found ? ensureProjectSlug(found) : null;
 };
 
-export const createProject = async (projectData: Partial<Project> & { title: string; clientName: string; slug: string }): Promise<Project> => {
+export const createProject = async (projectData: Partial<Project> & { title: string; clientName: string; slug?: string }): Promise<Project> => {
   const now = new Date().toISOString();
-  const cleanSlug = (projectData.slug || projectData.title)
+  const projectId = projectData.id || `proj-${Date.now()}`;
+  
+  const rawSlug = projectData.slug || projectData.title || projectData.clientName || projectId;
+  let cleanSlug = rawSlug
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-");
-
-  const projectId = projectData.id || `proj-${Date.now()}`;
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  if (!cleanSlug || cleanSlug === "undefined") {
+    cleanSlug = projectId;
+  }
 
   const newProject: Project = {
     title: projectData.title,
@@ -296,6 +326,8 @@ export const createProject = async (projectData: Partial<Project> & { title: str
     createdAt: now,
     updatedAt: now,
   };
+
+  ensureProjectSlug(newProject);
 
   // Automatically create EventFolder records for any configured driveFolders
   if (newProject.driveFolders && Array.isArray(newProject.driveFolders)) {
@@ -368,24 +400,37 @@ export const createProject = async (projectData: Partial<Project> & { title: str
 
 export const updateProject = async (id: string, projectData: Partial<Project>): Promise<Project> => {
   const now = new Date().toISOString();
-  try {
-    const docRef = doc(db, PROJECTS_COL, id);
-    await setDoc(docRef, { ...projectData, updatedAt: now }, { merge: true });
-  } catch (err) {
-    console.warn("Updating project locally:", err);
+
+  if (projectData.slug !== undefined) {
+    const raw = projectData.slug || projectData.title || id;
+    const clean = raw
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    projectData.slug = clean || id;
   }
 
   let updatedProj: Project | undefined;
   localProjectsState = localProjectsState.map(p => {
     if (p.id === id) {
-      updatedProj = { ...p, ...projectData, updatedAt: now };
+      const merged = { ...p, ...projectData, updatedAt: now };
+      updatedProj = ensureProjectSlug(merged);
       return updatedProj;
     }
     return p;
   });
 
   if (!updatedProj) {
-    updatedProj = { id, updatedAt: now, ...projectData } as Project;
+    updatedProj = ensureProjectSlug({ id, updatedAt: now, ...projectData } as Project);
+  }
+
+  try {
+    const docRef = doc(db, PROJECTS_COL, id);
+    await setDoc(docRef, { ...updatedProj, updatedAt: now }, { merge: true });
+  } catch (err) {
+    console.warn("Updating project locally:", err);
   }
 
   saveStorage(STORAGE_PROJECTS, localProjectsState);

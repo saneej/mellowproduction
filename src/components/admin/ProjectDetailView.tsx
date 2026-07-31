@@ -172,7 +172,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     );
   }
 
-  const projectUrl = `${window.location.origin}/projects/${project.slug}`;
+  const projectSlug = project.slug && project.slug !== "undefined" ? project.slug : project.id;
+  const projectUrl = `${window.location.origin}/projects/${projectSlug}`;
 
   // Actions
   const handleSaveInfo = async () => {
@@ -180,7 +181,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       const finalCoverImages = editCoverImages.filter(Boolean);
       const finalCoverImage = finalCoverImages[0] || editCoverImage || "";
       const formattedHashtag = editHashtag ? (editHashtag.startsWith('#') ? editHashtag : `#${editHashtag}`) : undefined;
-      await updateProject(project.id, {
+      const updated = await updateProject(project.id, {
         title: editTitle,
         clientName: editClientName,
         groomName: editGroomName || undefined,
@@ -193,20 +194,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         customTitleFontUrl: editCustomTitleFontUrl,
         customTitleFontName: editCustomTitleFontName,
       });
-      setProject({
-        ...project,
-        title: editTitle,
-        clientName: editClientName,
-        groomName: editGroomName || undefined,
-        brideName: editBrideName || undefined,
-        hashtag: formattedHashtag,
-        coverImage: finalCoverImage,
-        coverImages: finalCoverImages,
-        date: editDate,
-        titleFontFamily: editTitleFontFamily,
-        customTitleFontUrl: editCustomTitleFontUrl,
-        customTitleFontName: editCustomTitleFontName,
-      });
+      setProject(updated);
       setIsEditingInfo(false);
     } catch (err: any) {
       alert("Failed to save project details: " + err.message);
@@ -229,7 +217,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${project.slug}-backup.json`;
+    a.download = `${projectSlug}-backup.json`;
     a.click();
   };
 
@@ -761,7 +749,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   </button>
 
                   <a
-                    href={`${window.location.origin}/projects/${project.slug}/${evt.slug}`}
+                    href={`${window.location.origin}/projects/${projectSlug}/${evt.slug || evt.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1 transition-colors"

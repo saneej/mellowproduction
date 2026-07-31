@@ -82,7 +82,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   );
 
   const handleSelectProject = (proj: Project) => {
-    navigate(`/projects/${proj.slug}`);
+    const projSlug = proj.slug && proj.slug !== "undefined" ? proj.slug : proj.id;
+    navigate(`/projects/${projSlug}`);
     onClose();
   };
 

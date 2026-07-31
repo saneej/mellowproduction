@@ -25,7 +25,8 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
   const [logoDataUrl, setLogoDataUrl] = useState<string>("");
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const standardUrl = `${window.location.origin}/projects/${project.slug}`;
+  const projectSlug = project.slug && project.slug !== "undefined" ? project.slug : project.id;
+  const standardUrl = `${window.location.origin}/projects/${projectSlug}`;
   const qrAccessUrl = `${standardUrl}?qr=1${project.isPinProtected && project.pin ? `&pin=${encodeURIComponent(project.pin)}` : ""}`;
 
   // Pre-generate QR code as a local Base64 Data URL to avoid any CORS/Network download issues
@@ -304,7 +305,7 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
       const dataUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
-      a.download = `A5-QR-Card-${project.slug}.png`;
+      a.download = `A5-QR-Card-${projectSlug}.png`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -332,7 +333,7 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
       const pdfHeight = pdf.internal.pageSize.getHeight(); // 210mm
 
       pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`A5-QR-Card-${project.slug}.pdf`);
+      pdf.save(`A5-QR-Card-${projectSlug}.pdf`);
     } catch (err) {
       console.error("PDF Export error:", err);
     } finally {

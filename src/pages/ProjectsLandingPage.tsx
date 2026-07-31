@@ -43,7 +43,8 @@ export const ProjectsLandingPage: React.FC = () => {
     );
 
     if (foundByCode) {
-      navigate(`/projects/${foundByCode.slug}`);
+      const pSlug = foundByCode.slug && foundByCode.slug !== "undefined" ? foundByCode.slug : foundByCode.id;
+      navigate(`/projects/${pSlug}`);
       return;
     }
 
@@ -57,7 +58,8 @@ export const ProjectsLandingPage: React.FC = () => {
     );
 
     if (filtered.length === 1) {
-      navigate(`/projects/${filtered[0].slug}`);
+      const pSlug = filtered[0].slug && filtered[0].slug !== "undefined" ? filtered[0].slug : filtered[0].id;
+      navigate(`/projects/${pSlug}`);
     } else if (filtered.length === 0) {
       addToast("No events found. Please check your spelling or access code.", "error");
     } else {
@@ -183,12 +185,14 @@ export const ProjectsLandingPage: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProjects.map(project => (
-                <Link 
-                  key={project.id} 
-                  to={`/projects/${project.slug}`}
-                  className="group block"
-                >
+              {filteredProjects.map(project => {
+                const projectSlug = project.slug && project.slug !== "undefined" ? project.slug : project.id;
+                return (
+                  <Link 
+                    key={project.id} 
+                    to={`/projects/${projectSlug}`}
+                    className="group block"
+                  >
                   <div className="aspect-[4/3] bg-stone-100 rounded-2xl overflow-hidden relative shadow-sm border border-stone-200 mb-4">
                     <img
                       src={project.coverImage ? getDriveImageUrl(project.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"}
@@ -208,16 +212,17 @@ export const ProjectsLandingPage: React.FC = () => {
                     )}
                   </div>
                   
-                  <div className="px-2">
-                    <h3 className="text-xl font-display font-extrabold uppercase tracking-tight group-hover:text-brand-red transition-colors">
-                      {project.title}
-                    </h3>
-                    <p className="text-xs font-mono text-stone-500 mt-1 uppercase tracking-widest">
-                      {project.date} • {project.category || "Wedding & Events"}
-                    </p>
-                  </div>
-                </Link>
-              ))}
+                    <div className="px-2">
+                      <h3 className="text-xl font-display font-extrabold uppercase tracking-tight group-hover:text-brand-red transition-colors">
+                        {project.title}
+                      </h3>
+                      <p className="text-xs font-mono text-stone-500 mt-1 uppercase tracking-widest">
+                        {project.date} • {project.category || "Wedding & Events"}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </section>

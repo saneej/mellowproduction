@@ -271,7 +271,7 @@ export const ProjectPage: React.FC = () => {
                   transition={{ delay: idx * 0.1, duration: 0.6 }}
                 >
                   <Link
-                    to={`/projects/${projectSlug}/${evt.slug}`}
+                    to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
                     className="group block space-y-4"
                   >
                     {/* Clean Picture Card */}
