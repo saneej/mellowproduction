@@ -178,7 +178,7 @@ export const ProjectPage: React.FC = () => {
     : [project.coverImage].filter(Boolean);
 
   const activeCover = coverList[currentCoverIndex] || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600";
-  const activeCoverUrl = activeCover.startsWith("http") ? activeCover : getDriveImageUrl(activeCover, 1600);
+  const activeCoverUrl = getDriveImageUrl(activeCover, 1600);
 
   const themeStyles = getThemeStyles(project.theme);
 
@@ -259,15 +259,11 @@ export const ProjectPage: React.FC = () => {
                     <div className={`aspect-[3/2] rounded-2xl overflow-hidden relative shadow-sm border ${themeStyles.borderColor} ${project.theme === 'dark_luxury' ? 'bg-zinc-900' : 'bg-white'}`}>
                       <img
                         src={
-                          (evt.coverImage || "").startsWith("http")
-                            ? evt.coverImage
-                            : evt.coverImage
-                              ? getDriveImageUrl(evt.coverImage, 800)
-                              : (project.coverImage || "").startsWith("http")
-                                ? project.coverImage
-                                : project.coverImage
-                                  ? getDriveImageUrl(project.coverImage, 800)
-                                  : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"
+                          evt.coverImage 
+                            ? getDriveImageUrl(evt.coverImage, 800) 
+                            : project.coverImage 
+                              ? getDriveImageUrl(project.coverImage, 800) 
+                              : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"
                         }
                         alt={evt.title}
                         referrerPolicy="no-referrer"

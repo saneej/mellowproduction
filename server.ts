@@ -357,7 +357,7 @@ async function startServer() {
       }
       
       const size = 1200;
-      const imageUrl = coverImage.startsWith("http")
+      const imageUrl = coverImage.startsWith("http") || coverImage.startsWith("/") || coverImage.startsWith("blob:") || coverImage.startsWith("data:")
         ? coverImage
         : `https://drive.google.com/thumbnail?id=${coverImage}&sz=w${size}`;
         

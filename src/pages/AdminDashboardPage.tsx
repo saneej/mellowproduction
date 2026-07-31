@@ -347,7 +347,7 @@ export const AdminDashboardPage: React.FC = () => {
                               className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-xl hover:border-brand-red/50 cursor-pointer transition-all group"
                             >
                               <img 
-                                src={(p.coverImage || "").startsWith("http") ? p.coverImage : p.coverImage ? `https://drive.google.com/thumbnail?id=${p.coverImage}&sz=w800` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
+                                src={p.coverImage ? getDriveImageUrl(p.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
                                 alt={p.title} 
                                 className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500"
                               />
@@ -489,7 +489,7 @@ export const AdminDashboardPage: React.FC = () => {
                                   className="relative aspect-[16/9] bg-white/5 cursor-pointer overflow-hidden"
                                 >
                                   <img
-                                    src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://drive.google.com/thumbnail?id=${project.coverImage}&sz=w800` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"}
+                                    src={project.coverImage ? getDriveImageUrl(project.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"}
                                     alt={project.title}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                   />

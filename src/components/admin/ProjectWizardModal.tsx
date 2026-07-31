@@ -1,3 +1,4 @@
+import { ImageUploader } from '../common/ImageUploader';
 import React, { useState, useEffect } from "react";
 import { 
   X, 
@@ -485,8 +486,11 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                   value={coverMediaUrl}
                   onChange={e => setCoverMediaUrl(e.target.value)}
                   placeholder="e.g., https://images.unsplash.com/photo-1519741497674..."
-                  className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-red"
+                  className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-red mb-2"
                 />
+                {coverMediaType === "image" && (
+                  <ImageUploader onImageUploaded={url => setCoverMediaUrl(url)} />
+                )}
               </div>
 
               {/* Supported Source badges */}

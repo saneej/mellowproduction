@@ -1,3 +1,4 @@
+import { ImageUploader } from '../common/ImageUploader';
 import React, { useState, useEffect } from "react";
 import { 
   ArrowLeft, 
@@ -466,30 +467,40 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     <label className="text-[10px] uppercase text-white/50 block mb-1">Cover Images (1 or more URLs or GDrive IDs)</label>
                     <div className="space-y-2">
                       {editCoverImages.map((img, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={img}
-                            onChange={e => {
+                        <div key={index} className="flex flex-col gap-2 p-3 bg-white/5 border border-white/10 rounded-xl">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={img}
+                              onChange={e => {
+                                const newImgs = [...editCoverImages];
+                                newImgs[index] = e.target.value;
+                                setEditCoverImages(newImgs);
+                                if (index === 0) setEditCoverImage(e.target.value);
+                              }}
+                              placeholder="Image URL or Drive File ID"
+                              className="flex-1 bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImgs = editCoverImages.filter((_, i) => i !== index);
+                                setEditCoverImages(newImgs);
+                                if (index === 0) setEditCoverImage(newImgs[0] || "");
+                              }}
+                              className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                          <div className="w-full">
+                            <ImageUploader onImageUploaded={url => {
                               const newImgs = [...editCoverImages];
-                              newImgs[index] = e.target.value;
+                              newImgs[index] = url;
                               setEditCoverImages(newImgs);
-                              if (index === 0) setEditCoverImage(e.target.value);
-                            }}
-                            placeholder="Image URL or Drive File ID"
-                            className="flex-1 bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newImgs = editCoverImages.filter((_, i) => i !== index);
-                              setEditCoverImages(newImgs);
-                              if (index === 0) setEditCoverImage(newImgs[0] || "");
-                            }}
-                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                              if (index === 0) setEditCoverImage(url);
+                            }} />
+                          </div>
                         </div>
                       ))}
                       <button
@@ -547,7 +558,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   </button>
                 </div>
                 <img 
-                  src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? getDriveImageUrl(project.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
+                  src={project.coverImage ? getDriveImageUrl(project.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
                   alt={project.title} 
                   className="w-full h-56 object-cover"
                 />

@@ -52,7 +52,6 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
   // Helper to resolve cover image / video poster
   const getPosterUrl = () => {
     if (!rawCover) return "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000";
-    if (rawCover.startsWith("http")) return rawCover;
     return getDriveImageUrl(rawCover, 1600);
   };
 

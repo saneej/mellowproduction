@@ -37,7 +37,7 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
     : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
 
-  const tiny = item.tinyThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 200) : item.thumbnailUrl || fallbackImg);
+  const tiny = item.tinyThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 200) : item.thumbnailUrl || fallbackImg);
 
   const [currentSrc, setCurrentSrc] = useState<string>(tiny);
   const [loadStage, setLoadStage] = useState<'tiny' | 'small' | 'hd' | 'original'>('tiny');
@@ -74,9 +74,9 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   useEffect(() => {
     if (!isInView) return;
 
-    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 800) : item.thumbnailUrl || fallbackImg);
-    const hd = item.hdUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 2048) : item.fullUrl || small);
-    const original = item.originalUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 2400) : item.fullUrl || hd);
+    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 800) : item.thumbnailUrl || fallbackImg);
+    const hd = item.hdUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2048) : item.fullUrl || small);
+    const original = item.originalUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2400) : item.fullUrl || hd);
 
     const imgSmall = new Image();
     imgSmall.src = small;
@@ -105,8 +105,8 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     };
 
     imgSmall.onerror = () => {
-      if (item.driveFileId && !item.driveFileId.startsWith("http")) {
-        setCurrentSrc(`https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=w800`);
+      if (item.driveFileId) {
+        setCurrentSrc(getDriveImageUrl(item.driveFileId, 800));
       } else {
         setCurrentSrc(fallbackImg);
       }
@@ -129,8 +129,8 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         onClick={onClick}
         onError={(e) => {
           const target = e.currentTarget;
-          if (item.driveFileId && !item.driveFileId.startsWith("http") && !target.src.includes("thumbnail?id=")) {
-            target.src = `https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=w800`;
+          if (item.driveFileId && !target.src.includes("thumbnail?id=")) {
+            target.src = getDriveImageUrl(item.driveFileId, 800);
           } else {
             target.src = item.isVideo
               ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"

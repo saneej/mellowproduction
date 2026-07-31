@@ -33,7 +33,7 @@ export const extractDriveFileId = (urlOrId: string): string => {
 export const getDriveImageUrl = (fileId: string, size: number = 2048): string => {
   if (!fileId || typeof fileId !== "string") return "";
   // If it's already a full http URL
-  if (fileId.startsWith("http://") || fileId.startsWith("https://")) {
+  if (fileId.startsWith("http://") || fileId.startsWith("https://") || fileId.startsWith("data:") || fileId.startsWith("blob:") || fileId.startsWith("/")) {
     return fileId;
   }
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
@@ -41,7 +41,7 @@ export const getDriveImageUrl = (fileId: string, size: number = 2048): string =>
 
 export const getDriveLqipUrl = (fileId: string): string => {
   if (!fileId || typeof fileId !== "string") return "";
-  if (fileId.startsWith("http://") || fileId.startsWith("https://")) {
+  if (fileId.startsWith("http://") || fileId.startsWith("https://") || fileId.startsWith("data:") || fileId.startsWith("blob:") || fileId.startsWith("/")) {
     return fileId;
   }
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w50`;
