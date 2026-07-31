@@ -1024,6 +1024,7 @@ import { CommandPalette } from "./components/common/CommandPalette";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { ProjectPage } from "./pages/ProjectPage";
 import { GalleryPage } from "./pages/GalleryPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 
 export default function App() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -1051,7 +1052,7 @@ export default function App() {
               <Route path="/admin" element={<AdminDashboardPage />} />
               <Route path="/projects/:projectSlug" element={<ProjectPage />} />
               <Route path="/projects/:projectSlug/:eventSlug" element={<GalleryPage />} />
-              <Route path="*" element={<MainWebsite />} />
+              <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </BrowserRouter>
         </ToastProvider>

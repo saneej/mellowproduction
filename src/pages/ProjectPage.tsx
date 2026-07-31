@@ -5,6 +5,7 @@ import { Calendar, Camera, ArrowRight, Lock, CheckCircle2, ChevronRight } from "
 import { GalleryHeader } from "../components/common/Header";
 import { Footer } from "../components/common/Footer";
 import { PinModal } from "../components/gallery/PinModal";
+import { NotFoundPage } from "./NotFoundPage";
 import { getProjectBySlug, getEventsByProject } from "../services/dbService";
 import { Project, EventFolder } from "../types/gallery";
 
@@ -61,13 +62,9 @@ export const ProjectPage: React.FC = () => {
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 space-y-4">
-        <h2 className="text-3xl font-display font-extrabold uppercase">Project Not Found</h2>
-        <p className="text-xs font-mono text-white/50">The requested gallery URL is invalid or has been archived.</p>
-        <Link to="/" className="py-2.5 px-6 rounded-full bg-brand-red text-white text-xs font-bold uppercase tracking-wider">
-          Return to Home
-        </Link>
-      </div>
+      <NotFoundPage 
+        customMessage={`We couldn't find any project gallery matching "${projectSlug}". Please check your link or QR code PIN.`}
+      />
     );
   }
 
