@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { X, FolderPlus, RefreshCw } from "lucide-react";
+import { ImageUploader } from "../common/ImageUploader";
 
 interface AddFolderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddFolder: (folder: { name: string; driveFolderId: string; apiKey?: string }) => void;
+  onAddFolder: (folder: { name: string; driveFolderId: string; apiKey?: string; coverImage?: string }) => void;
 }
 
 export const AddFolderModal: React.FC<AddFolderModalProps> = ({
@@ -15,6 +16,7 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
   const [name, setName] = useState("");
   const [driveFolderId, setDriveFolderId] = useState("");
   const [apiKey, setApiKey] = useState("");
+  const [coverImage, setCoverImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -27,6 +29,7 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
       name: name.trim(),
       driveFolderId: driveFolderId.trim(),
       apiKey: apiKey.trim() || undefined,
+      coverImage: coverImage.trim() || undefined,
     });
     setIsSubmitting(false);
     onClose();
@@ -76,6 +79,21 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
             />
           </div>
 
+          <div>
+            <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
+              Cover Image (URL or Drive ID)
+            </label>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={coverImage}
+                onChange={e => setCoverImage(e.target.value)}
+                placeholder="Image URL..."
+                className="flex-1 bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
+              />
+              <ImageUploader onImageUploaded={url => setCoverImage(url)} />
+            </div>
+          </div>
           <div>
             <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
               API Key

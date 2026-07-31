@@ -352,7 +352,7 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
                 <div className="p-8 text-center bg-white/5 border border-white/10 rounded-2xl font-mono text-xs text-white/40 space-y-2">
                   <Key size={24} className="mx-auto text-white/20" />
                   <p>No specific access codes generated yet.</p>
-                  <p className="text-[10px] text-white/30">Master PIN fallback ('2026') is active.</p>
+                  
                 </div>
               ) : (
                 <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">

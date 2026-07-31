@@ -224,7 +224,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     setShowAddFolderModal(true);
   };
 
-  const handleAddFolderSubmit = async (folderData: { name: string; driveFolderId: string; apiKey?: string }) => {
+  const handleAddFolderSubmit = async (folderData: { name: string; driveFolderId: string; apiKey?: string; coverImage?: string }) => {
     const rawName = folderData.name || "Sub Event";
     const cleanDriveId = extractDriveFolderId(folderData.driveFolderId || "");
     const slug = rawName.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || `event-${Date.now()}`;
@@ -233,7 +233,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       projectId: project.id,
       title: rawName,
       slug,
-      coverImage: project.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+      coverImage: folderData.coverImage || project.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
       driveFolderId: cleanDriveId,
       order: events.length + 1,
       isPublished: true,
@@ -266,7 +266,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     loadProjectData();
   };
 
-  const handleEditFolderSubmit = async (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string }) => {
+  const handleEditFolderSubmit = async (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string; coverImage?: string }) => {
     if (!project || !editingFolder) return;
 
     const rawName = updatedData.name || "Sub Event";
@@ -280,6 +280,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         slug,
         driveFolderId: cleanDriveId,
         order: updatedData.order,
+        coverImage: updatedData.coverImage,
       });
 
       // 2. Update the folder configuration in the project's driveFolders array

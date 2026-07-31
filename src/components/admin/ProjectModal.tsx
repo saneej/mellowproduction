@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Sparkles, FolderPlus, Lock } from "lucide-react";
 import { Project, EventCategory } from "../../types/gallery";
 import { extractDriveFileId } from "../../services/driveService";
+import { ImageUploader } from "../common/ImageUploader";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -151,16 +152,19 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] font-mono text-white/50 uppercase mb-1">Cover Image (Google Drive File ID or URL)</label>
-            <input
-              type="text"
-              value={coverInput}
-              onChange={e => setCoverInput(e.target.value)}
-              placeholder="e.g. 1y8O84iZ7G3I3Z-kE8B... or image URL"
-              className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
-            />
+            <label className="block text-[11px] font-mono text-white/50 uppercase mb-1">Cover Image (URL or Drive File ID)</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={coverInput}
+                onChange={e => setCoverInput(e.target.value)}
+                placeholder="e.g. 1y8O84iZ7G3I3Z-kE8B... or image URL"
+                className="flex-1 bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
+              />
+              <ImageUploader onImageUploaded={(url) => setCoverInput(url)} />
+            </div>
             <p className="text-[10px] text-white/40 font-mono mt-1">
-              You can paste a Google Drive file share URL or direct file ID.
+              You can paste a URL/Drive ID or upload an image directly.
             </p>
           </div>
 

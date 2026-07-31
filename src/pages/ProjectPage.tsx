@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, Camera, ArrowRight, Lock, CheckCircle2, ChevronRight, Eye, Sparkles, Image as ImageIcon, ShieldCheck, Music, Volume2, VolumeX, Heart, MailOpen, Award, PenTool } from "lucide-react";
 import { GalleryHeader } from "../components/common/Header";
+import { ProjectHero } from "../components/gallery/ProjectHero";
 import { Footer } from "../components/common/Footer";
 import { PinModal } from "../components/gallery/PinModal";
 import { NotFoundPage } from "./NotFoundPage";
@@ -220,73 +221,13 @@ export const ProjectPage: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-6 pt-6 space-y-16 relative z-10">
         
-        {/* Pic-Time Style Full-Bleed Editorial Cover Hero */}
-        <div className="relative w-full h-[70vh] min-h-[500px] md:h-[75vh] rounded-[2rem] overflow-hidden bg-zinc-950 shadow-2xl group">
-          <AnimatePresence mode="wait">
-            <motion.img 
-              key={currentCoverIndex}
-              src={activeCoverUrl}
-              alt={project.title}
-              referrerPolicy="no-referrer"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
-              className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-102 transition-transform duration-[10000ms] ease-out"
-            />
-          </AnimatePresence>
-          
-          {/* Subtle elegant gradient mask */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/75 pointer-events-none" />
-
-          {/* Centered Editorial Typography Overlay */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 md:px-12 z-10">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-4 max-w-4xl"
-            >
-              <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
-                EXCLUSIVELY CURATED FOR
-              </p>
-              
-              <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tight text-white leading-tight filter drop-shadow-md">
-                {project.title}
-              </h1>
-
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono text-zinc-300 tracking-widest uppercase font-bold">
-                <span>{project.clientName}</span>
-                <span className="hidden sm:inline text-brand-red font-black">•</span>
-                <span>{project.date}</span>
-              </div>
-            </motion.div>
-
-            {/* Scroll/Explore Indicator at Bottom */}
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-              <span className="text-[9px] font-mono tracking-[0.25em] text-white/50 uppercase font-black">
-                Scroll To Explore
-              </span>
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-red" />
-            </div>
-          </div>
-
-          {/* Carousel navigation dots */}
-          {coverList.length > 1 && (
-            <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2">
-              {coverList.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentCoverIndex(i)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    i === currentCoverIndex ? "bg-white w-6" : "bg-white/30 hover:bg-white/60"
-                  }`}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <ProjectHero 
+          project={project}
+          activeCoverUrl={activeCoverUrl}
+          currentCoverIndex={currentCoverIndex}
+          coverList={coverList}
+          setCurrentCoverIndex={setCurrentCoverIndex}
+        />
 
         {/* Pure Pic-Time Style Gallery List */}
         <div className="space-y-12 pt-8">

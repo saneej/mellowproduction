@@ -124,7 +124,7 @@ export const GalleryPage: React.FC = () => {
             if (new Date(data.expiresAt) > new Date()) {
               setIsUnlocked(true);
               isLocalUnlocked = true;
-              activeCode = data.code || "2026";
+              activeCode = data.code || "";
               setClientCode(activeCode);
               
               // Load custom permissions if they exist

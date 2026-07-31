@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { X, Edit3, RefreshCw } from "lucide-react";
 import { EventFolder } from "../../types/gallery";
+import { ImageUploader } from "../common/ImageUploader";
 
 interface EditFolderModalProps {
   isOpen: boolean;
   folder: EventFolder | null;
   currentApiKey?: string;
   onClose: () => void;
-  onSave: (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string }) => void;
+  onSave: (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string; coverImage?: string }) => void;
 }
 
 export const EditFolderModal: React.FC<EditFolderModalProps> = ({
@@ -21,6 +22,7 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
   const [driveFolderId, setDriveFolderId] = useState("");
   const [order, setOrder] = useState(1);
   const [apiKey, setApiKey] = useState("");
+  const [coverImage, setCoverImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -29,6 +31,7 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
       setDriveFolderId(folder.driveFolderId || "");
       setOrder(folder.order || 1);
       setApiKey(currentApiKey);
+      setCoverImage(folder.coverImage || "");
     }
   }, [folder, currentApiKey]);
 
@@ -37,12 +40,14 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+
     setIsSubmitting(true);
     onSave({
       name: name.trim(),
       driveFolderId: driveFolderId.trim(),
       order: Number(order) || 1,
       apiKey: apiKey.trim() || undefined,
+      coverImage: coverImage.trim() || undefined,
     });
     setIsSubmitting(false);
     onClose();
@@ -92,6 +97,21 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
             />
           </div>
 
+          <div>
+            <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
+              Folder Cover Image (URL or Drive ID)
+            </label>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={coverImage}
+                onChange={e => setCoverImage(e.target.value)}
+                placeholder="Image URL or Drive ID..."
+                className="flex-1 bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
+              />
+              <ImageUploader onImageUploaded={url => setCoverImage(url)} />
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
