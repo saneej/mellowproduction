@@ -17,7 +17,7 @@ interface PinModalProps {
 
 export const PinModal: React.FC<PinModalProps> = ({
   isOpen,
-  correctPin = "2026",
+  correctPin,
   projectTitle,
   coverImage,
   accessCodes = [],
@@ -50,7 +50,7 @@ export const PinModal: React.FC<PinModalProps> = ({
     }
 
     // 1. Check master PIN fallback
-    if (cleanInput === correctPin || cleanInput === "2026") {
+    if (correctPin && cleanInput === correctPin) {
       recordAttempt(rateLimitKey, true);
       if (rememberDevice) {
         localStorage.setItem(`mellow_unlocked_${projectId}`, JSON.stringify({
@@ -191,8 +191,8 @@ export const PinModal: React.FC<PinModalProps> = ({
             <p className="text-[10px] text-white/30 font-mono tracking-wider">
               MELLOW PRODUCTION
             </p>
-            <p className="text-[8px] text-white/15 font-mono">
-              PIN: 2026
+            <p className="text-[10px] text-white/40 font-mono tracking-wider mt-2">
+              Developed by <a href="https://instagram.com/heysaneej" target="_blank" rel="noopener noreferrer" className="text-white hover:text-brand-red underline">saneejified</a>
             </p>
           </div>
         </motion.div>

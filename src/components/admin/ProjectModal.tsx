@@ -36,7 +36,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const [date, setDate] = useState(initialProject?.date || new Date().toISOString().split("T")[0]);
   const [coverInput, setCoverInput] = useState(initialProject?.coverImage || "");
   const [isPinProtected, setIsPinProtected] = useState(initialProject?.isPinProtected ?? true);
-  const [pin, setPin] = useState(initialProject?.pin || "2026");
+  const [pin, setPin] = useState(initialProject?.pin || "");
   const [saving, setSaving] = useState(false);
 
   if (!isOpen) return null;
@@ -186,7 +186,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                   type="text"
                   value={pin}
                   onChange={e => setPin(e.target.value)}
-                  placeholder="2026"
+                  placeholder="e.g. 1234"
                   className="w-28 bg-black border border-white/20 rounded-lg px-3 py-1.5 text-xs font-mono text-center text-white focus:outline-none focus:border-brand-red"
                 />
               </div>
