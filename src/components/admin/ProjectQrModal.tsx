@@ -168,15 +168,13 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
             <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-black/20 rounded-full blur-2xl pointer-events-none" />
 
             {/* HEADER: LOGO & BRANDING */}
-            <div className="w-full flex flex-col items-center space-y-2 pt-2 z-10 border-b border-white/20 pb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-white text-brand-red flex items-center justify-center font-black shadow-lg">
-                  <Camera size={18} />
-                </div>
-                <span className="text-base sm:text-lg font-display font-black tracking-widest uppercase text-white drop-shadow-md">
-                  MELLOW PRODUCTION
-                </span>
-              </div>
+            <div className="w-full flex flex-col items-center space-y-1.5 pt-2 z-10 border-b border-white/20 pb-4">
+              <img 
+                src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+                alt="Mellow Production" 
+                className="h-10 sm:h-12 object-contain drop-shadow-md" 
+                crossOrigin="anonymous" 
+              />
               <p className="text-[10px] font-mono tracking-widest uppercase text-white/80 font-semibold">
                 CLIENT GALLERY ACCESS CARD
               </p>
@@ -198,8 +196,13 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
                 
                 {/* Center Badge inside QR */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-9 h-9 rounded-xl bg-white border-2 border-brand-red shadow-2xl flex items-center justify-center text-brand-red font-display font-black text-xs">
-                    M
+                  <div className="w-10 h-10 rounded-xl bg-black border-2 border-white shadow-2xl flex items-center justify-center p-1.5 overflow-hidden">
+                    <img 
+                      src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+                      alt="Logo" 
+                      className="w-full h-full object-contain" 
+                      crossOrigin="anonymous" 
+                    />
                   </div>
                 </div>
               </div>
