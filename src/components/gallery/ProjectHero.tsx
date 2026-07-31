@@ -35,7 +35,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           </h1>
         </div>
         <div className="relative w-full max-w-6xl aspect-[16/9] overflow-hidden">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.img 
               key={currentCoverIndex}
               src={activeCoverUrl}
@@ -57,7 +57,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
     return (
       <div className="relative w-full min-h-[70vh] flex flex-col items-center justify-center bg-[#FFF0F5] overflow-hidden rounded-[3rem] p-6 shadow-sm border border-[#F5DADD]">
         <div className="absolute inset-0 z-0">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.img 
               key={currentCoverIndex}
               src={activeCoverUrl}
@@ -93,7 +93,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
       <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center pt-10">
         <div className="w-full bg-white p-6 sm:p-10 shadow-xl rotate-[-1deg] border border-[#E7DFC8]">
           <div className="relative aspect-[4/3] w-full overflow-hidden mb-8">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               <motion.img 
                 key={currentCoverIndex}
                 src={activeCoverUrl}
@@ -129,7 +129,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
     return (
       <div className="relative w-full rounded-t-full rounded-b-3xl overflow-hidden bg-[#FDFBFA] border-[8px] border-white shadow-xl flex flex-col items-center">
         <div className="relative w-full aspect-square sm:aspect-video overflow-hidden rounded-t-full">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.img 
               key={currentCoverIndex}
               src={activeCoverUrl}
@@ -174,7 +174,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           </div>
         </div>
         <div className="flex-1 relative aspect-square md:aspect-auto">
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.img 
               key={currentCoverIndex}
               src={activeCoverUrl}
@@ -195,7 +195,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   // Default: Dark Luxury & Classic Editorial (Full bleed)
   return (
     <div className="relative w-full h-[70vh] min-h-[500px] md:h-[75vh] rounded-[2rem] overflow-hidden bg-zinc-950 shadow-2xl group">
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.img 
           key={currentCoverIndex}
           src={activeCoverUrl}

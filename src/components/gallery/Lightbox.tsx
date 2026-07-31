@@ -308,22 +308,29 @@ export const Lightbox: React.FC<LightboxProps> = ({
           </button>
 
           {/* Media Content */}
-          <div className="max-w-full max-h-full flex items-center justify-center transition-transform duration-300">
+          <div className="max-w-full max-h-full flex items-center justify-center transition-transform duration-300 relative">
             {currentItem.isVideo ? (
               <iframe
                 src={currentItem.videoUrl || `https://drive.google.com/file/d/${currentItem.driveFileId}/preview`}
-                className="w-[85vw] h-[75vh] max-w-5xl rounded-xl border border-white/10 bg-black shadow-2xl"
+                className="w-[85vw] h-[75vh] max-w-5xl rounded-xl border border-white/10 bg-black shadow-2xl z-10"
                 allow="autoplay"
                 title={currentItem.fileName}
               />
             ) : (
-              <img
-                src={imageSrc}
-                alt={currentItem.fileName}
-                referrerPolicy="no-referrer"
-                style={{ transform: `scale(${zoomLevel})` }}
-                className="max-h-[82vh] max-w-[90vw] object-contain rounded-lg shadow-2xl transition-transform duration-300"
-              />
+              <AnimatePresence>
+                <motion.img
+                  key={currentItem.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.6 }}
+                  src={imageSrc}
+                  alt={currentItem.fileName}
+                  referrerPolicy="no-referrer"
+                  style={{ transform: `scale(${zoomLevel})` }}
+                  className="max-h-[82vh] max-w-[90vw] object-contain rounded-lg shadow-2xl transition-transform duration-300 absolute"
+                />
+              </AnimatePresence>
             )}
           </div>
 

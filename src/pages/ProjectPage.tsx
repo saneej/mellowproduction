@@ -187,7 +187,7 @@ export const ProjectPage: React.FC = () => {
       
       {/* Dynamic ambient backdrop blur for extra depth */}
       <div className="absolute top-0 inset-x-0 h-[500px] overflow-hidden pointer-events-none opacity-45 blur-3xl">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.img
             key={currentCoverIndex}
             src={activeCoverUrl}

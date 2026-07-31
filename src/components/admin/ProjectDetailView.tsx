@@ -853,6 +853,9 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     <option value="grid">Standard Responsive Grid</option>
                     <option value="masonry">Pinterest Masonry Layout</option>
                     <option value="timeline">Chronological Event Timeline</option>
+                    <option value="justified">Justified (Flex row-based)</option>
+                    <option value="carousel">Horizontal Carousel</option>
+                    <option value="collage">Dynamic Collage Grid</option>
                   </select>
                 </div>
 

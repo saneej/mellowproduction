@@ -111,7 +111,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   const [allowDownloads, setAllowDownloads] = useState(true);
   const [allowFavorites, setAllowFavorites] = useState(true);
   const [progressiveLoading, setProgressiveLoading] = useState(true);
-  const [layout, setLayout] = useState<"grid" | "masonry" | "timeline">("grid");
+  const [layout, setLayout] = useState<"grid" | "masonry" | "timeline" | "justified" | "carousel" | "collage">("grid");
   const [theme, setTheme] = useState<Project['theme']>("classic_editorial");
 
   // Created Project & QR Modal State
@@ -797,12 +797,15 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                   <label className="text-xs uppercase text-white/70">Gallery Layout Mode</label>
                   <select
                     value={layout}
-                    onChange={e => setLayout(e.target.value as "grid" | "masonry" | "timeline")}
+                    onChange={e => setLayout(e.target.value as any)}
                     className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-red"
                   >
                     <option value="grid">Standard Responsive Grid</option>
                     <option value="masonry">Pinterest Masonry Layout</option>
                     <option value="timeline">Chronological Event Timeline</option>
+                    <option value="justified">Justified (Flex row-based)</option>
+                    <option value="carousel">Horizontal Carousel</option>
+                    <option value="collage">Dynamic Collage Grid</option>
                   </select>
                 </div>
 

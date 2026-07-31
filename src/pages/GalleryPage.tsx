@@ -48,7 +48,7 @@ export const GalleryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   // Gallery Mode & Layouts (remember in localStorage)
-  const [galleryMode, setGalleryMode] = useState<"grid" | "masonry" | "timeline">(() => {
+  const [galleryMode, setGalleryMode] = useState<"grid" | "masonry" | "timeline" | "justified" | "carousel" | "collage">(() => {
     return (localStorage.getItem("mellow_gallery_mode") as any) || "grid";
   });
   const [filter, setFilter] = useState<"all" | "photos" | "videos" | "favorites">("all");
@@ -361,6 +361,48 @@ export const GalleryPage: React.FC = () => {
     return groups;
   }, [filteredMedia]);
 
+  const getLayoutClasses = () => {
+    if (galleryMode === "masonry") {
+      const colClass = layoutCols === 2 ? "lg:columns-2" : layoutCols === 4 ? "lg:columns-4" : layoutCols === 5 ? "lg:columns-5" : "lg:columns-3";
+      return {
+        wrapper: `columns-1 sm:columns-2 ${colClass} gap-6 space-y-6`,
+        item: "break-inside-avoid relative group"
+      };
+    }
+    if (galleryMode === "justified") {
+      return {
+        wrapper: "flex flex-wrap gap-4 justify-center",
+        item: "flex-auto w-32 sm:w-48 lg:w-64 relative group"
+      };
+    }
+    if (galleryMode === "carousel") {
+      return {
+        wrapper: "flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8 hide-scrollbar items-center",
+        item: "w-[85vw] sm:w-[60vw] md:w-[40vw] flex-shrink-0 snap-center relative group"
+      };
+    }
+    if (galleryMode === "collage") {
+      return {
+        wrapper: "grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 auto-rows-[150px] md:auto-rows-[250px]",
+        getItemClass: (idx: number) => {
+          const isLarge = idx % 9 === 0;
+          const isWide = idx % 5 === 0 && !isLarge;
+          const isTall = idx % 4 === 0 && !isLarge && !isWide;
+          return `relative group ${isLarge ? 'col-span-2 row-span-2' : isWide ? 'col-span-2' : isTall ? 'row-span-2' : ''}`;
+        }
+      };
+    }
+    
+    // grid
+    const gridColClass = layoutCols === 2 ? "lg:grid-cols-2" : layoutCols === 4 ? "lg:grid-cols-4" : layoutCols === 5 ? "lg:grid-cols-5" : "lg:grid-cols-3";
+    return {
+      wrapper: `grid grid-cols-1 sm:grid-cols-2 ${gridColClass} gap-6`,
+      item: "relative group"
+    };
+  };
+
+  const layoutStyles = getLayoutClasses();
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center justify-center p-6">
@@ -507,7 +549,7 @@ export const GalleryPage: React.FC = () => {
           <div className={`flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs font-mono ${themeStyles.borderColor}`}>
             
             {/* View Layout Options */}
-            <div className={`flex items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
+            <div className={`flex flex-wrap items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
               <button
                 onClick={() => setGalleryMode("grid")}
                 className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
@@ -516,7 +558,7 @@ export const GalleryPage: React.FC = () => {
                 title="Grid View"
               >
                 <LayoutGrid size={15} />
-                <span>Grid</span>
+                <span className="hidden lg:inline">Grid</span>
               </button>
               <button
                 onClick={() => setGalleryMode("masonry")}
@@ -526,7 +568,37 @@ export const GalleryPage: React.FC = () => {
                 title="Masonry View"
               >
                 <Layers size={15} />
-                <span>Masonry</span>
+                <span className="hidden lg:inline">Masonry</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("justified")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "justified" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Justified View"
+              >
+                <AlignJustify size={15} />
+                <span className="hidden lg:inline">Justified</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("collage")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "collage" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Collage View"
+              >
+                <LayoutTemplate size={15} />
+                <span className="hidden lg:inline">Collage</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("carousel")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "carousel" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Carousel View"
+              >
+                <MonitorPlay size={15} />
+                <span className="hidden lg:inline">Carousel</span>
               </button>
               <button
                 onClick={() => setGalleryMode("timeline")}
@@ -536,7 +608,7 @@ export const GalleryPage: React.FC = () => {
                 title="Timeline View"
               >
                 <Clock size={15} />
-                <span>Timeline</span>
+                <span className="hidden lg:inline">Timeline</span>
               </button>
             </div>
 
@@ -639,15 +711,14 @@ export const GalleryPage: React.FC = () => {
             ))}
           </div>
         ) : (
-          /* Standard Grid or Masonry View */
+          /* Dynamic Layouts */
           <div className="space-y-8">
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${
-              layoutCols === 2 ? "lg:grid-cols-2" :
-              layoutCols === 4 ? "lg:grid-cols-4" :
-              layoutCols === 5 ? "lg:grid-cols-5" : "lg:grid-cols-3"
-            } gap-6`}>
-              {visibleMedia.map((item) => (
-                <div key={item.id} className="relative group">
+            <div className={layoutStyles.wrapper}>
+              {visibleMedia.map((item, idx) => (
+                <div 
+                  key={item.id} 
+                  className={typeof layoutStyles.item === 'function' ? layoutStyles.item(idx) : layoutStyles.item}
+                >
                   {isSelectMode && (
                     <div 
                       onClick={(e) => {
@@ -664,6 +735,7 @@ export const GalleryPage: React.FC = () => {
                     item={item}
                     isFavorited={favoritedIds.has(item.id)}
                     onToggleFavorite={toggleFavorite}
+                    className={galleryMode === 'collage' ? '!aspect-auto h-full w-full object-cover' : undefined}
                     onClick={() => {
                       if (isSelectMode) {
                         toggleItemSelection(item.id);
