@@ -71,6 +71,25 @@ export interface SyncLog {
   status: 'completed' | 'failed' | 'partial';
 }
 
+export interface LandingPageConfig {
+  heroStyle?: 'classic_editorial' | 'split_hero' | 'dark_luxury' | 'romantic_card' | 'minimal_nordic';
+  showBrideGroom?: boolean;
+  brideName?: string;
+  groomName?: string;
+  hashtag?: string;
+  welcomeMessage?: string;
+  quoteText?: string;
+  cursiveFont?: string;
+  accentColor?: string;
+  showCountdown?: boolean;
+  eventDateText?: string;
+  locationText?: string;
+  showHashtagBadge?: boolean;
+  heroOverlayOpacity?: number;
+  bannerImage?: string;
+  subEventLayout?: 'grid' | 'cards' | 'carousel' | 'minimal_list';
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -79,6 +98,7 @@ export interface Project {
   clientEmail?: string;
   groomName?: string;
   brideName?: string;
+  hashtag?: string;
   category?: string;
   date: string; // ISO string YYYY-MM-DD
   coverImage: string;
@@ -95,6 +115,10 @@ export interface Project {
   accessCodes?: AccessCode[];
   layout?: 'grid' | 'masonry' | 'timeline' | 'justified' | 'carousel' | 'collage';
   theme?: 'classic_editorial' | 'dark_luxury' | 'earthy_sand' | 'clean_nordic' | 'vintage_warmth' | 'modern_minimalist' | 'romantic_blush' | 'mellowwedding' | 'mellow_wedding';
+  titleFontFamily?: string;
+  customTitleFontUrl?: string;
+  customTitleFontName?: string;
+  landingPageConfig?: LandingPageConfig;
   progressiveLoading?: boolean;
   defaultEventId?: string;
   allowClientDownloads?: boolean;

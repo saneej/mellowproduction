@@ -3,9 +3,8 @@ import { z } from 'zod';
 // Access Code Verification Schema
 export const accessCodeSchema = z.object({
   pin: z.string()
-    .min(3, { message: "Access code must be at least 3 characters" })
-    .max(20, { message: "Access code must not exceed 20 characters" })
-    .regex(/^[a-zA-Z0-9\-_]+$/, { message: "Access code can only contain letters, numbers, hyphens, and underscores" })
+    .min(1, { message: "Access code must be at least 1 character" })
+    .max(50, { message: "Access code must not exceed 50 characters" })
 });
 
 // Project Creation / Editing Schema

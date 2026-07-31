@@ -144,8 +144,8 @@ export const PinModal: React.FC<PinModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <input
-                type="password"
-                maxLength={16}
+                type="text"
+                maxLength={50}
                 value={pin}
                 onChange={e => {
                   setErrorMessage(null);
@@ -153,7 +153,7 @@ export const PinModal: React.FC<PinModalProps> = ({
                 }}
                 placeholder="ENTER ACCESS CODE"
                 autoFocus
-                className={`w-full text-center text-lg tracking-widest bg-white/5 border rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-white/20 uppercase focus:outline-none transition-all ${
+                className={`w-full text-center text-lg tracking-widest bg-white/5 border rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-white/20 focus:outline-none transition-all ${
                   errorMessage ? "border-red-500 bg-red-500/10" : "border-white/10 focus:border-white/30"
                 }`}
               />

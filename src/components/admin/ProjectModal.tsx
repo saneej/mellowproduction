@@ -3,6 +3,7 @@ import { X, Sparkles, FolderPlus, Lock } from "lucide-react";
 import { Project, EventCategory } from "../../types/gallery";
 import { extractDriveFileId } from "../../services/driveService";
 import { ImageUploader } from "../common/ImageUploader";
+import { FontSelector } from "../common/FontSelector";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -36,6 +37,9 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const [category, setCategory] = useState<EventCategory>(initialProject?.category || "wedding");
   const [date, setDate] = useState(initialProject?.date || new Date().toISOString().split("T")[0]);
   const [coverInput, setCoverInput] = useState(initialProject?.coverImage || "");
+  const [titleFontFamily, setTitleFontFamily] = useState(initialProject?.titleFontFamily || "default");
+  const [customTitleFontUrl, setCustomTitleFontUrl] = useState(initialProject?.customTitleFontUrl);
+  const [customTitleFontName, setCustomTitleFontName] = useState(initialProject?.customTitleFontName);
   const [isPinProtected, setIsPinProtected] = useState(initialProject?.isPinProtected ?? true);
   const [pin, setPin] = useState(initialProject?.pin || "");
   const [saving, setSaving] = useState(false);
@@ -69,6 +73,9 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         category,
         date,
         coverImage,
+        titleFontFamily,
+        customTitleFontUrl,
+        customTitleFontName,
         isPinProtected,
         pin,
         isPublished: true,
@@ -167,6 +174,19 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
               You can paste a URL/Drive ID or upload an image directly.
             </p>
           </div>
+
+          {/* Title Font & Custom Typography */}
+          <FontSelector
+            titleFontFamily={titleFontFamily}
+            customTitleFontUrl={customTitleFontUrl}
+            customTitleFontName={customTitleFontName}
+            previewText={title || "Ahmed & Amina Wedding"}
+            onChange={(fontData) => {
+              setTitleFontFamily(fontData.titleFontFamily);
+              setCustomTitleFontUrl(fontData.customTitleFontUrl);
+              setCustomTitleFontName(fontData.customTitleFontName);
+            }}
+          />
 
           {/* Security PIN Settings */}
           <div className="p-4 bg-white/5 border border-white/10 rounded-2xl space-y-3">

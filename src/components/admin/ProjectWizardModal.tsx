@@ -1,4 +1,5 @@
 import { ImageUploader } from '../common/ImageUploader';
+import { FontSelector } from '../common/FontSelector';
 import React, { useState, useEffect } from "react";
 import { 
   X, 
@@ -63,6 +64,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   const [clientName, setClientName] = useState("");
   const [groomName, setGroomName] = useState("");
   const [brideName, setBrideName] = useState("");
+  const [hashtag, setHashtag] = useState("");
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState(new Date().toISOString().split("T")[0]);
   const [category, setCategory] = useState("");
@@ -114,6 +116,9 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   const [progressiveLoading, setProgressiveLoading] = useState(true);
   const [layout, setLayout] = useState<"grid" | "masonry" | "timeline" | "justified" | "carousel" | "collage">("grid");
   const [theme, setTheme] = useState<Project['theme']>("classic_editorial");
+  const [titleFontFamily, setTitleFontFamily] = useState("default");
+  const [customTitleFontUrl, setCustomTitleFontUrl] = useState<string | undefined>();
+  const [customTitleFontName, setCustomTitleFontName] = useState<string | undefined>();
 
   // Created Project & QR Modal State
   const [createdProject, setCreatedProject] = useState<Project | null>(null);
@@ -226,6 +231,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
         clientName,
         groomName: groomName || undefined,
         brideName: brideName || undefined,
+        hashtag: hashtag ? (hashtag.startsWith('#') ? hashtag : `#${hashtag}`) : undefined,
         slug,
         category,
         date: eventDate,
@@ -244,6 +250,9 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
         progressiveLoading,
         layout,
         theme,
+        titleFontFamily,
+        customTitleFontUrl,
+        customTitleFontName,
       };
 
       const newProject = await createProject(projectData);
@@ -379,6 +388,19 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                     onChange={e => setBrideName(e.target.value)}
                     placeholder="e.g., Amina Siddiqui"
                     className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-red"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs uppercase text-amber-400 font-bold flex items-center gap-1">
+                    <span>Event Hashtag (Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={hashtag}
+                    onChange={e => setHashtag(e.target.value)}
+                    placeholder="e.g., #AminaWedsAhmed2026"
+                    className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-sm text-amber-300 font-mono focus:outline-none focus:border-amber-400 placeholder:text-white/30"
                   />
                 </div>
 
@@ -831,6 +853,19 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                   </select>
                 </div>
               </div>
+
+              {/* Title Font Selector */}
+              <FontSelector
+                titleFontFamily={titleFontFamily}
+                customTitleFontUrl={customTitleFontUrl}
+                customTitleFontName={customTitleFontName}
+                previewText={`${clientName || 'Amina & Ahmed'} ${eventName || 'Wedding'}`}
+                onChange={(fontData) => {
+                  setTitleFontFamily(fontData.titleFontFamily);
+                  setCustomTitleFontUrl(fontData.customTitleFontUrl);
+                  setCustomTitleFontName(fontData.customTitleFontName);
+                }}
+              />
 
               <div className="p-4 rounded-2xl bg-zinc-900 border border-white/10 space-y-4 text-xs">
                 <div className="text-xs font-bold uppercase text-white">Client Interactive Permissions</div>

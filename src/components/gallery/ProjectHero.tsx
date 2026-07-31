@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Project } from '../../types/gallery';
+import { ensureFontLoaded } from '../../utils/fontUtils';
 
 interface ProjectHeroProps {
   project: Project;
@@ -17,6 +18,25 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   coverList,
   setCurrentCoverIndex,
 }) => {
+  useEffect(() => {
+    ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
+    const cursiveFontId = project.landingPageConfig?.cursiveFont || 'great_vibes';
+    ensureFontLoaded(cursiveFontId, undefined, 'wedding_cursive');
+  }, [project.titleFontFamily, project.customTitleFontUrl, project.id, project.landingPageConfig?.cursiveFont]);
+
+  const loadedFontFamily = ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
+  const titleFontStyle = loadedFontFamily !== 'inherit' ? { fontFamily: loadedFontFamily } : {};
+
+  const cursiveFontId = project.landingPageConfig?.cursiveFont || 'great_vibes';
+  const loadedCursiveFamily = ensureFontLoaded(cursiveFontId, undefined, 'wedding_cursive');
+  const cursiveFontStyle = { fontFamily: loadedCursiveFamily };
+
+  const brideName = project.brideName || project.landingPageConfig?.brideName;
+  const groomName = project.groomName || project.landingPageConfig?.groomName;
+  const hashtag = project.hashtag || project.landingPageConfig?.hashtag;
+  const welcomeMessage = project.landingPageConfig?.welcomeMessage;
+  const quoteText = project.landingPageConfig?.quoteText;
+
   const isVintage = project.theme === 'vintage_warmth';
   const isEarthy = project.theme === 'earthy_sand';
   const isNordic = project.theme === 'clean_nordic';
@@ -52,21 +72,36 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
         </div>
 
         {/* Wedding Content Typography & Ornaments */}
-        <div className="relative z-10 w-full max-w-3xl -mt-16 sm:-mt-28 md:-mt-32 bg-white/95 backdrop-blur-md p-8 sm:p-12 md:p-16 rounded-[2.5rem] border border-[#EBE3D8] text-center flex flex-col items-center shadow-xl space-y-6">
-          <div className="flex items-center gap-3">
-            <span className="w-12 h-[1px] bg-[#C59B6C]/40" />
-            <span className="text-[10px] font-serif uppercase tracking-[0.35em] text-[#C59B6C] font-semibold">
-              ✧ Mellow Wedding ✧
-            </span>
-            <span className="w-12 h-[1px] bg-[#C59B6C]/40" />
-          </div>
+        <div className="relative z-10 w-full max-w-3xl -mt-16 sm:-mt-28 md:-mt-32 bg-white/95 backdrop-blur-md p-8 sm:p-12 md:p-16 rounded-[2.5rem] border border-[#EBE3D8] text-center flex flex-col items-center shadow-xl space-y-5">
+          {hashtag && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C59B6C]/10 border border-[#C59B6C]/30 text-[#C59B6C] text-xs font-mono font-bold tracking-wider uppercase mb-1">
+              <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
+            </div>
+          )}
 
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif italic font-normal tracking-wide text-[#2D2621] leading-tight">
+          {(brideName || groomName) && (
+            <div className="space-y-1">
+              <p className="text-[10px] font-serif uppercase tracking-[0.35em] text-[#C59B6C] font-semibold">
+                ✧ WEDDING CELEBRATION ✧
+              </p>
+              <h2 
+                style={cursiveFontStyle}
+                className="text-4xl sm:text-6xl text-[#C59B6C] font-normal leading-tight"
+              >
+                {brideName || 'Bride'} & {groomName || 'Groom'}
+              </h2>
+            </div>
+          )}
+
+          <h1
+            style={titleFontStyle}
+            className="text-3xl sm:text-5xl md:text-6xl font-serif italic font-normal tracking-wide text-[#2D2621] leading-tight"
+          >
             {project.title}
           </h1>
 
           <p className="text-xs sm:text-sm font-serif italic text-[#8A7E74] max-w-lg leading-relaxed">
-            A celebration of love, captured in timeless frames and cherished forever.
+            {welcomeMessage || quoteText || 'A celebration of love, captured in timeless frames and cherished forever.'}
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-xs font-serif tracking-[0.2em] text-[#8A7E74] uppercase">
@@ -102,7 +137,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           <p className="text-[10px] font-sans tracking-[0.4em] uppercase text-black font-semibold">
             {project.clientName} • {project.date}
           </p>
-          <h1 className="text-5xl md:text-7xl font-sans tracking-tighter uppercase font-medium text-black leading-none">
+          <h1
+            style={titleFontStyle}
+            className="text-5xl md:text-7xl font-sans tracking-tighter uppercase font-medium text-black leading-none"
+          >
             {project.title}
           </h1>
         </div>
@@ -147,7 +185,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
         
         <div className="relative z-10 w-full max-w-4xl bg-white/70 backdrop-blur-md p-10 md:p-16 rounded-[2rem] border border-[#F5DADD] text-center flex flex-col items-center shadow-xl">
           <div className="w-16 h-[1px] bg-[#C28C93] mb-8" />
-          <h1 className="text-4xl md:text-6xl font-serif italic font-light tracking-wide text-[#4A3036] leading-tight mb-6">
+          <h1
+            style={titleFontStyle}
+            className="text-4xl md:text-6xl font-serif italic font-light tracking-wide text-[#4A3036] leading-tight mb-6"
+          >
             {project.title}
           </h1>
           <div className="flex items-center gap-4 text-xs font-serif tracking-widest text-[#8E6D74] uppercase">
@@ -180,7 +221,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
             </AnimatePresence>
           </div>
           <div className="text-center space-y-4">
-            <h1 className="text-4xl sm:text-5xl font-serif font-black uppercase tracking-tight text-[#1F3428]">
+            <h1
+              style={titleFontStyle}
+              className="text-4xl sm:text-5xl font-serif font-black uppercase tracking-tight text-[#1F3428]"
+            >
               {project.title}
             </h1>
             <p className="text-[#5E7265] font-serif italic text-lg sm:text-xl">
@@ -216,7 +260,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           </AnimatePresence>
         </div>
         <div className="py-12 px-6 text-center space-y-4 w-full bg-[#FDFBFA]">
-          <h1 className="text-4xl sm:text-6xl font-serif italic tracking-wide text-[#3E3832]">
+          <h1
+            style={titleFontStyle}
+            className="text-4xl sm:text-6xl font-serif italic tracking-wide text-[#3E3832]"
+          >
             {project.title}
           </h1>
           <div className="flex items-center justify-center gap-4 text-xs font-mono text-[#92867B] tracking-widest uppercase">
@@ -236,7 +283,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] font-extrabold">
             PORTFOLIO HIGHLIGHT
           </p>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-sans tracking-[0.1em] uppercase font-semibold text-slate-950 leading-tight">
+          <h1
+            style={titleFontStyle}
+            className="text-4xl md:text-5xl lg:text-6xl font-sans tracking-[0.1em] uppercase font-semibold text-slate-950 leading-tight"
+          >
             {project.title}
           </h1>
           <div className="w-16 h-[2px] bg-slate-900" />
@@ -296,13 +346,44 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           transition={{ duration: 0.8 }}
           className="space-y-4 max-w-4xl"
         >
-          <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
-            EXCLUSIVELY CURATED FOR
-          </p>
+          {hashtag && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-mono font-bold tracking-wider uppercase mb-1">
+              <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
+            </div>
+          )}
+
+          {(brideName || groomName) && (
+            <div className="space-y-1">
+              <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
+                WEDDING CELEBRATION
+              </p>
+              <h2
+                style={cursiveFontStyle}
+                className="text-4xl sm:text-6xl text-amber-200 font-normal leading-tight drop-shadow-lg"
+              >
+                {brideName || 'Bride'} & {groomName || 'Groom'}
+              </h2>
+            </div>
+          )}
+
+          {!brideName && !groomName && (
+            <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
+              EXCLUSIVELY CURATED FOR
+            </p>
+          )}
           
-          <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tight text-white leading-tight filter drop-shadow-md">
+          <h1
+            style={titleFontStyle}
+            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tight text-white leading-tight filter drop-shadow-md"
+          >
             {project.title}
           </h1>
+
+          {welcomeMessage && (
+            <p className="text-xs sm:text-sm font-sans text-white/80 max-w-xl mx-auto drop-shadow">
+              {welcomeMessage}
+            </p>
+          )}
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono text-zinc-300 tracking-widest uppercase font-bold">
             <span>{project.clientName}</span>

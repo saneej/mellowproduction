@@ -15,6 +15,7 @@ import {
 import { Project, EventFolder } from "../../types/gallery";
 import { getThemeStyles } from "../../lib/themes";
 import { getDriveImageUrl } from "../../services/driveService";
+import { ensureFontLoaded } from "../../utils/fontUtils";
 
 interface GalleryHeroProps {
   project: Project;
@@ -121,7 +122,10 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
 
         {/* Title & Client Name */}
         <div className="space-y-2">
-          <h1 className={`text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight leading-none ${themeStyles.text}`}>
+          <h1
+            style={{ fontFamily: ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id) }}
+            className={`text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight leading-none ${themeStyles.text}`}
+          >
             {event ? event.title : project.title}
           </h1>
           <p className={`text-sm font-mono tracking-wider ${themeStyles.textMuted}`}>

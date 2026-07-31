@@ -1,4 +1,5 @@
 import { ImageUploader } from '../common/ImageUploader';
+import { FontSelector } from '../common/FontSelector';
 import React, { useState, useEffect } from "react";
 import { 
   ArrowLeft, 
@@ -25,7 +26,9 @@ import {
   Image as ImageIcon,
   ChevronRight,
   FileJson,
-  CopyPlus
+  CopyPlus,
+  Wand2,
+  Sparkles
 } from "lucide-react";
 import { 
   Project, 
@@ -59,6 +62,7 @@ import { AccessCodesModal } from "./AccessCodesModal";
 import { AddFolderModal } from "./AddFolderModal";
 import { EditFolderModal } from "./EditFolderModal";
 import { FavoritesViewerModal } from "./FavoritesViewerModal";
+import { LandingPageEditor } from "./LandingPageEditor";
 
 import { extractDriveFolderId } from "../../services/driveService";
 import { SyncEngine } from "../../services/syncEngine";
@@ -94,6 +98,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
   // Modals
   const [showQrModal, setShowQrModal] = useState(false);
+  const [showLandingPageEditor, setShowLandingPageEditor] = useState(false);
   const [showAccessCodesModal, setShowAccessCodesModal] = useState(false);
   const [showAddFolderModal, setShowAddFolderModal] = useState(false);
   const [showEditFolderModal, setShowEditFolderModal] = useState(false);
@@ -109,9 +114,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const [editClientName, setEditClientName] = useState("");
   const [editGroomName, setEditGroomName] = useState("");
   const [editBrideName, setEditBrideName] = useState("");
+  const [editHashtag, setEditHashtag] = useState("");
   const [editCoverImage, setEditCoverImage] = useState("");
   const [editCoverImages, setEditCoverImages] = useState<string[]>([]);
   const [editDate, setEditDate] = useState("");
+  const [editTitleFontFamily, setEditTitleFontFamily] = useState("default");
+  const [editCustomTitleFontUrl, setEditCustomTitleFontUrl] = useState<string | undefined>();
+  const [editCustomTitleFontName, setEditCustomTitleFontName] = useState<string | undefined>();
 
   const loadProjectData = async () => {
     setLoading(true);
@@ -123,9 +132,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         setEditClientName(p.clientName);
         setEditGroomName(p.groomName || "");
         setEditBrideName(p.brideName || "");
+        setEditHashtag(p.hashtag || "");
         setEditCoverImage(p.coverImage || "");
         setEditCoverImages(p.coverImages || [p.coverImage].filter(Boolean));
         setEditDate(p.date || "");
+        setEditTitleFontFamily(p.titleFontFamily || "default");
+        setEditCustomTitleFontUrl(p.customTitleFontUrl);
+        setEditCustomTitleFontName(p.customTitleFontName);
       }
 
       const evts = await getEventsByProject(projectId);
@@ -166,14 +179,19 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     try {
       const finalCoverImages = editCoverImages.filter(Boolean);
       const finalCoverImage = finalCoverImages[0] || editCoverImage || "";
+      const formattedHashtag = editHashtag ? (editHashtag.startsWith('#') ? editHashtag : `#${editHashtag}`) : undefined;
       await updateProject(project.id, {
         title: editTitle,
         clientName: editClientName,
         groomName: editGroomName || undefined,
         brideName: editBrideName || undefined,
+        hashtag: formattedHashtag,
         coverImage: finalCoverImage,
         coverImages: finalCoverImages,
         date: editDate,
+        titleFontFamily: editTitleFontFamily,
+        customTitleFontUrl: editCustomTitleFontUrl,
+        customTitleFontName: editCustomTitleFontName,
       });
       setProject({
         ...project,
@@ -181,9 +199,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         clientName: editClientName,
         groomName: editGroomName || undefined,
         brideName: editBrideName || undefined,
+        hashtag: formattedHashtag,
         coverImage: finalCoverImage,
         coverImages: finalCoverImages,
         date: editDate,
+        titleFontFamily: editTitleFontFamily,
+        customTitleFontUrl: editCustomTitleFontUrl,
+        customTitleFontName: editCustomTitleFontName,
       });
       setIsEditingInfo(false);
     } catch (err: any) {
@@ -379,6 +401,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
         <div className="flex items-center gap-2 flex-wrap">
           <button
+            onClick={() => setShowLandingPageEditor(true)}
+            className="py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-lg border border-amber-400/30"
+          >
+            <Wand2 size={16} className="animate-pulse text-amber-200" />
+            <span>Landing Page Builder</span>
+          </button>
+
+          <button
             onClick={() => setShowQrModal(true)}
             className="py-2.5 px-4 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold uppercase flex items-center gap-1.5 transition-all"
           >
@@ -468,6 +498,16 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     />
                   </div>
                   <div>
+                    <label className="text-[10px] uppercase text-amber-400 block mb-1 font-bold">Event Hashtag</label>
+                    <input
+                      type="text"
+                      value={editHashtag}
+                      onChange={e => setEditHashtag(e.target.value)}
+                      placeholder="e.g. #AminaWedsAhmed2026"
+                      className="w-full bg-black border border-amber-500/30 rounded-xl px-3 py-2 text-xs text-amber-300 font-mono focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                  <div>
                     <label className="text-[10px] uppercase text-white/50 block mb-1">Cover Images (1 or more URLs or GDrive IDs)</label>
                     <div className="space-y-2">
                       {editCoverImages.map((img, index) => (
@@ -525,6 +565,18 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                       className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
                     />
                   </div>
+
+                  <FontSelector
+                    titleFontFamily={editTitleFontFamily}
+                    customTitleFontUrl={editCustomTitleFontUrl}
+                    customTitleFontName={editCustomTitleFontName}
+                    previewText={editTitle || "Project Title"}
+                    onChange={(fontData) => {
+                      setEditTitleFontFamily(fontData.titleFontFamily);
+                      setEditCustomTitleFontUrl(fontData.customTitleFontUrl);
+                      setEditCustomTitleFontName(fontData.customTitleFontName);
+                    }}
+                  />
                 </div>
                 <div className="flex gap-2 pt-2">
                   <button
@@ -1065,6 +1117,40 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         }}
         onSave={handleEditFolderSubmit}
       />
+
+      {/* LANDING PAGE EDITOR MODAL */}
+      {showLandingPageEditor && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md overflow-y-auto animate-fade-in p-2 sm:p-6">
+          <div className="max-w-7xl mx-auto min-h-[90vh] bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col">
+            <LandingPageEditor
+              project={project}
+              onClose={() => {
+                setShowLandingPageEditor(false);
+                loadProjectData();
+              }}
+              onSave={async (updatedConfig) => {
+                try {
+                  await updateProject(project.id, {
+                    landingPageConfig: updatedConfig,
+                    brideName: updatedConfig.brideName || project.brideName,
+                    groomName: updatedConfig.groomName || project.groomName,
+                    hashtag: updatedConfig.hashtag || project.hashtag,
+                  });
+                  setProject({
+                    ...project,
+                    landingPageConfig: updatedConfig,
+                    brideName: updatedConfig.brideName || project.brideName,
+                    groomName: updatedConfig.groomName || project.groomName,
+                    hashtag: updatedConfig.hashtag || project.hashtag,
+                  });
+                } catch (err: any) {
+                  alert("Failed to save page configuration: " + err.message);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* FAVORITES VIEWER MODAL */}
       {selectedFav && (

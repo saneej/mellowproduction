@@ -4,6 +4,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import { Project } from "../../types/gallery";
+import { ensureFontLoaded } from "../../utils/fontUtils";
 
 interface ProjectQrModalProps {
   isOpen: boolean;
@@ -220,8 +221,15 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
     currentY = qrY + qrSize + 90;
 
     // 4. PROJECT TITLE & CLIENT NAME
+    const loadedFontFamily = ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
+    if (typeof document !== "undefined" && document.fonts && loadedFontFamily !== "inherit") {
+      try {
+        await document.fonts.load(`bold 46px ${loadedFontFamily}`);
+      } catch (e) {}
+    }
+
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 46px sans-serif";
+    ctx.font = `bold 46px ${loadedFontFamily !== "inherit" ? loadedFontFamily : "sans-serif"}`;
     ctx.textAlign = "center";
 
     let displayTitle = project.title.toUpperCase();
@@ -455,7 +463,10 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
 
               {/* Project Title & Client info */}
               <div className="space-y-0.5 max-w-xs px-2">
-                <h4 className="text-base sm:text-lg font-display font-black uppercase tracking-tight leading-tight text-white drop-shadow line-clamp-1">
+                <h4
+                  style={{ fontFamily: ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id) }}
+                  className="text-base sm:text-lg font-display font-black uppercase tracking-tight leading-tight text-white drop-shadow line-clamp-1"
+                >
                   {project.title}
                 </h4>
                 <p className="text-[11px] font-mono text-white/90 font-medium">

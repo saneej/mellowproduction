@@ -366,7 +366,7 @@ export const createProject = async (projectData: Partial<Project> & { title: str
   return projectToStore;
 };
 
-export const updateProject = async (id: string, projectData: Partial<Project>): Promise<void> => {
+export const updateProject = async (id: string, projectData: Partial<Project>): Promise<Project> => {
   const now = new Date().toISOString();
   try {
     const docRef = doc(db, PROJECTS_COL, id);
@@ -375,9 +375,22 @@ export const updateProject = async (id: string, projectData: Partial<Project>): 
     console.warn("Updating project locally:", err);
   }
 
-  localProjectsState = localProjectsState.map(p => p.id === id ? { ...p, ...projectData, updatedAt: now } : p);
+  let updatedProj: Project | undefined;
+  localProjectsState = localProjectsState.map(p => {
+    if (p.id === id) {
+      updatedProj = { ...p, ...projectData, updatedAt: now };
+      return updatedProj;
+    }
+    return p;
+  });
+
+  if (!updatedProj) {
+    updatedProj = { id, updatedAt: now, ...projectData } as Project;
+  }
+
   saveStorage(STORAGE_PROJECTS, localProjectsState);
   logActivity("UPDATE_PROJECT", `Updated project ID: ${id}`, { projectId: id });
+  return updatedProj;
 };
 
 export const deleteProject = async (id: string): Promise<void> => {

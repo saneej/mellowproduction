@@ -119,7 +119,12 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
                 placeholder="Image URL or Drive ID..."
                 className="flex-1 bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
               />
-              <ImageUploader onImageUploaded={url => setCoverImage(url)} />
+              <ImageUploader 
+                onImageUploaded={url => setCoverImage(url)} 
+                label="Compress & Upload Thumbnail"
+                compress={true}
+                maxDimension={900}
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">

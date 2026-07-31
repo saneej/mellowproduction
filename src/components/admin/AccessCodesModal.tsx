@@ -35,6 +35,7 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
 }) => {
   const [accessCodes, setAccessCodes] = useState<AccessCode[]>(project.accessCodes || []);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Form State for Adding / Editing
   const [editingCodeId, setEditingCodeId] = useState<string | null>(null);
@@ -85,7 +86,7 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
   };
 
   const generateRandomCode = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*";
     let res = "";
     for (let i = 0; i < 8; i++) {
       res += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -95,61 +96,70 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
 
   const handleSaveCode = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !code.trim()) return;
+    const cleanCode = code.trim();
+    if (!name.trim() || !cleanCode) return;
 
-    let updatedList: AccessCode[] = [];
+    setIsSaving(true);
+    try {
+      let updatedList: AccessCode[] = [];
 
-    if (editingCodeId) {
-      // Edit existing code
-      updatedList = accessCodes.map(ac => ac.id === editingCodeId ? {
-        ...ac,
-        name: name.trim(),
-        code: code.trim().toUpperCase(),
-        enabled,
-        expirationDate: expirationDate || undefined,
-        maxUses: maxUses ? Number(maxUses) : undefined,
-        notes: notes.trim() || undefined,
-        permissions: {
-          canView,
-          canDownload,
-          canFavorite,
-          downloadOriginalQuality,
-          downloadZip
-        }
-      } : ac);
-    } else {
-      // Create new code
-      const newAc: AccessCode = {
-        id: `ac-${Date.now()}`,
-        name: name.trim(),
-        code: code.trim().toUpperCase(),
-        enabled: true,
-        expirationDate: expirationDate || undefined,
-        maxUses: maxUses ? Number(maxUses) : undefined,
-        usedCount: 0,
-        notes: notes.trim() || undefined,
-        permissions: {
-          canView,
-          canDownload,
-          canFavorite,
-          downloadOriginalQuality,
-          downloadZip
-        }
-      };
-      updatedList = [newAc, ...accessCodes];
+      if (editingCodeId) {
+        // Edit existing code
+        updatedList = accessCodes.map(ac => ac.id === editingCodeId ? {
+          ...ac,
+          name: name.trim(),
+          code: cleanCode,
+          enabled,
+          expirationDate: expirationDate || undefined,
+          maxUses: maxUses ? Number(maxUses) : undefined,
+          notes: notes.trim() || undefined,
+          permissions: {
+            canView,
+            canDownload,
+            canFavorite,
+            downloadOriginalQuality,
+            downloadZip
+          }
+        } : ac);
+      } else {
+        // Create new code
+        const newAc: AccessCode = {
+          id: `ac-${Date.now()}`,
+          name: name.trim(),
+          code: cleanCode,
+          enabled: true,
+          expirationDate: expirationDate || undefined,
+          maxUses: maxUses ? Number(maxUses) : undefined,
+          usedCount: 0,
+          notes: notes.trim() || undefined,
+          permissions: {
+            canView,
+            canDownload,
+            canFavorite,
+            downloadOriginalQuality,
+            downloadZip
+          }
+        };
+        updatedList = [newAc, ...accessCodes];
+      }
+
+      setAccessCodes(updatedList);
+      const updatedProj = await updateProject(project.id, { accessCodes: updatedList });
+      onProjectUpdated(updatedProj || { ...project, accessCodes: updatedList });
+      resetForm();
+    } catch (err: any) {
+      console.error("Failed to save access code:", err);
+      alert("Error saving access code: " + (err?.message || "Unknown error"));
+    } finally {
+      setIsSaving(false);
     }
-
-    setAccessCodes(updatedList);
-    const updatedProj = await updateProject(project.id, { accessCodes: updatedList });
-    onProjectUpdated(updatedProj);
-    resetForm();
   };
 
   const handleToggleEnable = async (id: string) => {
     const updatedList = accessCodes.map(ac => ac.id === id ? { ...ac, enabled: !ac.enabled } : ac);
     setAccessCodes(updatedList);
     const updatedProj = await updateProject(project.id, { accessCodes: updatedList });
-    onProjectUpdated(updatedProj);
+    onProjectUpdated(updatedProj || { ...project, accessCodes: updatedList });
   };
 
   const handleDeleteCode = async (id: string) => {
@@ -157,7 +167,7 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
     const updatedList = accessCodes.filter(ac => ac.id !== id);
     setAccessCodes(updatedList);
     const updatedProj = await updateProject(project.id, { accessCodes: updatedList });
-    onProjectUpdated(updatedProj);
+    onProjectUpdated(updatedProj || { ...project, accessCodes: updatedList });
   };
 
   const handleDuplicateCode = async (ac: AccessCode) => {
@@ -171,7 +181,7 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
     const updatedList = [dupAc, ...accessCodes];
     setAccessCodes(updatedList);
     const updatedProj = await updateProject(project.id, { accessCodes: updatedList });
-    onProjectUpdated(updatedProj);
+    onProjectUpdated(updatedProj || { ...project, accessCodes: updatedList });
   };
 
   const handleCopy = (ac: AccessCode) => {
@@ -232,7 +242,7 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] text-white/60 uppercase">Secret Code</label>
+                  <label className="block text-[11px] text-white/60 uppercase">Secret Code (Supports Symbols & Letters)</label>
                   <button
                     type="button"
                     onClick={generateRandomCode}
@@ -245,9 +255,9 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
                   type="text"
                   required
                   value={code}
-                  onChange={e => setCode(e.target.value.toUpperCase())}
-                  placeholder="e.g. MELLOW2026"
-                  className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white font-bold tracking-widest placeholder:text-white/30 focus:outline-none focus:border-brand-red uppercase"
+                  onChange={e => setCode(e.target.value)}
+                  placeholder="e.g. #MELLOW_2026! or VIP-123"
+                  className="w-full bg-zinc-900 border border-white/10 rounded-xl px-3 py-2 text-white font-bold tracking-widest placeholder:text-white/30 focus:outline-none focus:border-brand-red font-mono"
                 />
               </div>
 
@@ -326,9 +336,17 @@ export const AccessCodesModal: React.FC<AccessCodesModalProps> = ({
               <div className="flex items-center gap-2 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-brand-red text-white font-bold uppercase text-xs hover:bg-brand-red/90 transition-all shadow-lg"
+                  disabled={isSaving}
+                  className="flex-1 py-2.5 rounded-xl bg-brand-red text-white font-bold uppercase text-xs hover:bg-brand-red/90 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  {editingCodeId ? "Update Code" : "Save Access Code"}
+                  {isSaving ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <span>{editingCodeId ? "Update Code" : "Save Access Code"}</span>
+                  )}
                 </button>
                 {editingCodeId && (
                   <button
