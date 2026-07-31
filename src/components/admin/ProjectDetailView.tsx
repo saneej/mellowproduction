@@ -53,6 +53,7 @@ import {
 import { ProjectQrModal } from "./ProjectQrModal";
 import { DriveSyncModal } from "./DriveSyncModal";
 import { AccessCodesModal } from "./AccessCodesModal";
+import { AddFolderModal } from "./AddFolderModal";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -86,6 +87,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   // Modals
   const [showQrModal, setShowQrModal] = useState(false);
   const [showAccessCodesModal, setShowAccessCodesModal] = useState(false);
+  const [showAddFolderModal, setShowAddFolderModal] = useState(false);
+  const [activeParentFolderId, setActiveParentFolderId] = useState<string | null>(null);
   const [syncingEventId, setSyncingEventId] = useState<string | null>(null);
   const [editingCode, setEditingCode] = useState<AccessCode | null>(null);
 
@@ -156,23 +159,38 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     }
   };
 
-  const handleAddSubEvent = async (parentId?: string) => {
-    const title = window.prompt("Enter Sub-Event Name (e.g. Stage Photos, Outdoor):");
-    if (!title) return;
+  const handleAddSubEvent = (parentId?: string) => {
+    setActiveParentFolderId(parentId || null);
+    setShowAddFolderModal(true);
+  };
 
-    const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
+  const handleAddFolderSubmit = async (folderData: { name: string; driveFolderId: string; apiKey?: string }) => {
+    const slug = folderData.name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
     await createEvent({
       projectId: project.id,
-      title,
+      title: folderData.name,
       slug,
       coverImage: project.coverImage,
-      driveFolderId: "",
+      driveFolderId: folderData.driveFolderId,
       order: events.length + 1,
       isPublished: true,
-      parentId: parentId || null,
+      parentId: activeParentFolderId || null,
     });
 
-    await updateProject(project.id, { eventCount: (project.eventCount || 0) + 1 });
+    const newFolderConfig: DriveFolderConfig = {
+      id: `folder-${Date.now()}`,
+      name: folderData.name,
+      driveFolderId: folderData.driveFolderId,
+      apiKey: folderData.apiKey,
+      status: folderData.driveFolderId ? "connected" : "untested",
+    };
+
+    const updatedFolders = [...(project.driveFolders || []), newFolderConfig];
+    await updateProject(project.id, { 
+      eventCount: (project.eventCount || 0) + 1,
+      driveFolders: updatedFolders,
+    });
+
     loadProjectData();
   };
 
@@ -548,6 +566,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           }}
         />
       )}
+
+      {/* ADD FOLDER MODAL */}
+      <AddFolderModal
+        isOpen={showAddFolderModal}
+        onClose={() => setShowAddFolderModal(false)}
+        onAddFolder={handleAddFolderSubmit}
+      />
 
     </div>
   );

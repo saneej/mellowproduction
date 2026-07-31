@@ -9,8 +9,10 @@ import {
   ChevronRight,
   Menu,
   X,
-  Phone
+  Phone,
+  Lock
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import React, { useState, useRef, useEffect } from "react";
 
 // --- Components ---
@@ -856,7 +858,7 @@ const Footer = () => {
           </Magnetic>
         </div>
         
-        <div className="flex flex-wrap justify-center gap-8">
+        <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8">
           {internalLinks.map((link) => (
             <a 
               key={link.name} 
@@ -866,6 +868,13 @@ const Footer = () => {
               {link.name}
             </a>
           ))}
+          <Link
+            to="/admin"
+            className="text-[10px] uppercase tracking-widest font-extrabold text-white bg-brand-red/90 hover:bg-brand-red px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 shadow-md hover:shadow-brand-red/20"
+          >
+            <Lock size={11} />
+            <span>Client Login</span>
+          </Link>
           <a 
             href="https://www.premiumbeat.com/blog/category/video-production/" 
             target="_blank" 

@@ -570,9 +570,11 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                       )}
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase text-white/50">Folder Name</label>
+                    <div className="space-y-3.5">
+                      <div>
+                        <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
+                          Folder Name
+                        </label>
                         <input
                           type="text"
                           value={folder.name}
@@ -580,13 +582,15 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                             const val = e.target.value;
                             setDriveFolders(prev => prev.map(f => f.id === folder.id ? { ...f, name: val } : f));
                           }}
-                          placeholder="e.g., Nikah Ceremony"
-                          className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-red"
+                          placeholder="e.g. Nikah Ceremony / Main Album"
+                          className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
                         />
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase text-white/50">Drive Folder ID</label>
+                      <div>
+                        <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
+                          GOOGLE FOLDER ID
+                        </label>
                         <input
                           type="text"
                           value={folder.driveFolderId}
@@ -594,25 +598,25 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                             const val = e.target.value;
                             setDriveFolders(prev => prev.map(f => f.id === folder.id ? { ...f, driveFolderId: val } : f));
                           }}
-                          placeholder="1A2B3C..."
-                          className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-red"
+                          placeholder="1R74K2Sk6xWXqiIu8bmd-wUa7ZMI2nvXn"
+                          className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
                         />
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[10px] uppercase text-white/50">Drive Account</label>
-                        <select
-                          value={folder.driveAccountId}
+                      <div>
+                        <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
+                          API KEY
+                        </label>
+                        <input
+                          type="password"
+                          value={folder.apiKey || ""}
                           onChange={e => {
                             const val = e.target.value;
-                            setDriveFolders(prev => prev.map(f => f.id === folder.id ? { ...f, driveAccountId: val } : f));
+                            setDriveFolders(prev => prev.map(f => f.id === folder.id ? { ...f, apiKey: val } : f));
                           }}
-                          className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-brand-red"
-                        >
-                          {driveAccountsList.map(acc => (
-                            <option key={acc.id} value={acc.id}>{acc.name} ({acc.email})</option>
-                          ))}
-                        </select>
+                          placeholder="••••••••••••••••••••••••••"
+                          className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
+                        />
                       </div>
                     </div>
 

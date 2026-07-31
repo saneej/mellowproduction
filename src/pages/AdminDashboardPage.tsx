@@ -299,25 +299,44 @@ export const AdminDashboardPage: React.FC = () => {
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {projects.slice(0, 3).map(p => (
-                          <div 
-                            key={p.id} 
-                            onClick={() => setSelectedProjectId(p.id)}
-                            className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-xl hover:border-brand-red/50 cursor-pointer transition-all group"
-                          >
-                            <img 
-                              src={p.coverImage.startsWith("http") ? p.coverImage : `https://lh3.googleusercontent.com/d/${p.coverImage}=s800`} 
-                              alt={p.title} 
-                              className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                            <div className="p-4 space-y-1">
-                              <div className="font-bold text-white text-base truncate group-hover:text-brand-red transition-colors">{p.title}</div>
-                              <div className="text-xs font-mono text-white/50">{p.clientName} • {p.date}</div>
-                            </div>
+                      {projects.length === 0 ? (
+                        <div className="p-8 bg-zinc-950 border border-dashed border-white/20 rounded-3xl text-center space-y-4">
+                          <FolderPlus className="mx-auto text-white/40" size={40} />
+                          <div>
+                            <h4 className="text-lg font-bold text-white uppercase">No Projects Yet</h4>
+                            <p className="text-xs font-mono text-white/50 mt-1">Start by creating your first client photography gallery.</p>
                           </div>
-                        ))}
-                      </div>
+                          {canEditProjects && (
+                            <button
+                              onClick={() => setIsWizardOpen(true)}
+                              className="py-2.5 px-5 rounded-2xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 hover:bg-brand-red/90 transition-all shadow-lg"
+                            >
+                              <Plus size={16} />
+                              <span>Create Project</span>
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          {projects.slice(0, 3).map(p => (
+                            <div 
+                              key={p.id} 
+                              onClick={() => setSelectedProjectId(p.id)}
+                              className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-xl hover:border-brand-red/50 cursor-pointer transition-all group"
+                            >
+                              <img 
+                                src={p.coverImage.startsWith("http") ? p.coverImage : `https://lh3.googleusercontent.com/d/${p.coverImage}=s800`} 
+                                alt={p.title} 
+                                className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                              <div className="p-4 space-y-1">
+                                <div className="font-bold text-white text-base truncate group-hover:text-brand-red transition-colors">{p.title}</div>
+                                <div className="text-xs font-mono text-white/50">{p.clientName} • {p.date}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     {/* Activity Logs */}
@@ -400,6 +419,25 @@ export const AdminDashboardPage: React.FC = () => {
                     {/* Projects Grid */}
                     {loading ? (
                       <div className="py-20 text-center font-mono text-xs text-white/50">Loading Projects...</div>
+                    ) : filteredProjects.length === 0 ? (
+                      <div className="py-16 px-6 bg-zinc-950 border border-dashed border-white/20 rounded-3xl text-center space-y-4">
+                        <FolderPlus className="mx-auto text-white/40" size={48} />
+                        <div>
+                          <h3 className="text-xl font-display font-extrabold uppercase text-white">No Projects Found</h3>
+                          <p className="text-xs font-mono text-white/50 max-w-md mx-auto mt-1">
+                            {search ? `No projects match "${search}". Try clearing search.` : "You have no pre-added or active projects. Create a new project to get started."}
+                          </p>
+                        </div>
+                        {canEditProjects && (
+                          <button
+                            onClick={() => setIsWizardOpen(true)}
+                            className="py-3 px-6 rounded-2xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 hover:bg-brand-red/90 transition-all shadow-xl"
+                          >
+                            <Plus size={16} />
+                            <span>Create New Project</span>
+                          </button>
+                        )}
+                      </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredProjects.map(project => {

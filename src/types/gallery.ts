@@ -56,7 +56,8 @@ export interface DriveFolderConfig {
   id: string;
   name: string;
   driveFolderId: string;
-  driveAccountId: string;
+  apiKey?: string;
+  driveAccountId?: string;
   status?: 'connected' | 'error' | 'syncing' | 'untested';
   fileCount?: number;
   lastSync?: string;
