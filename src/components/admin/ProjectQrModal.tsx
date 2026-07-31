@@ -89,6 +89,20 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
         allowTaint: true,
         backgroundColor: "#dc2626",
         logging: false,
+        onclone: (clonedDoc) => {
+          // Replace any oklch(...) occurrences in styles with RGB fallback so html2canvas doesn't crash
+          const styleTags = clonedDoc.querySelectorAll("style");
+          styleTags.forEach((style) => {
+            if (style.textContent && style.textContent.includes("oklch")) {
+              style.textContent = style.textContent.replace(/oklch\([^)]+\)/gi, "rgb(220, 38, 38)");
+            }
+          });
+          const clonedCard = clonedDoc.getElementById("a5-printable-qr-card");
+          if (clonedCard) {
+            clonedCard.style.background = "linear-gradient(to bottom, #dc2626, #b91c1c, #881337)";
+            clonedCard.style.color = "#ffffff";
+          }
+        },
       });
       const dataUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
@@ -116,6 +130,19 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
         allowTaint: true,
         backgroundColor: "#dc2626",
         logging: false,
+        onclone: (clonedDoc) => {
+          const styleTags = clonedDoc.querySelectorAll("style");
+          styleTags.forEach((style) => {
+            if (style.textContent && style.textContent.includes("oklch")) {
+              style.textContent = style.textContent.replace(/oklch\([^)]+\)/gi, "rgb(220, 38, 38)");
+            }
+          });
+          const clonedCard = clonedDoc.getElementById("a5-printable-qr-card");
+          if (clonedCard) {
+            clonedCard.style.background = "linear-gradient(to bottom, #dc2626, #b91c1c, #881337)";
+            clonedCard.style.color = "#ffffff";
+          }
+        },
       });
       const imgData = canvas.toDataURL("image/png");
       
