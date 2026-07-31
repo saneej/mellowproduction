@@ -113,6 +113,7 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   lastSync?: string;
+  isSynced?: boolean;
 }
 
 export interface EventFolder {

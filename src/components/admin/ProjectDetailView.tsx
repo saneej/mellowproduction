@@ -157,8 +157,12 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
   const handleDelete = async () => {
     if (window.confirm(`Are you sure you want to delete project "${project.title}"? This action cannot be undone.`)) {
-      await deleteProject(project.id);
-      onBack();
+      try {
+        await deleteProject(project.id);
+        onBack();
+      } catch (err: any) {
+        alert(`Failed to delete project: ${err?.message || err}`);
+      }
     }
   };
 

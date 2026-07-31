@@ -32,6 +32,29 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
   const [error, setError] = useState("");
   const [isGuideOpen, setIsGuideOpen] = useState(false);
 
+  React.useEffect(() => {
+    if (isOpen) {
+      getProjectById(projectId).then((project) => {
+        if (project) {
+          // Find the folder config matching this event ID or title
+          const folderConfig = project.driveFolders?.find(
+            (f) => f.id === eventId || f.name === eventTitle
+          );
+          if (folderConfig) {
+            setFolderInput(folderConfig.driveFolderId || "");
+            setApiKey(folderConfig.apiKey || "");
+          } else {
+            const firstFolder = project.driveFolders?.[0];
+            if (firstFolder) {
+              setFolderInput(firstFolder.driveFolderId || "");
+              setApiKey(firstFolder.apiKey || "");
+            }
+          }
+        }
+      });
+    }
+  }, [isOpen, projectId, eventId, eventTitle]);
+
   if (!isOpen) return null;
 
   const handleTestFolder = async () => {

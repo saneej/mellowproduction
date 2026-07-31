@@ -15,6 +15,7 @@ import {
   writeBatch
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { extractDriveFolderId } from "./driveService";
 import { 
   Project, 
   EventFolder, 
@@ -164,11 +165,13 @@ export const getProjects = async (): Promise<Project[]> => {
     
     // Auto-sync any unsynced local projects to Firestore
     const docIds = new Set(docs.map(d => d.id));
-    const unSyncedLocal = localProjectsState.filter(p => !docIds.has(p.id));
+    const unSyncedLocal = localProjectsState.filter(p => !docIds.has(p.id) && p.isSynced === false);
     if (unSyncedLocal.length > 0) {
       for (const p of unSyncedLocal) {
         try {
-          await setDoc(doc(db, PROJECTS_COL, p.id), p);
+          // Remove the isSynced flag before uploading
+          const { isSynced, ...projectToUpload } = p;
+          await setDoc(doc(db, PROJECTS_COL, p.id), projectToUpload);
         } catch (e) {
           console.warn("Failed to sync local project to Firestore:", e);
         }
@@ -288,18 +291,73 @@ export const createProject = async (projectData: Partial<Project> & { title: str
     updatedAt: now,
   };
 
+  // Automatically create EventFolder records for any configured driveFolders
+  if (newProject.driveFolders && Array.isArray(newProject.driveFolders)) {
+    const updatedFolders = [...newProject.driveFolders];
+    for (let index = 0; index < updatedFolders.length; index++) {
+      const folderConfig = updatedFolders[index];
+      const eventId = `event-${Date.now()}-${index}`;
+      
+      const rawTitle = folderConfig.name || `Folder ${index + 1}`;
+      const eventSlug = rawTitle
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-") || `event-${Date.now()}-${index}`;
+
+      const newEvent: EventFolder = {
+        id: eventId,
+        projectId: projectId,
+        title: rawTitle,
+        slug: eventSlug,
+        coverImage: newProject.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+        driveFolderId: extractDriveFolderId(folderConfig.driveFolderId),
+        order: index + 1,
+        isPublished: true,
+        parentId: null,
+        createdAt: now
+      };
+
+      try {
+        const eventDocRef = doc(db, EVENTS_COL, eventId);
+        await setDoc(eventDocRef, newEvent);
+        console.log("Successfully auto-created event in Firestore:", eventId);
+      } catch (err) {
+        console.warn("Auto-creating event locally due to Firestore error:", err);
+      }
+
+      // Add to local state
+      localEventsState = [...localEventsState.filter(e => e.id !== eventId), newEvent];
+      
+      // Update the config folder id to match eventId
+      updatedFolders[index] = {
+        ...folderConfig,
+        id: eventId,
+        driveFolderId: extractDriveFolderId(folderConfig.driveFolderId),
+        status: folderConfig.driveFolderId ? "connected" : "untested"
+      };
+    }
+    
+    newProject.driveFolders = updatedFolders;
+    newProject.eventCount = updatedFolders.length;
+    saveStorage(STORAGE_EVENTS, localEventsState);
+  }
+
+  let isSynced = true;
   try {
     const docRef = doc(db, PROJECTS_COL, newProject.id);
     await setDoc(docRef, newProject);
     console.log("Successfully saved project to Firestore:", newProject.id);
   } catch (err) {
     console.warn("Saving project locally due to Firestore error:", err);
+    isSynced = false;
   }
 
-  localProjectsState = [newProject, ...localProjectsState.filter(p => p.id !== newProject.id)];
+  const projectToStore = { ...newProject, isSynced };
+  localProjectsState = [projectToStore, ...localProjectsState.filter(p => p.id !== newProject.id)];
   saveStorage(STORAGE_PROJECTS, localProjectsState);
   logActivity("CREATE_PROJECT", `Created new project: ${newProject.title}`, { projectId: newProject.id });
-  return newProject;
+  return projectToStore;
 };
 
 export const updateProject = async (id: string, projectData: Partial<Project>): Promise<void> => {
@@ -318,12 +376,31 @@ export const updateProject = async (id: string, projectData: Partial<Project>): 
 
 export const deleteProject = async (id: string): Promise<void> => {
   try {
+    // 1. Delete project document from Firestore
     const docRef = doc(db, PROJECTS_COL, id);
     await deleteDoc(docRef);
+
+    // 2. Cascade delete associated events in Firestore
+    const eventsRef = collection(db, EVENTS_COL);
+    const eventsQuery = query(eventsRef, where("projectId", "==", id));
+    const eventsSnap = await getDocs(eventsQuery);
+    for (const evtDoc of eventsSnap.docs) {
+      await deleteDoc(doc(db, EVENTS_COL, evtDoc.id));
+    }
+
+    // 3. Cascade delete associated media items in Firestore
+    const mediaRef = collection(db, MEDIA_COL);
+    const mediaQuery = query(mediaRef, where("projectId", "==", id));
+    const mediaSnap = await getDocs(mediaQuery);
+    for (const mediaDoc of mediaSnap.docs) {
+      await deleteDoc(doc(db, MEDIA_COL, mediaDoc.id));
+    }
   } catch (err) {
-    console.warn("Deleting project locally:", err);
+    console.error("Error deleting project or associated records from Firestore:", err);
+    throw err;
   }
 
+  // Only proceed with local deletion if Firestore operations succeeded
   localProjectsState = localProjectsState.filter(p => p.id !== id);
   localEventsState = localEventsState.filter(e => e.projectId !== id);
   localMediaState = localMediaState.filter(m => m.projectId !== id);
@@ -345,24 +422,99 @@ const ensureEventSlug = (e: EventFolder): EventFolder => {
 };
 
 export const getEventsByProject = async (projectId: string): Promise<EventFolder[]> => {
+  let sorted: EventFolder[] = [];
   try {
     const colRef = collection(db, EVENTS_COL);
     const q = query(colRef, where("projectId", "==", projectId));
     const snap = await getDocs(q);
     if (!snap.empty) {
       const docs = snap.docs.map(doc => ensureEventSlug({ id: doc.id, ...doc.data() } as EventFolder));
-      const sorted = docs.sort((a, b) => a.order - b.order);
+      sorted = docs.sort((a, b) => a.order - b.order);
       const docIds = new Set(sorted.map(d => d.id));
       const otherEvents = localEventsState.filter(e => e.projectId !== projectId && !docIds.has(e.id));
       localEventsState = [...otherEvents, ...sorted];
       saveStorage(STORAGE_EVENTS, localEventsState);
-      return sorted;
     }
   } catch (err) {
     console.warn("Firestore fetch events fallback:", err);
+    const filtered = localEventsState.filter(e => e.projectId === projectId).map(ensureEventSlug);
+    sorted = filtered.sort((a, b) => a.order - b.order);
   }
-  const filtered = localEventsState.filter(e => e.projectId === projectId).map(ensureEventSlug);
-  return filtered.sort((a, b) => a.order - b.order);
+
+  // If there are no event folders in the database/local, but the project has driveFolders, auto-heal!
+  if (sorted.length === 0) {
+    try {
+      const project = await getProjectById(projectId);
+      if (project && project.driveFolders && project.driveFolders.length > 0) {
+        const now = new Date().toISOString();
+        const updatedFolders = [...project.driveFolders];
+        
+        for (let index = 0; index < updatedFolders.length; index++) {
+          const folderConfig = updatedFolders[index];
+          // Use the config ID if it looks like a valid event ID, otherwise make a new one
+          const eventId = folderConfig.id && folderConfig.id.startsWith("event-")
+            ? folderConfig.id
+            : `event-${Date.now()}-${index}`;
+          
+          const rawTitle = folderConfig.name || `Folder ${index + 1}`;
+          const eventSlug = rawTitle
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, "")
+            .replace(/[\s_-]+/g, "-") || `event-${Date.now()}-${index}`;
+
+          const newEvent: EventFolder = {
+            id: eventId,
+            projectId: projectId,
+            title: rawTitle,
+            slug: eventSlug,
+            coverImage: project.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+            driveFolderId: extractDriveFolderId(folderConfig.driveFolderId),
+            order: index + 1,
+            isPublished: true,
+            parentId: null,
+            createdAt: now
+          };
+
+          try {
+            const eventDocRef = doc(db, EVENTS_COL, eventId);
+            await setDoc(eventDocRef, newEvent);
+            console.log("Auto-healed/created missing event in Firestore:", eventId);
+          } catch (err) {
+            console.warn("Auto-healing event locally:", err);
+          }
+
+          sorted.push(newEvent);
+          localEventsState = [...localEventsState.filter(e => e.id !== eventId), newEvent];
+          
+          updatedFolders[index] = {
+            ...folderConfig,
+            id: eventId,
+            driveFolderId: extractDriveFolderId(folderConfig.driveFolderId),
+            status: folderConfig.driveFolderId ? "connected" : "untested"
+          };
+        }
+
+        saveStorage(STORAGE_EVENTS, localEventsState);
+
+        // Update project with the synced IDs
+        try {
+          const projectDocRef = doc(db, PROJECTS_COL, projectId);
+          await setDoc(projectDocRef, { driveFolders: updatedFolders, eventCount: updatedFolders.length }, { merge: true });
+        } catch (err) {
+          console.warn("Updating project drive folders locally only:", err);
+        }
+        
+        // Update local state
+        localProjectsState = localProjectsState.map(p => p.id === projectId ? { ...p, driveFolders: updatedFolders, eventCount: updatedFolders.length } : p);
+        saveStorage(STORAGE_PROJECTS, localProjectsState);
+      }
+    } catch (err) {
+      console.warn("Failed to auto-heal missing events for project:", err);
+    }
+  }
+
+  return sorted;
 };
 
 export const getEventFolders = getEventsByProject;

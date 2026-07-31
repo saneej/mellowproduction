@@ -109,7 +109,18 @@ export class SyncEngine {
 
       for (const evt of eventsToScan) {
         try {
-          const files = await provider.listFolderFiles(evt.folderId, apiKey);
+          // Resolve API key for this specific folder if not explicitly provided
+          let activeApiKey = apiKey;
+          if (!activeApiKey) {
+            const folderConfig = project.driveFolders?.find(
+              df => df.id === evt.id || df.driveFolderId === evt.folderId
+            );
+            if (folderConfig?.apiKey) {
+              activeApiKey = folderConfig.apiKey;
+            }
+          }
+          
+          const files = await provider.listFolderFiles(evt.folderId, activeApiKey);
           totalScanned += files.length;
 
           for (let i = 0; i < files.length; i++) {

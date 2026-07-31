@@ -132,8 +132,12 @@ export const AdminDashboardPage: React.FC = () => {
       return;
     }
     if (window.confirm(`Are you sure you want to delete project "${title}"?`)) {
-      await deleteProject(id);
-      loadData();
+      try {
+        await deleteProject(id);
+        loadData();
+      } catch (err: any) {
+        alert(`Failed to delete project: ${err?.message || err}`);
+      }
     }
   };
 
