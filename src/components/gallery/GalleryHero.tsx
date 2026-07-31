@@ -12,6 +12,7 @@ import {
   Volume2 
 } from "lucide-react";
 import { Project, EventFolder } from "../../types/gallery";
+import { getThemeStyles } from "../../lib/themes";
 import { getDriveImageUrl } from "../../services/driveService";
 
 interface GalleryHeroProps {
@@ -40,6 +41,14 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
   const rawCover = event?.coverImage || project.coverImage || "";
   const isVideoCover = rawCover.match(/\.(mp4|webm|mov|m4v)$/i) || rawCover.includes("youtube.com") || rawCover.includes("vimeo.com") || rawCover.includes("drive.google.com/file");
 
+  // Resolve theme
+  const themeStyles = getThemeStyles(project.theme);
+  const gradFrom = project.theme === 'dark_luxury' ? 'from-[#141414] via-[#141414]/80' : 
+                   project.theme === 'earthy_sand' ? 'from-[#FDFBFA] via-[#FDFBFA]/80' :
+                   project.theme === 'vintage_warmth' ? 'from-[#FFFDF9] via-[#FFFDF9]/80' :
+                   project.theme === 'clean_nordic' ? 'from-white via-white/80' :
+                   'from-white via-white/80';
+
   // Helper to resolve cover image / video poster
   const getPosterUrl = () => {
     if (!rawCover) return "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000";
@@ -61,7 +70,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
   };
 
   return (
-    <div className="relative rounded-3xl overflow-hidden bg-white border border-brand-red/15 shadow-xl transition-all duration-500">
+    <div className={`relative rounded-3xl overflow-hidden border shadow-xl transition-all duration-500 ${themeStyles.cardBg}`}>
       
       {/* Background Media Container */}
       <div className="absolute inset-0 z-0 overflow-hidden opacity-25">
@@ -91,7 +100,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
             className="w-full h-full object-cover filter blur-sm scale-105"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
+        <div className={`absolute inset-0 bg-gradient-to-t ${gradFrom} to-transparent`} />
       </div>
 
       {/* Hero Content */}
@@ -99,44 +108,44 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
         
         {/* Category & Date */}
         <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
-          <span className="px-3.5 py-1 bg-brand-red text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-xs">
+          <span className={`px-3.5 py-1 rounded-full font-bold uppercase tracking-widest text-[10px] shadow-xs ${themeStyles.accent}`}>
             {project.category || "Wedding & Events"}
           </span>
-          <span className="text-zinc-600 font-medium flex items-center gap-1.5">
-            <Calendar size={13} className="text-brand-red" />
+          <span className={`font-medium flex items-center gap-1.5 ${themeStyles.textMuted}`}>
+            <Calendar size={13} className={themeStyles.accentText} />
             {event ? `${event.title} • ${project.date}` : project.date}
           </span>
         </div>
 
         {/* Title & Client Name */}
         <div className="space-y-2">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight text-zinc-900 leading-none">
+          <h1 className={`text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight leading-none ${themeStyles.text}`}>
             {event ? event.title : project.title}
           </h1>
-          <p className="text-sm font-mono text-zinc-600 tracking-wider">
+          <p className={`text-sm font-mono tracking-wider ${themeStyles.textMuted}`}>
             {event ? (
-              <span>Part of <strong className="text-zinc-900">{project.title}</strong> gallery for <strong className="text-brand-red font-bold">{project.clientName}</strong></span>
+              <span>Part of <strong className={themeStyles.text}>{project.title}</strong> gallery for <strong className={`${themeStyles.accentText} font-bold`}>{project.clientName}</strong></span>
             ) : (
-              <span>Exclusively captured for <strong className="text-brand-red font-bold">{project.clientName}</strong></span>
+              <span>Exclusively captured for <strong className={`${themeStyles.accentText} font-bold`}>{project.clientName}</strong></span>
             )}
           </p>
         </div>
 
         {/* Stats Row */}
         <div className="flex flex-wrap items-center gap-4 pt-2 font-mono text-xs">
-          <div className="px-3.5 py-1.5 rounded-xl bg-brand-red/5 border border-brand-red/15 flex items-center gap-2 text-zinc-800 shadow-xs">
-            <Camera size={14} className="text-brand-red" />
-            <span><strong className="text-zinc-900">{photoCount}</strong> Photos</span>
+          <div className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-2 shadow-xs bg-black/5 ${themeStyles.borderColor} ${themeStyles.text}`}>
+            <Camera size={14} className={themeStyles.accentText} />
+            <span><strong className={themeStyles.text}>{photoCount}</strong> Photos</span>
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl bg-brand-red/5 border border-brand-red/15 flex items-center gap-2 text-zinc-800 shadow-xs">
-            <Video size={14} className="text-brand-red" />
-            <span><strong className="text-zinc-900">{videoCount}</strong> Videos</span>
+          <div className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-2 shadow-xs bg-black/5 ${themeStyles.borderColor} ${themeStyles.text}`}>
+            <Video size={14} className={themeStyles.accentText} />
+            <span><strong className={themeStyles.text}>{videoCount}</strong> Videos</span>
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl bg-brand-red/5 border border-brand-red/15 flex items-center gap-2 text-zinc-800 shadow-xs">
-            <Heart size={14} className="text-brand-red fill-brand-red" />
-            <span><strong className="text-zinc-900">{favoriteCount}</strong> Saved Favorites</span>
+          <div className={`px-3.5 py-1.5 rounded-xl border flex items-center gap-2 shadow-xs bg-black/5 ${themeStyles.borderColor} ${themeStyles.text}`}>
+            <Heart size={14} className={`${themeStyles.accentText} fill-current`} />
+            <span><strong className={themeStyles.text}>{favoriteCount}</strong> Saved Favorites</span>
           </div>
         </div>
 
@@ -145,7 +154,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {onDownloadAll && project.downloadEnabled !== false && (
             <button
               onClick={onDownloadAll}
-              className="py-3 px-6 rounded-2xl bg-brand-red hover:bg-brand-red/90 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-105 transition-all"
+              className={`py-3 px-6 rounded-2xl font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-103 transition-all ${themeStyles.accent} cursor-pointer`}
             >
               <Download size={16} />
               <span>Download Gallery</span>
@@ -155,9 +164,9 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {onShareClick && (
             <button
               onClick={onShareClick}
-              className="py-3 px-5 rounded-2xl bg-brand-red/5 hover:bg-brand-red/10 border border-brand-red/20 text-brand-red font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 backdrop-blur-md transition-all shadow-xs"
+              className={`py-3 px-5 rounded-2xl border font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 backdrop-blur-md transition-all shadow-xs cursor-pointer bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:bg-black/10`}
             >
-              <Share2 size={16} />
+              <Share2 size={16} className={themeStyles.accentText} />
               <span>Share</span>
             </button>
           )}
@@ -165,20 +174,20 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {onShowQrClick && (
             <button
               onClick={onShowQrClick}
-              className="p-3 rounded-2xl bg-brand-red/5 hover:bg-brand-red/10 border border-brand-red/20 text-brand-red backdrop-blur-md transition-all shadow-xs"
+              className={`p-3 rounded-2xl border backdrop-blur-md transition-all shadow-xs cursor-pointer bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:bg-black/10`}
               title="Show QR Code"
             >
-              <QrCode size={18} />
+              <QrCode size={18} className={themeStyles.accentText} />
             </button>
           )}
 
           {isVideoCover && !rawCover.includes("youtube.com") && !rawCover.includes("vimeo.com") && (
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="p-3 rounded-2xl bg-brand-red/5 hover:bg-brand-red/10 border border-brand-red/20 text-brand-red backdrop-blur-md transition-all ml-auto shadow-xs"
+              className={`p-3 rounded-2xl border backdrop-blur-md transition-all ml-auto shadow-xs cursor-pointer bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:bg-black/10`}
               title={isMuted ? "Unmute Cover Audio" : "Mute Cover Audio"}
             >
-              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              {isMuted ? <VolumeX size={18} className={themeStyles.accentText} /> : <Volume2 size={18} className={themeStyles.accentText} />}
             </button>
           )}
         </div>

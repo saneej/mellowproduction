@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Heart, Download, Play } from "lucide-react";
 import { MediaItem } from "../../types/gallery";
 import { getDriveImageUrl } from "../../services/driveService";
+import { getThemeStyles } from "../../lib/themes";
 
 interface ProgressiveImageProps {
   item: MediaItem;
@@ -13,6 +14,7 @@ interface ProgressiveImageProps {
   isFavorited?: boolean;
   onToggleFavorite?: (id: string) => void;
   onDownload?: (item: MediaItem) => void;
+  theme?: string;
 }
 
 export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
@@ -24,10 +26,12 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   isZoomedOrDownloaded = false,
   isFavorited = false,
   onToggleFavorite,
-  onDownload
+  onDownload,
+  theme
 }) => {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const themeStyles = getThemeStyles(theme);
 
   const fallbackImg = item.isVideo
     ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
@@ -142,8 +146,8 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       {/* Video Overlay Badge */}
       {item.isVideo && (
         <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
-          <div className="w-12 h-12 rounded-full bg-brand-red/90 text-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-            <Play size={20} className="ml-0.5 fill-white" />
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform ${themeStyles.accent}`}>
+            <Play size={20} className={`ml-0.5 ${themeStyles.accent === 'bg-brand-red hover:bg-brand-red/70 text-white' || themeStyles.accent.includes('text-white') || themeStyles.accent.includes('text-stone-50') ? 'fill-white text-white' : 'fill-current'}`} />
           </div>
           {item.duration && (
             <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded bg-black/80 font-mono text-[10px] text-white">
@@ -164,13 +168,13 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
                 e.stopPropagation();
                 onToggleFavorite(item.id);
               }}
-              className={`p-2.5 rounded-full transition-colors backdrop-blur-md ${
+              className={`p-2.5 rounded-full transition-colors backdrop-blur-md cursor-pointer ${
                 isFavorited 
-                  ? "bg-brand-red text-white" 
+                  ? `${themeStyles.accent}` 
                   : "bg-black/60 text-white/80 hover:text-white hover:bg-black/80"
               }`}
             >
-              <Heart size={16} className={isFavorited ? "fill-white" : ""} />
+              <Heart size={16} className={isFavorited ? "fill-current" : ""} />
             </button>
           )}
 

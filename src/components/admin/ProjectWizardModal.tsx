@@ -112,6 +112,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   const [allowFavorites, setAllowFavorites] = useState(true);
   const [progressiveLoading, setProgressiveLoading] = useState(true);
   const [layout, setLayout] = useState<"grid" | "masonry" | "timeline">("grid");
+  const [theme, setTheme] = useState<Project['theme']>("classic_editorial");
 
   // Created Project & QR Modal State
   const [createdProject, setCreatedProject] = useState<Project | null>(null);
@@ -241,6 +242,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
         allowClientFavorites: allowFavorites,
         progressiveLoading,
         layout,
+        theme,
       };
 
       const newProject = await createProject(projectData);
@@ -777,7 +779,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
           {/* STEP 5: SETTINGS */}
           {currentStep === 5 && (
             <div className="space-y-6 animate-fade-in">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs uppercase text-white/70">Project Status</label>
                   <select
@@ -801,6 +803,21 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                     <option value="grid">Standard Responsive Grid</option>
                     <option value="masonry">Pinterest Masonry Layout</option>
                     <option value="timeline">Chronological Event Timeline</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs uppercase text-white/70">Gallery Theme (Pic-Time style)</label>
+                  <select
+                    value={theme}
+                    onChange={e => setTheme(e.target.value as any)}
+                    className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-brand-red"
+                  >
+                    <option value="classic_editorial">Classic Editorial (Cream & Charcoal)</option>
+                    <option value="dark_luxury">Dark Luxury (Carbon & Gold)</option>
+                    <option value="earthy_sand">Earthy Sand (Beige & Terracotta)</option>
+                    <option value="clean_nordic">Clean Nordic (Cool Gray & Slate)</option>
+                    <option value="vintage_warmth">Vintage Warmth (Sepia & Pine Green)</option>
                   </select>
                 </div>
               </div>

@@ -2,15 +2,18 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Camera, ShieldCheck, LogOut, ArrowLeft, Search } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
+import { getThemeStyles } from "../../lib/themes";
 
 export const GalleryHeader: React.FC<{
   title?: string;
   backUrl?: string;
   backText?: string;
   clientMode?: boolean;
-}> = ({ title, backUrl, backText = "Back", clientMode = false }) => {
+  theme?: string;
+}> = ({ title, backUrl, backText = "Back", clientMode = false, theme }) => {
   const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
+  const themeStyles = getThemeStyles(theme);
 
   const openSearch = () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }));
@@ -19,7 +22,7 @@ export const GalleryHeader: React.FC<{
   return (
     <header className={`sticky top-0 z-40 w-full backdrop-blur-md px-6 py-4 transition-all ${
       clientMode 
-        ? "bg-white/95 border-b border-brand-red/10 text-zinc-900 shadow-sm" 
+        ? `${themeStyles.bg} border-b ${themeStyles.borderColor} shadow-sm` 
         : "bg-black/80 border-b border-white/10 text-white"
     }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -31,7 +34,7 @@ export const GalleryHeader: React.FC<{
               to={backUrl} 
               className={`flex items-center gap-2 text-xs uppercase tracking-widest font-bold py-1 px-3.5 rounded-full border transition-colors ${
                 clientMode 
-                  ? "border-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white" 
+                  ? `${themeStyles.borderColor} ${themeStyles.accentText} hover:bg-black/5` 
                   : "border-white/10 text-white/70 hover:text-white hover:border-white/30"
               }`}
             >
@@ -40,21 +43,21 @@ export const GalleryHeader: React.FC<{
             </Link>
           ) : (
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 rounded-lg bg-brand-red flex items-center justify-center shadow-md">
+              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-md">
                 <img 
                   src="https://i.postimg.cc/j250f7G7/logo-white.png" 
                   alt="Mellow Production" 
                   className="w-5 h-5 object-contain group-hover:scale-105 transition-transform"
                 />
               </div>
-              <span className={`font-display font-extrabold text-lg uppercase tracking-tight ${clientMode ? "text-zinc-900" : "text-white"}`}>
-                Mellow <span className="text-brand-red font-light">Gallery</span>
+              <span className={`font-display font-extrabold text-lg uppercase tracking-tight ${clientMode ? themeStyles.text : "text-white"}`}>
+                Mellow <span className={`font-light ${clientMode ? themeStyles.accentText : "text-brand-red"}`}>Gallery</span>
               </span>
             </Link>
           )}
 
           {title && (
-            <div className={`hidden sm:flex items-center gap-2 border-l pl-4 ml-2 ${clientMode ? "border-brand-red/15 text-zinc-500" : "border-white/10 text-white/50"}`}>
+            <div className={`hidden sm:flex items-center gap-2 border-l pl-4 ml-2 ${clientMode ? `${themeStyles.borderColor} ${themeStyles.textMuted}` : "border-white/10 text-white/50"}`}>
               <span className="text-xs uppercase font-mono tracking-widest truncate max-w-[300px]">{title}</span>
             </div>
           )}

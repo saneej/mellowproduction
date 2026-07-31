@@ -793,6 +793,44 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-white/70 uppercase">Gallery Layout Mode</label>
+                  <select
+                    value={project.layout || "grid"}
+                    onChange={async e => {
+                      const val = e.target.value as any;
+                      setProject({ ...project, layout: val });
+                      await updateProject(project.id, { layout: val });
+                    }}
+                    className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                  >
+                    <option value="grid">Standard Responsive Grid</option>
+                    <option value="masonry">Pinterest Masonry Layout</option>
+                    <option value="timeline">Chronological Event Timeline</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-white/70 uppercase">Gallery Theme (Pic-Time style)</label>
+                  <select
+                    value={project.theme || "classic_editorial"}
+                    onChange={async e => {
+                      const val = e.target.value as any;
+                      setProject({ ...project, theme: val });
+                      await updateProject(project.id, { theme: val });
+                    }}
+                    className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                  >
+                    <option value="classic_editorial">Classic Editorial (Cream & Charcoal)</option>
+                    <option value="dark_luxury">Dark Luxury (Carbon & Gold)</option>
+                    <option value="earthy_sand">Earthy Sand (Beige & Terracotta)</option>
+                    <option value="clean_nordic">Clean Nordic (Cool Gray & Slate)</option>
+                    <option value="vintage_warmth">Vintage Warmth (Sepia & Pine Green)</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between pt-2">
                 <span>Allow Client Downloads</span>
                 <input

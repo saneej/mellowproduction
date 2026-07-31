@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { MediaItem } from "../../types/gallery";
 import { getDriveImageUrl, getDriveDownloadUrl } from "../../services/driveService";
+import { getThemeStyles } from "../../lib/themes";
 
 interface LightboxProps {
   items: MediaItem[];
@@ -25,6 +26,7 @@ interface LightboxProps {
   onIndexChange: (idx: number) => void;
   favoritedIds: Set<string>;
   onToggleFavorite: (id: string) => void;
+  theme?: string;
 }
 
 export const Lightbox: React.FC<LightboxProps> = ({
@@ -35,6 +37,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
   onIndexChange,
   favoritedIds,
   onToggleFavorite,
+  theme,
 }) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isSlideshow, setIsSlideshow] = useState(false);
@@ -172,6 +175,8 @@ export const Lightbox: React.FC<LightboxProps> = ({
     document.body.removeChild(link);
   };
 
+  const themeStyles = getThemeStyles(theme);
+
   return (
     <AnimatePresence>
       <motion.div
@@ -195,7 +200,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
             {/* Fullscreen Button */}
             <button
               onClick={toggleFullscreen}
-              className="p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               title="Toggle Fullscreen"
             >
               {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
@@ -204,9 +209,9 @@ export const Lightbox: React.FC<LightboxProps> = ({
             {/* Slideshow Button */}
             <button
               onClick={() => setIsSlideshow(!isSlideshow)}
-              className={`p-2 rounded-full border transition-all ${
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
                 isSlideshow 
-                  ? "bg-brand-red text-white border-brand-red animate-pulse" 
+                  ? `${themeStyles.accent} ${themeStyles.borderColor} animate-pulse` 
                   : "bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
               }`}
               title={isSlideshow ? "Pause Slideshow" : "Play Slideshow"}
@@ -219,14 +224,14 @@ export const Lightbox: React.FC<LightboxProps> = ({
               <>
                 <button
                   onClick={() => setZoomLevel(prev => Math.min(prev + 0.5, 3))}
-                  className="hidden sm:inline-flex p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  className="hidden sm:inline-flex p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                   title="Zoom In"
                 >
                   <ZoomIn size={16} />
                 </button>
                 <button
                   onClick={() => setZoomLevel(prev => Math.max(prev - 0.5, 1))}
-                  className="hidden sm:inline-flex p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+                  className="hidden sm:inline-flex p-2 rounded-full bg-white/5 border border-white/10 text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                   title="Zoom Out"
                 >
                   <ZoomOut size={16} />
@@ -237,14 +242,14 @@ export const Lightbox: React.FC<LightboxProps> = ({
             {/* Heart Favorite Toggle */}
             <button
               onClick={() => onToggleFavorite(currentItem.id)}
-              className={`p-2 rounded-full border transition-all ${
+              className={`p-2 rounded-full border transition-all cursor-pointer ${
                 isFav 
-                  ? "bg-brand-red border-brand-red text-white" 
+                  ? `${themeStyles.accent} ${themeStyles.borderColor}` 
                   : "bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
               }`}
               title={isFav ? "Remove Favorite" : "Add to Favorites"}
             >
-              <Heart size={16} className={isFav ? "fill-white" : ""} />
+              <Heart size={16} className={isFav ? "fill-current" : ""} />
             </button>
 
             {/* Download */}

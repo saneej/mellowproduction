@@ -9,6 +9,7 @@ import { NotFoundPage } from "./NotFoundPage";
 import { getProjectBySlug, getEventsByProject, incrementProjectViews, addNotification } from "../services/dbService";
 import { getDriveImageUrl } from "../services/driveService";
 import { Project, EventFolder } from "../types/gallery";
+import { getThemeStyles } from "../lib/themes";
 
 export const ProjectPage: React.FC = () => {
   const { projectSlug } = useParams<{ projectSlug: string }>();
@@ -178,11 +179,13 @@ export const ProjectPage: React.FC = () => {
   const activeCover = coverList[currentCoverIndex] || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600";
   const activeCoverUrl = activeCover.startsWith("http") ? activeCover : getDriveImageUrl(activeCover, 1600);
 
+  const themeStyles = getThemeStyles(project.theme);
+
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 selection:bg-brand-red selection:text-white pb-24 relative overflow-x-hidden">
+    <div className={`min-h-screen ${themeStyles.bg} pb-24 relative overflow-x-hidden transition-all duration-500`}>
       
       {/* Dynamic ambient backdrop blur for extra depth */}
-      <div className="absolute top-0 inset-x-0 h-[500px] overflow-hidden pointer-events-none opacity-40 blur-3xl">
+      <div className="absolute top-0 inset-x-0 h-[500px] overflow-hidden pointer-events-none opacity-45 blur-3xl">
         <AnimatePresence mode="wait">
           <motion.img
             key={currentCoverIndex}
@@ -197,7 +200,7 @@ export const ProjectPage: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      <GalleryHeader clientMode title={project.title} />
+      <GalleryHeader clientMode title={project.title} theme={project.theme} />
 
       {/* PIN Access Modal */}
       <PinModal
@@ -288,13 +291,13 @@ export const ProjectPage: React.FC = () => {
         {/* Pure Pic-Time Style Gallery List */}
         <div className="space-y-12 pt-8">
           <div className="text-center space-y-2">
-            <span className="text-[10px] font-mono text-brand-red uppercase tracking-[0.25em] font-black block">
+            <span className={`text-[10px] font-mono uppercase tracking-[0.25em] font-black block ${themeStyles.accentText}`}>
               ✦ Portfolio Index ✦
             </span>
-            <h2 className="text-3xl font-display font-black uppercase tracking-tight text-zinc-950">
+            <h2 className={`text-3xl uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
               The Collections
             </h2>
-            <div className="w-8 h-[2px] bg-brand-red mx-auto mt-2" />
+            <div className={`w-12 h-[2px] mx-auto mt-2 ${project.theme === 'dark_luxury' ? 'bg-amber-600' : project.theme === 'earthy_sand' ? 'bg-[#C5846B]' : project.theme === 'vintage_warmth' ? 'bg-[#2B4938]' : project.theme === 'clean_nordic' ? 'bg-slate-900' : 'bg-stone-900'}`} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -312,7 +315,7 @@ export const ProjectPage: React.FC = () => {
                     className="group block space-y-4"
                   >
                     {/* Clean Picture Card */}
-                    <div className="aspect-[3/2] bg-zinc-100 rounded-2xl overflow-hidden relative shadow-sm border border-zinc-200/40">
+                    <div className={`aspect-[3/2] rounded-2xl overflow-hidden relative shadow-sm border ${themeStyles.borderColor} ${project.theme === 'dark_luxury' ? 'bg-zinc-900' : 'bg-white'}`}>
                       <img
                         src={
                           (evt.coverImage || "").startsWith("http")
@@ -337,14 +340,14 @@ export const ProjectPage: React.FC = () => {
                     {/* Minimalist Editorial Label underneath */}
                     <div className="px-1 flex items-baseline justify-between">
                       <div className="space-y-1">
-                        <span className="text-[10px] font-mono text-zinc-400 tracking-widest block font-extrabold">
+                        <span className={`text-[10px] font-mono tracking-widest block font-extrabold ${themeStyles.textMuted}`}>
                           {displayIndex} — GALLERY
                         </span>
-                        <h3 className="text-lg font-display font-black uppercase tracking-tight text-zinc-950 group-hover:text-brand-red transition-colors duration-300">
+                        <h3 className={`text-lg uppercase tracking-tight transition-colors duration-300 ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:opacity-75`}>
                           {evt.title}
                         </h3>
                       </div>
-                      <div className="text-[10px] font-mono tracking-widest text-zinc-400 group-hover:text-brand-red transition-colors duration-300 font-extrabold flex items-center gap-1">
+                      <div className={`text-[10px] font-mono tracking-widest transition-colors duration-300 font-extrabold flex items-center gap-1 ${themeStyles.textMuted} group-hover:opacity-75`}>
                         VIEW <span>→</span>
                       </div>
                     </div>

@@ -34,6 +34,7 @@ import { MultiSelectionBar } from "../components/gallery/MultiSelectionBar";
 import { Breadcrumbs } from "../components/common/Breadcrumbs";
 import { getProjectBySlug, getEventBySlug, getMediaByEvent, getSortedMedia, logDownload, incrementProjectViews, saveLiveFavorites, getLiveFavorites } from "../services/dbService";
 import { Project, EventFolder, MediaItem, AccessCode } from "../types/gallery";
+import { getThemeStyles } from "../lib/themes";
 import { getDriveDownloadUrl, getDriveImageUrl } from "../services/driveService";
 import { useToast } from "../components/common/Toast";
 
@@ -389,12 +390,15 @@ export const GalleryPage: React.FC = () => {
     );
   }
 
+  const themeStyles = getThemeStyles(project.theme);
+
   return (
-    <div className="min-h-screen bg-white text-zinc-900 selection:bg-brand-red selection:text-white pb-32">
+    <div className={`min-h-screen ${themeStyles.bg} transition-all duration-500 pb-32`}>
       
       {/* Header */}
       <GalleryHeader 
         clientMode 
+        theme={project.theme}
         title={`${project.title} • ${eventFolder.title}`} 
         backUrl={`/projects/${projectSlug}`}
         backText="Collections"
@@ -436,18 +440,18 @@ export const GalleryPage: React.FC = () => {
         />
 
         {/* Gallery Toolbar: Search, Filters, Layout Switcher */}
-        <div className="bg-white border border-brand-red/15 rounded-2xl p-4 sm:p-6 space-y-4 shadow-lg">
+        <div className={`border p-4 sm:p-6 space-y-4 shadow-lg rounded-2xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             {/* Instant Search Bar */}
             <div className="relative flex-1 max-w-md">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-red" />
+              <Search size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${themeStyles.accentText}`} />
               <input
                 type="text"
                 placeholder="Search gallery files..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-brand-red/5 border border-brand-red/15 rounded-xl pl-10 pr-4 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 font-mono focus:outline-none focus:border-brand-red shadow-xs"
+                className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} placeholder:${themeStyles.textMuted}`}
               />
             </div>
 
@@ -456,7 +460,7 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setFilter("all")}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border ${
-                  filter === "all" ? "bg-brand-red text-white font-bold border-brand-red shadow-sm" : "bg-brand-red/5 border-brand-red/15 text-zinc-700 hover:text-brand-red hover:bg-brand-red/10"
+                  filter === "all" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
                 }`}
               >
                 All ({mediaItems.length})
@@ -464,7 +468,7 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setFilter("photos")}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                  filter === "photos" ? "bg-brand-red text-white font-bold border-brand-red shadow-sm" : "bg-brand-red/5 border-brand-red/15 text-zinc-700 hover:text-brand-red hover:bg-brand-red/10"
+                  filter === "photos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
                 }`}
               >
                 <ImageIcon size={14} /> Photos ({mediaItems.filter(m => !m.isVideo).length})
@@ -472,7 +476,7 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setFilter("videos")}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                  filter === "videos" ? "bg-brand-red text-white font-bold border-brand-red shadow-sm" : "bg-brand-red/5 border-brand-red/15 text-zinc-700 hover:text-brand-red hover:bg-brand-red/10"
+                  filter === "videos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
                 }`}
               >
                 <VideoIcon size={14} /> Videos ({mediaItems.filter(m => m.isVideo).length})
@@ -480,16 +484,16 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setFilter("favorites")}
                 className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                  filter === "favorites" ? "bg-brand-red text-white font-bold border-brand-red shadow-sm" : "bg-brand-red/5 border-brand-red/15 text-brand-red hover:bg-brand-red/10"
+                  filter === "favorites" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
                 }`}
               >
-                <Heart size={14} className={favoritedIds.size > 0 ? "fill-white text-white" : ""} /> Favorites ({favoritedIds.size})
+                <Heart size={14} className={favoritedIds.size > 0 ? "fill-current" : ""} /> Favorites ({favoritedIds.size})
               </button>
 
               {favoritedIds.size > 0 && (
                 <button
                   onClick={() => setIsFavoritesDrawerOpen(true)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse"
+                  className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse cursor-pointer"
                 >
                   <CheckSquare size={14} />
                   <span>Submit Selection ({favoritedIds.size})</span>
@@ -500,14 +504,14 @@ export const GalleryPage: React.FC = () => {
           </div>
 
           {/* Sub-bar: Layout Mode Switcher & Sort Options */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-brand-red/10 text-xs font-mono">
+          <div className={`flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs font-mono ${themeStyles.borderColor}`}>
             
             {/* View Layout Options */}
-            <div className="flex items-center gap-1 bg-brand-red/5 border border-brand-red/15 p-1 rounded-xl">
+            <div className={`flex items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
               <button
                 onClick={() => setGalleryMode("grid")}
                 className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "grid" ? "bg-brand-red text-white font-bold shadow-xs" : "text-zinc-600 hover:text-brand-red"
+                  galleryMode === "grid" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
                 }`}
                 title="Grid View"
               >
@@ -517,7 +521,7 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setGalleryMode("masonry")}
                 className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "masonry" ? "bg-brand-red text-white font-bold shadow-xs" : "text-zinc-600 hover:text-brand-red"
+                  galleryMode === "masonry" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
                 }`}
                 title="Masonry View"
               >
@@ -527,7 +531,7 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setGalleryMode("timeline")}
                 className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "timeline" ? "bg-brand-red text-white font-bold shadow-xs" : "text-zinc-600 hover:text-brand-red"
+                  galleryMode === "timeline" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
                 }`}
                 title="Timeline View"
               >
@@ -541,7 +545,7 @@ export const GalleryPage: React.FC = () => {
               <button
                 onClick={() => setIsSelectMode(!isSelectMode)}
                 className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
-                  isSelectMode ? "bg-brand-red border-brand-red text-white font-bold shadow-sm" : "bg-brand-red/5 border-brand-red/15 text-zinc-700 hover:text-brand-red hover:bg-brand-red/10"
+                  isSelectMode ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
                 }`}
               >
                 <CheckSquare size={14} />
@@ -549,13 +553,13 @@ export const GalleryPage: React.FC = () => {
               </button>
 
               {galleryMode === "grid" && (
-                <div className="hidden sm:flex items-center gap-1 bg-brand-red/5 border border-brand-red/15 p-1 rounded-xl">
+                <div className={`hidden sm:flex items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
                   {[2, 3, 4, 5].map((cols) => (
                     <button
                       key={cols}
                       onClick={() => setLayoutCols(cols as any)}
                       className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors ${
-                        layoutCols === cols ? "bg-brand-red text-white font-bold" : "text-zinc-600 hover:text-brand-red"
+                        layoutCols === cols ? `${themeStyles.accent} font-bold` : `${themeStyles.textMuted} hover:opacity-80`
                       }`}
                     >
                       {cols}C
@@ -568,7 +572,7 @@ export const GalleryPage: React.FC = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-brand-red/5 border border-brand-red/15 rounded-xl px-3 py-1.5 text-xs text-zinc-800 font-mono focus:outline-none focus:border-brand-red"
+                className={`rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 border ${themeStyles.borderColor} ${themeStyles.text}`}
               >
                 <option value="manual">Sort: Original</option>
                 <option value="file_name">Sort: Name</option>
@@ -582,20 +586,20 @@ export const GalleryPage: React.FC = () => {
 
         {/* Media Grid Rendering */}
         {filteredMedia.length === 0 ? (
-          <div className="py-24 text-center space-y-3 bg-white border border-brand-red/15 rounded-3xl p-8 shadow-md">
-            <ImageIcon size={40} className="mx-auto text-brand-red/30" />
-            <h3 className="text-lg font-display font-bold uppercase text-zinc-900">No Assets Found</h3>
-            <p className="text-xs font-mono text-zinc-500">Try clearing search query or category filters.</p>
+          <div className={`py-24 text-center space-y-3 border rounded-3xl p-8 shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+            <ImageIcon size={40} className={`mx-auto opacity-30 ${themeStyles.accentText}`} />
+            <h3 className={`text-lg uppercase ${themeStyles.fontDisplay} ${themeStyles.text}`}>No Assets Found</h3>
+            <p className={`text-xs font-mono ${themeStyles.textMuted}`}>Try clearing search query or category filters.</p>
           </div>
         ) : galleryMode === "timeline" ? (
           /* Timeline Chronological Grouping */
           <div className="space-y-12">
             {Object.entries(timelineGroups).map(([dateStr, items]: [string, MediaItem[]]) => (
               <div key={dateStr} className="space-y-4">
-                <div className="flex items-center gap-3 border-b border-brand-red/10 pb-2">
-                  <Clock size={16} className="text-brand-red" />
-                  <h3 className="text-lg font-display font-extrabold uppercase text-zinc-900">{dateStr}</h3>
-                  <span className="text-xs font-mono text-zinc-500">({items.length} items)</span>
+                <div className={`flex items-center gap-3 border-b pb-2 ${themeStyles.borderColor}`}>
+                  <Clock size={16} className={themeStyles.accentText} />
+                  <h3 className={`text-lg uppercase ${themeStyles.fontDisplay} ${themeStyles.text}`}>{dateStr}</h3>
+                  <span className={`text-xs font-mono ${themeStyles.textMuted}`}>({items.length} items)</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -603,13 +607,17 @@ export const GalleryPage: React.FC = () => {
                     <div key={item.id} className="relative group">
                       {isSelectMode && (
                         <div 
-                          onClick={() => toggleItemSelection(item.id)}
-                          className="absolute top-3 left-3 z-30 w-7 h-7 rounded-lg bg-white/90 border border-brand-red/30 flex items-center justify-center cursor-pointer shadow-md"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleItemSelection(item.id);
+                          }}
+                          className={`absolute top-3 left-3 z-30 w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}
                         >
-                          {selectedIds.has(item.id) && <div className="w-4 h-4 rounded bg-brand-red" />}
+                          {selectedIds.has(item.id) && <div className={`w-4 h-4 rounded ${themeStyles.accent}`} />}
                         </div>
                       )}
                       <ProgressiveImage
+                        theme={project.theme}
                         item={item}
                         isFavorited={favoritedIds.has(item.id)}
                         onToggleFavorite={toggleFavorite}
@@ -642,13 +650,17 @@ export const GalleryPage: React.FC = () => {
                 <div key={item.id} className="relative group">
                   {isSelectMode && (
                     <div 
-                      onClick={() => toggleItemSelection(item.id)}
-                      className="absolute top-3 left-3 z-30 w-7 h-7 rounded-lg bg-white/90 border border-brand-red/30 flex items-center justify-center cursor-pointer shadow-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleItemSelection(item.id);
+                      }}
+                      className={`absolute top-3 left-3 z-30 w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}
                     >
-                      {selectedIds.has(item.id) && <div className="w-4 h-4 rounded bg-brand-red" />}
+                      {selectedIds.has(item.id) && <div className={`w-4 h-4 rounded ${themeStyles.accent}`} />}
                     </div>
                   )}
                   <ProgressiveImage
+                    theme={project.theme}
                     item={item}
                     isFavorited={favoritedIds.has(item.id)}
                     onToggleFavorite={toggleFavorite}
@@ -672,7 +684,7 @@ export const GalleryPage: React.FC = () => {
               <div className="text-center pt-8">
                 <button
                   onClick={() => setVisibleCount(prev => prev + 36)}
-                  className="py-3 px-8 rounded-full bg-white hover:bg-brand-red hover:text-white border border-brand-red/20 text-brand-red font-mono text-xs uppercase font-bold tracking-wider transition-all shadow-md"
+                  className={`py-3 px-8 rounded-full font-mono text-xs uppercase font-bold tracking-wider transition-all shadow-md border cursor-pointer bg-white hover:opacity-80 ${themeStyles.borderColor} ${themeStyles.accentText}`}
                 >
                   Load More ({filteredMedia.length - visibleCount} remaining)
                 </button>
@@ -685,6 +697,7 @@ export const GalleryPage: React.FC = () => {
 
       {/* Multi-Selection Action Bar */}
       <MultiSelectionBar
+        theme={project.theme}
         selectedCount={selectedIds.size}
         totalCount={filteredMedia.length}
         onSelectAll={() => setSelectedIds(new Set(filteredMedia.map(m => m.id)))}
@@ -708,6 +721,7 @@ export const GalleryPage: React.FC = () => {
       {/* Lightbox Modal */}
       {lightboxIndex !== null && (
         <Lightbox
+          theme={project.theme}
           items={filteredMedia}
           currentIndex={lightboxIndex}
           isOpen={lightboxIndex !== null}
