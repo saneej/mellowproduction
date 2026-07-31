@@ -6,7 +6,7 @@ let firebaseConfig = {
   projectId: "gen-lang-client-0834100727",
   appId: "1:988733213593:web:dc1371cda5c8efb42be108",
   apiKey: "AIzaSyDMkBT_wCUcCtx43yr_6RSvHlqQoQqYmRA",
-  authDomain: (import.meta as any).env?.VITE_FIREBASE_AUTH_DOMAIN || "gen-lang-client-0834100727.firebaseapp.com",
+  authDomain: "gen-lang-client-0834100727.firebaseapp.com",
   firestoreDatabaseId: "ai-studio-mellowproduction-1f712ecb-62f2-4ccf-a846-3797629a27a1",
   storageBucket: "gen-lang-client-0834100727.firebasestorage.app",
   messagingSenderId: "988733213593"
