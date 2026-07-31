@@ -118,10 +118,23 @@ export const GalleryPage: React.FC = () => {
       // Check PIN Protection or saved device token
       let isLocalUnlocked = false;
       let activeCode = "public";
-      if (!proj.isPinProtected) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const isQrAccess = searchParams.get("qr") === "1" || (proj.pin && searchParams.get("pin") === proj.pin);
+
+      if (!proj.isPinProtected || isQrAccess) {
         setIsUnlocked(true);
         isLocalUnlocked = true;
-        setClientCode("public");
+        activeCode = proj.pin || "qr_access";
+        setClientCode(activeCode);
+        if (proj.isPinProtected && isQrAccess) {
+          localStorage.setItem(
+            `mellow_unlocked_${proj.id}`,
+            JSON.stringify({
+              code: activeCode,
+              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            })
+          );
+        }
       } else {
         const savedUnlock = localStorage.getItem(`mellow_unlocked_${proj.id}`);
         if (savedUnlock) {

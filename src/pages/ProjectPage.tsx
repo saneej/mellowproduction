@@ -104,9 +104,21 @@ export const ProjectPage: React.FC = () => {
       incrementProjectViews(proj.id);
       
       let isLocalUnlocked = false;
-      if (!proj.isPinProtected) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const isQrAccess = searchParams.get("qr") === "1" || (proj.pin && searchParams.get("pin") === proj.pin);
+
+      if (!proj.isPinProtected || isQrAccess) {
         setIsUnlocked(true);
         isLocalUnlocked = true;
+        if (proj.isPinProtected && isQrAccess) {
+          localStorage.setItem(
+            `mellow_unlocked_${proj.id}`,
+            JSON.stringify({
+              code: proj.pin || "qr_access",
+              expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            })
+          );
+        }
       } else {
         const savedUnlock = localStorage.getItem(`mellow_unlocked_${proj.id}`);
         if (savedUnlock) {

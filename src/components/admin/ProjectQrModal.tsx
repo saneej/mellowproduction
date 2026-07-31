@@ -24,7 +24,8 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
   const [logoDataUrl, setLogoDataUrl] = useState<string>("");
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const projectUrl = `${window.location.origin}/projects/${project.slug}`;
+  const standardUrl = `${window.location.origin}/projects/${project.slug}`;
+  const qrAccessUrl = `${standardUrl}?qr=1${project.isPinProtected && project.pin ? `&pin=${encodeURIComponent(project.pin)}` : ""}`;
 
   // Pre-generate QR code as a local Base64 Data URL to avoid any CORS/Network download issues
   useEffect(() => {
@@ -32,7 +33,7 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
     const darkColor = qrStyle === "white_on_red" ? "#ffffff" : "#000000";
     const lightColor = qrStyle === "white_on_red" ? "#dc2626" : "#ffffff";
 
-    QRCode.toDataURL(projectUrl, {
+    QRCode.toDataURL(qrAccessUrl, {
       width: 600,
       margin: 1,
       color: {
@@ -50,7 +51,7 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [projectUrl, qrStyle]);
+  }, [qrAccessUrl, qrStyle]);
 
   // Pre-load logo image as a Base64 Data URL so html2canvas can capture it without CORS taint
   useEffect(() => {
@@ -72,7 +73,7 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(projectUrl);
+    navigator.clipboard.writeText(qrAccessUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -337,11 +338,18 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
 
         {/* URL Box */}
         <div className="p-2.5 bg-zinc-900 border border-white/10 rounded-2xl flex items-center justify-between gap-2 text-xs font-mono">
-          <span className="truncate text-white/70">{projectUrl}</span>
+          <div className="truncate text-white/70">
+            <span className="text-[10px] text-emerald-400 font-bold block uppercase tracking-wider">Direct QR Link (Bypasses Access Code):</span>
+            <span className="truncate block">{qrAccessUrl}</span>
+          </div>
           <button 
-            onClick={handleCopyLink}
+            onClick={() => {
+              navigator.clipboard.writeText(qrAccessUrl);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
             className="p-1.5 hover:bg-white/10 rounded-lg text-brand-red flex-shrink-0 cursor-pointer"
-            title="Copy Gallery Link"
+            title="Copy Direct QR Link"
           >
             {copied ? <Check size={15} className="text-emerald-400" /> : <Copy size={15} />}
           </button>
