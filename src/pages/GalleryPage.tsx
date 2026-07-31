@@ -18,7 +18,10 @@ import {
   ListFilter,
   Layers,
   Clock,
-  CheckSquare
+  CheckSquare,
+  AlignJustify,
+  LayoutTemplate,
+  MonitorPlay
 } from "lucide-react";
 import JSZip from "jszip";
 import { GalleryHeader } from "../components/common/Header";
@@ -717,7 +720,7 @@ export const GalleryPage: React.FC = () => {
               {visibleMedia.map((item, idx) => (
                 <div 
                   key={item.id} 
-                  className={typeof layoutStyles.item === 'function' ? layoutStyles.item(idx) : layoutStyles.item}
+                  className={layoutStyles.getItemClass ? layoutStyles.getItemClass(idx) : layoutStyles.item}
                 >
                   {isSelectMode && (
                     <div 

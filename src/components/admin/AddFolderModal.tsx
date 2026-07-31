@@ -83,6 +83,16 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
             <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5">
               Cover Image (URL or Drive ID)
             </label>
+            {coverImage && (
+              <div className="mb-3 w-full h-32 rounded-xl overflow-hidden bg-black border border-white/10">
+                <img 
+                  src={coverImage.startsWith('http') ? coverImage : `https://drive.google.com/thumbnail?id=${coverImage}&sz=w400`} 
+                  alt="Cover Preview" 
+                  className="w-full h-full object-cover opacity-80"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
             <div className="flex gap-2 mb-4">
               <input
                 type="text"

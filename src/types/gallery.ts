@@ -51,6 +51,7 @@ export interface DriveFolderConfig {
   fileCount?: number;
   lastSync?: string;
   folderPath?: string;
+  coverImage?: string;
 }
 
 export type AutoSyncSchedule = 'disabled' | '1h' | '6h' | '12h' | '24h';

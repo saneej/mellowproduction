@@ -246,6 +246,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       name: rawName,
       driveFolderId: cleanDriveId,
       apiKey: folderData.apiKey,
+      coverImage: folderData.coverImage,
       status: cleanDriveId ? "connected" : "untested",
     };
 
@@ -295,6 +296,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         name: rawName,
         driveFolderId: cleanDriveId,
         apiKey: updatedData.apiKey,
+        coverImage: updatedData.coverImage,
         status: cleanDriveId ? "connected" : "untested",
       };
 
@@ -669,6 +671,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     Order #{evt.order}
                   </span>
                 </div>
+                
+                {evt.coverImage && (
+                  <div className="w-full aspect-video rounded-xl overflow-hidden border border-white/10 bg-black">
+                    <img 
+                      src={evt.coverImage.startsWith('http') ? evt.coverImage : `https://drive.google.com/thumbnail?id=${evt.coverImage}&sz=w600`}
+                      alt="Cover preview"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover opacity-80"
+                    />
+                  </div>
+                )}
 
                 <div className="text-xs text-white/50 space-y-1">
                   <div>Drive Folder ID: <span className="text-white font-mono">{evt.driveFolderId || "Not Linked"}</span></div>

@@ -1,3 +1,4 @@
+import { getDriveImageUrl } from "../../services/driveService";
 import React, { useState, useEffect } from "react";
 import { BarChart3, Eye, Download, Heart, TrendingUp, Calendar, Activity } from "lucide-react";
 import { Project, DownloadLog, ActivityLog } from "../../types/gallery";
