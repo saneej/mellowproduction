@@ -119,6 +119,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   const [titleFontFamily, setTitleFontFamily] = useState("default");
   const [customTitleFontUrl, setCustomTitleFontUrl] = useState<string | undefined>();
   const [customTitleFontName, setCustomTitleFontName] = useState<string | undefined>();
+  const [titleFontSize, setTitleFontSize] = useState<number>(100);
 
   // Created Project & QR Modal State
   const [createdProject, setCreatedProject] = useState<Project | null>(null);
@@ -130,15 +131,15 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
 
   // Auto generate slug
   useEffect(() => {
-    if (!slugIsCustom && clientName) {
-      const generated = (clientName || "")
+    if (!slugIsCustom && (eventName || clientName)) {
+      const generated = (eventName || clientName || "")
         .toLowerCase()
         .trim()
         .replace(/[^\w\s-]/g, "")
         .replace(/[\s_-]+/g, "-");
       setSlug(generated);
     }
-  }, [clientName, slugIsCustom]);
+  }, [eventName, clientName, slugIsCustom]);
 
   // Check slug availability on change
   useEffect(() => {
@@ -227,7 +228,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
       };
 
       const projectData = {
-        title: `${clientName} ${eventName}`,
+        title: eventName || clientName,
         clientName,
         groomName: groomName || undefined,
         brideName: brideName || undefined,
@@ -253,6 +254,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
         titleFontFamily,
         customTitleFontUrl,
         customTitleFontName,
+        titleFontSize,
       };
 
       const newProject = await createProject(projectData);
@@ -859,11 +861,15 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                 titleFontFamily={titleFontFamily}
                 customTitleFontUrl={customTitleFontUrl}
                 customTitleFontName={customTitleFontName}
-                previewText={`${clientName || 'Amina & Ahmed'} ${eventName || 'Wedding'}`}
+                titleFontSize={titleFontSize}
+                previewText={eventName || clientName || 'Wedding Celebration'}
                 onChange={(fontData) => {
                   setTitleFontFamily(fontData.titleFontFamily);
                   setCustomTitleFontUrl(fontData.customTitleFontUrl);
                   setCustomTitleFontName(fontData.customTitleFontName);
+                  if (fontData.titleFontSize !== undefined) {
+                    setTitleFontSize(fontData.titleFontSize);
+                  }
                 }}
               />
 
@@ -915,8 +921,8 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <div className="text-white/40 uppercase text-[10px]">Client / Title</div>
-                    <div className="text-white font-bold text-sm">{clientName} {eventName}</div>
+                    <div className="text-white/40 uppercase text-[10px]">Project Title</div>
+                    <div className="text-white font-bold text-sm">{eventName || clientName}</div>
                   </div>
 
                   <div>

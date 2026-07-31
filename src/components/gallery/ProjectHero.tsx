@@ -25,11 +25,22 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   }, [project.titleFontFamily, project.customTitleFontUrl, project.id, project.landingPageConfig?.cursiveFont]);
 
   const loadedFontFamily = ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
-  const titleFontStyle = loadedFontFamily !== 'inherit' ? { fontFamily: loadedFontFamily } : {};
+  const titleFontSizeMultiplier = (project.titleFontSize || project.landingPageConfig?.titleFontSize || 100) / 100;
+  const subtitleFontSizeMultiplier = (project.subtitleFontSize || project.landingPageConfig?.subtitleFontSize || 100) / 100;
+
+  const titleFontStyle: React.CSSProperties = {
+    ...(loadedFontFamily !== 'inherit' ? { fontFamily: loadedFontFamily } : {}),
+    ...(titleFontSizeMultiplier !== 1 ? { fontSize: `${titleFontSizeMultiplier}em` } : {}),
+  };
 
   const cursiveFontId = project.landingPageConfig?.cursiveFont || 'great_vibes';
   const loadedCursiveFamily = ensureFontLoaded(cursiveFontId, undefined, 'wedding_cursive');
-  const cursiveFontStyle = { fontFamily: loadedCursiveFamily };
+  const cursiveFontStyle: React.CSSProperties = { 
+    fontFamily: loadedCursiveFamily,
+    ...(subtitleFontSizeMultiplier !== 1 ? { fontSize: `${subtitleFontSizeMultiplier}em` } : {}),
+  };
+
+  const subtitleFontStyle: React.CSSProperties = subtitleFontSizeMultiplier !== 1 ? { fontSize: `${subtitleFontSizeMultiplier}em` } : {};
 
   const brideName = project.brideName || project.landingPageConfig?.brideName;
   const groomName = project.groomName || project.landingPageConfig?.groomName;
@@ -100,7 +111,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
             {project.title}
           </h1>
 
-          <p className="text-xs sm:text-sm font-serif italic text-[#8A7E74] max-w-lg leading-relaxed">
+          <p style={subtitleFontStyle} className="text-xs sm:text-sm font-serif italic text-[#8A7E74] max-w-lg leading-relaxed">
             {welcomeMessage || quoteText || 'A celebration of love, captured in timeless frames and cherished forever.'}
           </p>
 

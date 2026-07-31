@@ -88,6 +88,8 @@ export interface LandingPageConfig {
   heroOverlayOpacity?: number;
   bannerImage?: string;
   subEventLayout?: 'grid' | 'cards' | 'carousel' | 'minimal_list';
+  titleFontSize?: number;
+  subtitleFontSize?: number;
 }
 
 export interface Project {
@@ -118,6 +120,8 @@ export interface Project {
   titleFontFamily?: string;
   customTitleFontUrl?: string;
   customTitleFontName?: string;
+  titleFontSize?: number;
+  subtitleFontSize?: number;
   landingPageConfig?: LandingPageConfig;
   progressiveLoading?: boolean;
   defaultEventId?: string;

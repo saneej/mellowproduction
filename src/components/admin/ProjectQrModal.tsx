@@ -465,7 +465,10 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
               {/* Project Title & Client info */}
               <div className="space-y-0.5 max-w-xs px-2">
                 <h4
-                  style={{ fontFamily: ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id) }}
+                  style={{ 
+                    fontFamily: ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id),
+                    ...(project.titleFontSize && project.titleFontSize !== 100 ? { fontSize: `${project.titleFontSize / 100}rem` } : {})
+                  }}
                   className="text-base sm:text-lg font-display font-black uppercase tracking-tight leading-tight text-white drop-shadow line-clamp-1"
                 >
                   {project.title}

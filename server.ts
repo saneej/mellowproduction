@@ -337,8 +337,8 @@ async function startServer() {
         return next();
       }
       
-      let title = `${project.title} | Mellow Production`;
-      let description = `Exclusive private media collection for ${project.clientName}. Powered by Mellow Production.`;
+      let title = project.title;
+      let description = `Official media gallery for ${project.title}. Powered by Mellow Production.`;
       
       let coverImage = project.coverImage || "";
       if (project.coverImages && project.coverImages.length > 0) {
@@ -348,18 +348,28 @@ async function startServer() {
       if (eventSlug && eventSlug !== "main") {
         const event = await getEventBySlug(project.id, eventSlug);
         if (event) {
-          title = `${event.title} - ${project.title} | Mellow Production`;
-          description = `Explore the ${event.title} collection from the ${project.title} gallery. Powered by Mellow Production.`;
+          title = `${event.title} - ${project.title}`;
+          description = `Explore ${event.title} from the ${project.title} gallery. Powered by Mellow Production.`;
           if (event.coverImage) {
             coverImage = event.coverImage;
           }
         }
       }
       
-      const size = 1200;
-      const imageUrl = coverImage.startsWith("http") || coverImage.startsWith("/") || coverImage.startsWith("blob:") || coverImage.startsWith("data:")
-        ? coverImage
-        : `https://drive.google.com/thumbnail?id=${coverImage}&sz=w${size}`;
+      const host = req.get('host') || '';
+      const protocol = req.headers['x-forwarded-proto'] || 'https';
+      const fullHost = host ? `${protocol}://${host}` : '';
+
+      let imageUrl = "https://i.postimg.cc/fywXfwKj/BANNER.png";
+      if (coverImage) {
+        if (coverImage.startsWith("http://") || coverImage.startsWith("https://")) {
+          imageUrl = coverImage;
+        } else if (coverImage.startsWith("/")) {
+          imageUrl = `${fullHost}${coverImage}`;
+        } else {
+          imageUrl = `https://lh3.googleusercontent.com/d/${coverImage}=s1200`;
+        }
+      }
         
       const templatePath = process.env.NODE_ENV === "production"
         ? path.join(process.cwd(), "dist", "index.html")

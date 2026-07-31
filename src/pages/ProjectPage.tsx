@@ -11,6 +11,7 @@ import { getProjectBySlug, getEventsByProject, incrementProjectViews, addNotific
 import { getDriveImageUrl } from "../services/driveService";
 import { Project, EventFolder } from "../types/gallery";
 import { getThemeStyles } from "../lib/themes";
+import { updatePageMeta } from "../utils/seoUtils";
 
 export const ProjectPage: React.FC = () => {
   const { projectSlug } = useParams<{ projectSlug: string }>();
@@ -143,7 +144,16 @@ export const ProjectPage: React.FC = () => {
 
   useEffect(() => {
     if (project) {
-      document.title = `${project.title} | Mellow Production`;
+      const cover = (project.coverImages && project.coverImages.length > 0)
+        ? project.coverImages[0]
+        : (project.coverImage || "");
+
+      updatePageMeta(
+        `${project.title} | Mellow Production`,
+        `Official private media collection for ${project.title}. Powered by Mellow Production.`,
+        cover,
+        window.location.href
+      );
     }
   }, [project]);
 

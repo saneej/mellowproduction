@@ -123,7 +123,10 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
         {/* Title & Client Name */}
         <div className="space-y-2">
           <h1
-            style={{ fontFamily: ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id) }}
+            style={{ 
+              fontFamily: ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id),
+              ...(project.titleFontSize && project.titleFontSize !== 100 ? { fontSize: `${project.titleFontSize / 100}em` } : {})
+            }}
             className={`text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight leading-none ${themeStyles.text}`}
           >
             {event ? event.title : project.title}

@@ -64,6 +64,8 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
   const [titleFontFamily, setTitleFontFamily] = useState(project.titleFontFamily || 'default');
   const [customTitleFontUrl, setCustomTitleFontUrl] = useState(project.customTitleFontUrl);
   const [customTitleFontName, setCustomTitleFontName] = useState(project.customTitleFontName);
+  const [titleFontSize, setTitleFontSize] = useState<number>(project.titleFontSize || project.landingPageConfig?.titleFontSize || 100);
+  const [subtitleFontSize, setSubtitleFontSize] = useState<number>(project.subtitleFontSize || project.landingPageConfig?.subtitleFontSize || 100);
 
   const [activeTab, setActiveTab] = useState<'content' | 'style' | 'layout'>('content');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
@@ -100,6 +102,8 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
         brideName,
         groomName,
         hashtag: cleanHashtag,
+        titleFontSize,
+        subtitleFontSize,
       };
 
       await onSave({
@@ -109,6 +113,8 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
         titleFontFamily,
         customTitleFontUrl,
         customTitleFontName,
+        titleFontSize,
+        subtitleFontSize,
         landingPageConfig: updatedConfig,
       });
 
@@ -451,9 +457,56 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
 
                   {/* Cursive Font Preview Box */}
                   <div className="p-3 bg-zinc-950 border border-rose-500/30 rounded-xl text-center">
-                    <p className="text-2xl text-rose-200" style={{ fontFamily: loadedCursiveFamily }}>
+                    <p 
+                      className="text-2xl text-rose-200 transition-all" 
+                      style={{ 
+                        fontFamily: loadedCursiveFamily,
+                        fontSize: `${(subtitleFontSize / 100) * 1.5}rem`
+                      }}
+                    >
                       {brideName || 'Amina'} & {groomName || 'Ahmed'}
                     </p>
+                  </div>
+
+                  {/* Subtitle / Cursive Font Size Control */}
+                  <div className="pt-2 border-t border-white/10 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-[10px] font-mono text-white/60 uppercase">
+                        Cursive / Subtitle Size ({subtitleFontSize}%)
+                      </label>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSubtitleFontSize(Math.max(50, subtitleFontSize - 10))}
+                          className="px-2 py-0.5 bg-white/5 hover:bg-white/10 rounded text-[10px] font-mono text-white/70"
+                        >
+                          -
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSubtitleFontSize(100)}
+                          className="px-2 py-0.5 bg-white/5 hover:bg-white/10 rounded text-[10px] font-mono text-white/50"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSubtitleFontSize(Math.min(200, subtitleFontSize + 10))}
+                          className="px-2 py-0.5 bg-white/5 hover:bg-white/10 rounded text-[10px] font-mono text-white/70"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                    <input
+                      type="range"
+                      min="60"
+                      max="200"
+                      step="5"
+                      value={subtitleFontSize}
+                      onChange={e => setSubtitleFontSize(Number(e.target.value))}
+                      className="w-full accent-rose-400 bg-white/10 h-1.5 rounded-lg appearance-none cursor-pointer"
+                    />
                   </div>
                 </div>
 
@@ -462,11 +515,15 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                   titleFontFamily={titleFontFamily}
                   customTitleFontUrl={customTitleFontUrl}
                   customTitleFontName={customTitleFontName}
+                  titleFontSize={titleFontSize}
                   previewText={project.title}
                   onChange={fontData => {
                     setTitleFontFamily(fontData.titleFontFamily);
                     setCustomTitleFontUrl(fontData.customTitleFontUrl);
                     setCustomTitleFontName(fontData.customTitleFontName);
+                    if (fontData.titleFontSize !== undefined) {
+                      setTitleFontSize(fontData.titleFontSize);
+                    }
                   }}
                 />
 

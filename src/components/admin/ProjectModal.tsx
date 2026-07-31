@@ -32,6 +32,8 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   initialProject
 }) => {
   const [title, setTitle] = useState(initialProject?.title || "");
+  const [slug, setSlug] = useState(initialProject?.slug || "");
+  const [slugIsCustom, setSlugIsCustom] = useState(Boolean(initialProject?.slug));
   const [clientName, setClientName] = useState(initialProject?.clientName || "");
   const [clientEmail, setClientEmail] = useState(initialProject?.clientEmail || "");
   const [category, setCategory] = useState<EventCategory>(initialProject?.category || "wedding");
@@ -40,6 +42,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const [titleFontFamily, setTitleFontFamily] = useState(initialProject?.titleFontFamily || "default");
   const [customTitleFontUrl, setCustomTitleFontUrl] = useState(initialProject?.customTitleFontUrl);
   const [customTitleFontName, setCustomTitleFontName] = useState(initialProject?.customTitleFontName);
+  const [titleFontSize, setTitleFontSize] = useState<number>(initialProject?.titleFontSize || 100);
   const [isPinProtected, setIsPinProtected] = useState(initialProject?.isPinProtected ?? true);
   const [pin, setPin] = useState(initialProject?.pin || "");
   const [saving, setSaving] = useState(false);
@@ -56,18 +59,25 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       .replace(/^-+|-+$/g, "");
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setTitle(newTitle);
+    if (!slugIsCustom) {
+      setSlug(generateSlug(newTitle));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !clientName) return;
 
     setSaving(true);
     try {
-      const slug = generateSlug(title) || `project-${Date.now()}`;
+      const finalSlug = generateSlug(slug) || generateSlug(title) || `project-${Date.now()}`;
       const coverImage = extractDriveFileId(coverInput) || coverInput || "1y8O84iZ7G3I3Z-kE8B_eH3_N2p6XqR7m";
 
       await onSave({
         title,
-        slug,
+        slug: finalSlug,
         clientName,
         clientEmail,
         category,
@@ -76,6 +86,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         titleFontFamily,
         customTitleFontUrl,
         customTitleFontName,
+        titleFontSize,
         isPinProtected,
         pin,
         isPublished: true,
@@ -113,7 +124,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 type="text"
                 required
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={e => handleTitleChange(e.target.value)}
                 placeholder="e.g. Ahmed & Amina Wedding"
                 className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
               />
@@ -130,6 +141,37 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                   <option key={c.value} value={c.value}>{c.label}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-mono text-white/50 uppercase">Project URL Slug</label>
+              <button
+                type="button"
+                onClick={() => {
+                  setSlugIsCustom(!slugIsCustom);
+                  if (slugIsCustom) {
+                    setSlug(generateSlug(title));
+                  }
+                }}
+                className="text-[10px] font-mono text-brand-red hover:underline"
+              >
+                {slugIsCustom ? "Auto-Generate from Title" : "Customize URL"}
+              </button>
+            </div>
+            <div className="flex items-center bg-white/5 border border-white/15 rounded-xl px-3 py-2 text-sm text-white font-mono">
+              <span className="text-white/40 text-xs pr-1">/projects/</span>
+              <input
+                type="text"
+                value={slug}
+                onChange={e => {
+                  setSlugIsCustom(true);
+                  setSlug(e.target.value.toLowerCase().replace(/[\s_-]+/g, "-"));
+                }}
+                placeholder="ahmed-and-amina-wedding"
+                className="flex-1 bg-transparent text-white font-bold text-xs focus:outline-none"
+              />
             </div>
           </div>
 
@@ -180,11 +222,15 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             titleFontFamily={titleFontFamily}
             customTitleFontUrl={customTitleFontUrl}
             customTitleFontName={customTitleFontName}
+            titleFontSize={titleFontSize}
             previewText={title || "Ahmed & Amina Wedding"}
             onChange={(fontData) => {
               setTitleFontFamily(fontData.titleFontFamily);
               setCustomTitleFontUrl(fontData.customTitleFontUrl);
               setCustomTitleFontName(fontData.customTitleFontName);
+              if (fontData.titleFontSize !== undefined) {
+                setTitleFontSize(fontData.titleFontSize);
+              }
             }}
           />
 

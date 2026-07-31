@@ -32,6 +32,7 @@ import { CinematicSlideshowModal } from "../components/gallery/CinematicSlidesho
 import { VideoPlayerModal } from "../components/gallery/VideoPlayerModal";
 import { FavoritesDrawer } from "../components/gallery/FavoritesDrawer";
 import { PinModal } from "../components/gallery/PinModal";
+import { updatePageMeta } from "../utils/seoUtils";
 import { GalleryHero } from "../components/gallery/GalleryHero";
 import { ShareModal } from "../components/gallery/ShareModal";
 import { MultiSelectionBar } from "../components/gallery/MultiSelectionBar";
@@ -208,9 +209,21 @@ export const GalleryPage: React.FC = () => {
 
   useEffect(() => {
     if (project && eventFolder) {
-      document.title = `${eventFolder.title} - ${project.title} | Mellow Production`;
+      const cover = eventFolder.coverImage || (project.coverImages && project.coverImages.length > 0 ? project.coverImages[0] : project.coverImage || "");
+      updatePageMeta(
+        `${eventFolder.title} - ${project.title} | Mellow Production`,
+        `Explore ${eventFolder.title} from the ${project.title} gallery. Powered by Mellow Production.`,
+        cover,
+        window.location.href
+      );
     } else if (project) {
-      document.title = `${project.title} | Mellow Production`;
+      const cover = (project.coverImages && project.coverImages.length > 0) ? project.coverImages[0] : (project.coverImage || "");
+      updatePageMeta(
+        `${project.title} | Mellow Production`,
+        `Official media gallery for ${project.title}. Powered by Mellow Production.`,
+        cover,
+        window.location.href
+      );
     }
   }, [project, eventFolder]);
 

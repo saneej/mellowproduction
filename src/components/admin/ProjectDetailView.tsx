@@ -111,6 +111,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   // Edit details states
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [editTitle, setEditTitle] = useState("");
+  const [editSlug, setEditSlug] = useState("");
   const [editClientName, setEditClientName] = useState("");
   const [editGroomName, setEditGroomName] = useState("");
   const [editBrideName, setEditBrideName] = useState("");
@@ -121,6 +122,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const [editTitleFontFamily, setEditTitleFontFamily] = useState("default");
   const [editCustomTitleFontUrl, setEditCustomTitleFontUrl] = useState<string | undefined>();
   const [editCustomTitleFontName, setEditCustomTitleFontName] = useState<string | undefined>();
+  const [editTitleFontSize, setEditTitleFontSize] = useState<number>(100);
+  const [editSubtitleFontSize, setEditSubtitleFontSize] = useState<number>(100);
 
   const loadProjectData = async () => {
     setLoading(true);
@@ -129,6 +132,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       if (p) {
         setProject(p);
         setEditTitle(p.title);
+        setEditSlug(p.slug || p.id);
         setEditClientName(p.clientName);
         setEditGroomName(p.groomName || "");
         setEditBrideName(p.brideName || "");
@@ -139,6 +143,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         setEditTitleFontFamily(p.titleFontFamily || "default");
         setEditCustomTitleFontUrl(p.customTitleFontUrl);
         setEditCustomTitleFontName(p.customTitleFontName);
+        setEditTitleFontSize(p.titleFontSize || p.landingPageConfig?.titleFontSize || 100);
+        setEditSubtitleFontSize(p.subtitleFontSize || p.landingPageConfig?.subtitleFontSize || 100);
       }
 
       const evts = await getEventsByProject(projectId);
@@ -181,8 +187,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       const finalCoverImages = editCoverImages.filter(Boolean);
       const finalCoverImage = finalCoverImages[0] || editCoverImage || "";
       const formattedHashtag = editHashtag ? (editHashtag.startsWith('#') ? editHashtag : `#${editHashtag}`) : undefined;
+      
+      const cleanSlug = (editSlug || editTitle || project.id)
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
       const updated = await updateProject(project.id, {
         title: editTitle,
+        slug: cleanSlug || project.id,
         clientName: editClientName,
         groomName: editGroomName || undefined,
         brideName: editBrideName || undefined,
@@ -193,6 +208,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         titleFontFamily: editTitleFontFamily,
         customTitleFontUrl: editCustomTitleFontUrl,
         customTitleFontName: editCustomTitleFontName,
+        titleFontSize: editTitleFontSize,
+        subtitleFontSize: editSubtitleFontSize,
       });
       setProject(updated);
       setIsEditingInfo(false);
@@ -457,6 +474,19 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     />
                   </div>
                   <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">URL Slug (/projects/<b>slug</b>)</label>
+                    <div className="flex items-center bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white font-mono focus-within:border-brand-red">
+                      <span className="text-white/40 text-[11px] pr-1 select-none">/projects/</span>
+                      <input
+                        type="text"
+                        value={editSlug}
+                        onChange={e => setEditSlug(e.target.value.toLowerCase().replace(/[\s_-]+/g, "-"))}
+                        placeholder="project-custom-slug"
+                        className="flex-1 bg-transparent text-white font-bold focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
                     <label className="text-[10px] uppercase text-white/50 block mb-1">Client Name</label>
                     <input
                       type="text"
@@ -558,11 +588,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     titleFontFamily={editTitleFontFamily}
                     customTitleFontUrl={editCustomTitleFontUrl}
                     customTitleFontName={editCustomTitleFontName}
+                    titleFontSize={editTitleFontSize}
                     previewText={editTitle || "Project Title"}
                     onChange={(fontData) => {
                       setEditTitleFontFamily(fontData.titleFontFamily);
                       setEditCustomTitleFontUrl(fontData.customTitleFontUrl);
                       setEditCustomTitleFontName(fontData.customTitleFontName);
+                      if (fontData.titleFontSize !== undefined) {
+                        setEditTitleFontSize(fontData.titleFontSize);
+                      }
                     }}
                   />
                 </div>
@@ -587,11 +621,14 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   <button
                     onClick={() => {
                       setEditTitle(project.title);
+                      setEditSlug(project.slug || project.id);
                       setEditClientName(project.clientName);
                       setEditGroomName(project.groomName || "");
                       setEditBrideName(project.brideName || "");
                       setEditCoverImage(project.coverImage || "");
                       setEditCoverImages(project.coverImages || [project.coverImage].filter(Boolean));
+                      setEditTitleFontSize(project.titleFontSize || project.landingPageConfig?.titleFontSize || 100);
+                      setEditSubtitleFontSize(project.subtitleFontSize || project.landingPageConfig?.subtitleFontSize || 100);
                       setEditDate(project.date || "");
                       setIsEditingInfo(true);
                     }}
