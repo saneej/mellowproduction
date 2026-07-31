@@ -78,33 +78,221 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Helper function to render the exact A5 card onto an HTML5 Canvas using native 2D context
+  const renderA5CardToCanvas = async (): Promise<HTMLCanvasElement> => {
+    const canvas = document.createElement("canvas");
+    // High DPI A5 Dimensions: 1181 x 1676 px (matches 148mm x 210mm ratio)
+    const width = 1181;
+    const height = 1676;
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Could not get 2d context");
+
+    // 1. Background Gradient (Red Theme)
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "#dc2626"); // red-600
+    gradient.addColorStop(0.5, "#b91c1c"); // red-700
+    gradient.addColorStop(1, "#881337"); // rose-900
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Decorative corner glow circles
+    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.beginPath();
+    ctx.arc(0, 0, 320, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
+    ctx.beginPath();
+    ctx.arc(width, height, 380, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Image loader helper
+    const loadImage = (src: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = (e) => reject(e);
+        img.src = src;
+      });
+    };
+
+    const logoSrc = logoDataUrl || "https://i.postimg.cc/j250f7G7/logo-white.png";
+    const logoImg = await loadImage(logoSrc).catch(() => null);
+    const qrImg = qrDataUrl ? await loadImage(qrDataUrl).catch(() => null) : null;
+
+    let currentY = 110;
+
+    // 2. HEADER: Logo & Subtitle
+    if (logoImg) {
+      const logoHeight = 85;
+      const logoWidth = (logoImg.width / logoImg.height) * logoHeight;
+      ctx.drawImage(logoImg, (width - logoWidth) / 2, currentY, logoWidth, logoHeight);
+      currentY += logoHeight + 20;
+    } else {
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 44px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("MELLOW PRODUCTION", width / 2, currentY + 40);
+      currentY += 80;
+    }
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.font = "bold 20px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("CLIENT GALLERY ACCESS CARD", width / 2, currentY);
+    currentY += 35;
+
+    // Divider line
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(120, currentY);
+    ctx.lineTo(width - 120, currentY);
+    ctx.stroke();
+
+    currentY += 75;
+
+    // 3. MIDDLE: QR Code
+    const qrSize = 510;
+    const qrX = (width - qrSize) / 2;
+    const qrY = currentY;
+
+    const cardPadding = 35;
+    const cardX = qrX - cardPadding;
+    const cardY = qrY - cardPadding;
+    const cardW = qrSize + cardPadding * 2;
+    const cardH = qrSize + cardPadding * 2;
+
+    if (qrStyle === "white_card") {
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(cardX, cardY, cardW, cardH, 32);
+      } else {
+        ctx.rect(cardX, cardY, cardW, cardH);
+      }
+      ctx.fill();
+    } else {
+      ctx.fillStyle = "rgba(185, 28, 28, 0.6)";
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(cardX, cardY, cardW, cardH, 32);
+      } else {
+        ctx.rect(cardX, cardY, cardW, cardH);
+      }
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    }
+
+    if (qrImg) {
+      ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+    }
+
+    // Logo badge in middle of QR
+    if (logoImg) {
+      const badgeSize = 92;
+      const badgeX = (width - badgeSize) / 2;
+      const badgeY = qrY + (qrSize - badgeSize) / 2;
+
+      ctx.fillStyle = "#000000";
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(badgeX, badgeY, badgeSize, badgeSize, 18);
+      } else {
+        ctx.rect(badgeX, badgeY, badgeSize, badgeSize);
+      }
+      ctx.fill();
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      const logoBWidth = badgeSize - 20;
+      const logoBHeight = (logoImg.height / logoImg.width) * logoBWidth;
+      ctx.drawImage(logoImg, badgeX + 10, badgeY + (badgeSize - logoBHeight) / 2, logoBWidth, logoBHeight);
+    }
+
+    currentY = qrY + qrSize + 90;
+
+    // 4. PROJECT TITLE & CLIENT NAME
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 46px sans-serif";
+    ctx.textAlign = "center";
+
+    let displayTitle = project.title.toUpperCase();
+    if (displayTitle.length > 28) {
+      displayTitle = displayTitle.substring(0, 26) + "...";
+    }
+    ctx.fillText(displayTitle, width / 2, currentY);
+    currentY += 45;
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+    ctx.font = "24px monospace";
+    const subInfo = `${project.clientName}${project.date ? ` • ${project.date}` : ""}`;
+    ctx.fillText(subInfo, width / 2, currentY);
+    currentY += 50;
+
+    // 5. PIN CODE BADGE IF PROTECTED
+    if (project.isPinProtected && project.pin) {
+      const pinText = `PIN: ${project.pin}`;
+      ctx.font = "bold 24px monospace";
+      const textMetrics = ctx.measureText(pinText);
+      const pillW = textMetrics.width + 70;
+      const pillH = 48;
+      const pillX = (width - pillW) / 2;
+      const pillY = currentY - 34;
+
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      if (typeof ctx.roundRect === "function") {
+        ctx.roundRect(pillX, pillY, pillW, pillH, 24);
+      } else {
+        ctx.rect(pillX, pillY, pillW, pillH);
+      }
+      ctx.fill();
+
+      ctx.fillStyle = "#dc2626";
+      ctx.fillText(pinText, width / 2, currentY);
+      currentY += 50;
+    }
+
+    // Helper Scan text
+    ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+    ctx.font = "bold 20px monospace";
+    ctx.fillText("SCAN CAMERA TO VIEW PHOTOS", width / 2, currentY);
+
+    // 6. FOOTER
+    const footerY = height - 120;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(120, footerY - 30);
+    ctx.lineTo(width - 120, footerY - 30);
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 22px monospace";
+    ctx.fillText("mellowproduction.in  |  hello@mellowproduction.in", width / 2, footerY);
+
+    if (phone) {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.font = "bold 20px monospace";
+      ctx.fillText(`PHONE: ${phone}`, width / 2, footerY + 38);
+    }
+
+    return canvas;
+  };
+
   // EXPORT AS PNG
   const handleExportPng = async () => {
-    if (!cardRef.current) return;
     setDownloadingFormat("png");
     try {
-      await new Promise((r) => setTimeout(r, 100));
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3, // High DPI for crisp printing
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#dc2626",
-        logging: false,
-        onclone: (clonedDoc) => {
-          // Replace any oklch(...) occurrences in styles with RGB fallback so html2canvas doesn't crash
-          const styleTags = clonedDoc.querySelectorAll("style");
-          styleTags.forEach((style) => {
-            if (style.textContent && style.textContent.includes("oklch")) {
-              style.textContent = style.textContent.replace(/oklch\([^)]+\)/gi, "rgb(220, 38, 38)");
-            }
-          });
-          const clonedCard = clonedDoc.getElementById("a5-printable-qr-card");
-          if (clonedCard) {
-            clonedCard.style.background = "linear-gradient(to bottom, #dc2626, #b91c1c, #881337)";
-            clonedCard.style.color = "#ffffff";
-          }
-        },
-      });
+      const canvas = await renderA5CardToCanvas();
       const dataUrl = canvas.toDataURL("image/png");
       const a = document.createElement("a");
       a.href = dataUrl;
@@ -121,32 +309,11 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
 
   // EXPORT AS PDF (A5 Format: 148mm x 210mm)
   const handleExportPdf = async () => {
-    if (!cardRef.current) return;
     setDownloadingFormat("pdf");
     try {
-      await new Promise((r) => setTimeout(r, 100));
-      const canvas = await html2canvas(cardRef.current, {
-        scale: 3,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#dc2626",
-        logging: false,
-        onclone: (clonedDoc) => {
-          const styleTags = clonedDoc.querySelectorAll("style");
-          styleTags.forEach((style) => {
-            if (style.textContent && style.textContent.includes("oklch")) {
-              style.textContent = style.textContent.replace(/oklch\([^)]+\)/gi, "rgb(220, 38, 38)");
-            }
-          });
-          const clonedCard = clonedDoc.getElementById("a5-printable-qr-card");
-          if (clonedCard) {
-            clonedCard.style.background = "linear-gradient(to bottom, #dc2626, #b91c1c, #881337)";
-            clonedCard.style.color = "#ffffff";
-          }
-        },
-      });
+      const canvas = await renderA5CardToCanvas();
       const imgData = canvas.toDataURL("image/png");
-      
+
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
