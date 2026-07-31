@@ -150,19 +150,39 @@ export const getProjects = async (): Promise<Project[]> => {
 };
 
 export const getProjectBySlug = async (slug: string): Promise<Project | null> => {
+  if (!slug) return null;
+  const cleanSlug = slug.toLowerCase().trim();
   try {
     const colRef = collection(db, PROJECTS_COL);
-    const q = query(colRef, where("slug", "==", slug), limit(1));
-    const snap = await getDocs(q);
+    let q = query(colRef, where("slug", "==", slug), limit(1));
+    let snap = await getDocs(q);
+    
+    if (snap.empty && cleanSlug !== slug) {
+      q = query(colRef, where("slug", "==", cleanSlug), limit(1));
+      snap = await getDocs(q);
+    }
+    
     if (!snap.empty) {
       const docData = snap.docs[0];
       return { id: docData.id, ...docData.data() } as Project;
     }
-    // Fallback to local
-    return localProjectsState.find(p => p.slug === slug) || null;
+
+    // Fallback: search by Document ID
+    try {
+      const docRef = doc(db, PROJECTS_COL, slug);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Project;
+      }
+    } catch {
+      // ignore doc ref error if invalid id format
+    }
+
+    // Fallback to local state
+    return localProjectsState.find(p => p.slug === slug || p.slug === cleanSlug || p.id === slug) || null;
   } catch (err) {
     console.warn("Firestore error, fallback slug match:", err);
-    return localProjectsState.find(p => p.slug === slug) || null;
+    return localProjectsState.find(p => p.slug === slug || p.slug === cleanSlug || p.id === slug) || null;
   }
 };
 
@@ -181,11 +201,16 @@ export const getProjectById = async (id: string): Promise<Project | null> => {
 
 export const createProject = async (projectData: Partial<Project> & { title: string; clientName: string; slug: string }): Promise<Project> => {
   const now = new Date().toISOString();
+  const cleanSlug = (projectData.slug || projectData.title)
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-");
+
   const newProject: Project = {
     id: `proj-${Date.now()}`,
     title: projectData.title,
     clientName: projectData.clientName,
-    slug: projectData.slug,
     category: projectData.category || "wedding",
     date: projectData.date || now.split("T")[0],
     coverImage: projectData.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=1600",
@@ -196,17 +221,14 @@ export const createProject = async (projectData: Partial<Project> & { title: str
     downloadsCount: projectData.downloadsCount || 0,
     favoritesCount: projectData.favoritesCount || 0,
     ...projectData,
+    slug: cleanSlug,
     createdAt: now,
     updatedAt: now,
   };
 
   try {
     const colRef = collection(db, PROJECTS_COL);
-    const docRef = await addDoc(colRef, {
-      ...projectData,
-      createdAt: now,
-      updatedAt: now,
-    });
+    const docRef = await addDoc(colRef, newProject);
     newProject.id = docRef.id;
   } catch (err) {
     console.warn("Saving project locally due to Firestore error:", err);
