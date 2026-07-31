@@ -938,6 +938,73 @@ export const saveFavorites = async (
   return favObj;
 };
 
+export const saveLiveFavorites = async (
+  projectId: string,
+  clientCode: string,
+  favoritedIds: string[]
+): Promise<void> => {
+  if (!projectId || !clientCode) return;
+  const key = clientCode.trim().toLowerCase();
+  const localKey = `mellow_live_favs_${projectId}_${key}`;
+  
+  // Update local cache
+  try {
+    localStorage.setItem(localKey, JSON.stringify(favoritedIds));
+  } catch (err) {
+    console.warn("Local storage write error:", err);
+  }
+
+  // Update Firestore
+  try {
+    const docId = `${projectId}_${key}`;
+    const docRef = doc(db, "client_live_favorites", docId);
+    await setDoc(docRef, {
+      projectId,
+      clientCode: key,
+      favoritedIds,
+      updatedAt: new Date().toISOString()
+    }, { merge: true });
+  } catch (err) {
+    console.warn("Save live favorites database error:", err);
+  }
+};
+
+export const getLiveFavorites = async (
+  projectId: string,
+  clientCode: string
+): Promise<string[]> => {
+  if (!projectId || !clientCode) return [];
+  const key = clientCode.trim().toLowerCase();
+  const localKey = `mellow_live_favs_${projectId}_${key}`;
+
+  // Check Firestore first
+  try {
+    const docId = `${projectId}_${key}`;
+    const docRef = doc(db, "client_live_favorites", docId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const ids = snap.data().favoritedIds || [];
+      // sync to local storage cache
+      try {
+        localStorage.setItem(localKey, JSON.stringify(ids));
+      } catch {}
+      return ids;
+    }
+  } catch (err) {
+    console.warn("Fetch live favorites database error:", err);
+  }
+
+  // Fallback to local storage cache
+  try {
+    const cached = localStorage.getItem(localKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch {}
+
+  return [];
+};
+
 export const getFavoritesByProject = async (projectId: string): Promise<FavoriteSelection[]> => {
   try {
     const colRef = collection(db, FAVORITES_COL);

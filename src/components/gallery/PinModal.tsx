@@ -12,7 +12,7 @@ interface PinModalProps {
   coverImage?: string;
   accessCodes?: AccessCode[];
   projectId?: string;
-  onSuccess: (codePermissions?: AccessCode['permissions']) => void;
+  onSuccess: (codePermissions?: AccessCode['permissions'], enteredCode?: string) => void;
 }
 
 export const PinModal: React.FC<PinModalProps> = ({
@@ -55,6 +55,7 @@ export const PinModal: React.FC<PinModalProps> = ({
       if (rememberDevice) {
         localStorage.setItem(`mellow_unlocked_${projectId}`, JSON.stringify({
           unlockedAt: new Date().toISOString(),
+          code: cleanInput,
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
         }));
       }
@@ -65,7 +66,7 @@ export const PinModal: React.FC<PinModalProps> = ({
         canFavorite: true,
         downloadOriginalQuality: true,
         downloadZip: true
-      });
+      }, cleanInput);
       return;
     }
 
@@ -100,12 +101,13 @@ export const PinModal: React.FC<PinModalProps> = ({
         localStorage.setItem(`mellow_unlocked_${projectId}`, JSON.stringify({
           unlockedAt: new Date().toISOString(),
           codeName: matchedCode.name,
+          code: cleanInput,
           expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         }));
       }
 
       setErrorMessage(null);
-      onSuccess(matchedCode.permissions);
+      onSuccess(matchedCode.permissions, cleanInput);
       return;
     }
 

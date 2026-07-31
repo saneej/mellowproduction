@@ -27,6 +27,11 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // Live Client Favorites collection (synced across devices): Full read & write
+    match /client_live_favorites/{liveFavoriteId} {
+      allow read, write: if true;
+    }
+
     // Activity & Download logs: Full read & write access
     match /activity_logs/{logId} {
       allow read, write: if true;

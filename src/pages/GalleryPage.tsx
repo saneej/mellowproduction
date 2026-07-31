@@ -32,7 +32,7 @@ import { GalleryHero } from "../components/gallery/GalleryHero";
 import { ShareModal } from "../components/gallery/ShareModal";
 import { MultiSelectionBar } from "../components/gallery/MultiSelectionBar";
 import { Breadcrumbs } from "../components/common/Breadcrumbs";
-import { getProjectBySlug, getEventBySlug, getMediaByEvent, getSortedMedia, logDownload, incrementProjectViews } from "../services/dbService";
+import { getProjectBySlug, getEventBySlug, getMediaByEvent, getSortedMedia, logDownload, incrementProjectViews, saveLiveFavorites, getLiveFavorites } from "../services/dbService";
 import { Project, EventFolder, MediaItem, AccessCode } from "../types/gallery";
 import { getDriveDownloadUrl, getDriveImageUrl } from "../services/driveService";
 import { useToast } from "../components/common/Toast";
@@ -77,6 +77,7 @@ export const GalleryPage: React.FC = () => {
 
   // PIN & Access Code Protection
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [clientCode, setClientCode] = useState<string>("");
   const [clientPermissions, setClientPermissions] = useState<AccessCode['permissions']>({
     canView: true,
     canDownload: true,
@@ -107,22 +108,13 @@ export const GalleryPage: React.FC = () => {
       setProject(proj);
       incrementProjectViews(proj.id);
 
-      // Restore stored favorites for this project
-      const savedFavs = localStorage.getItem(`mellow_favs_${proj.id}`);
-      if (savedFavs) {
-        try {
-          const parsed = JSON.parse(savedFavs);
-          setFavoritedIds(new Set(parsed));
-        } catch {
-          // fallback
-        }
-      }
-
       // Check PIN Protection or saved device token
       let isLocalUnlocked = false;
+      let activeCode = "public";
       if (!proj.isPinProtected) {
         setIsUnlocked(true);
         isLocalUnlocked = true;
+        setClientCode("public");
       } else {
         const savedUnlock = localStorage.getItem(`mellow_unlocked_${proj.id}`);
         if (savedUnlock) {
@@ -131,6 +123,8 @@ export const GalleryPage: React.FC = () => {
             if (new Date(data.expiresAt) > new Date()) {
               setIsUnlocked(true);
               isLocalUnlocked = true;
+              activeCode = data.code || "2026";
+              setClientCode(activeCode);
               
               // Load custom permissions if they exist
               const savedPerms = localStorage.getItem(`mellow_permissions_${proj.id}`);
@@ -142,6 +136,25 @@ export const GalleryPage: React.FC = () => {
             // fallback
           }
         }
+      }
+
+      // Restore stored favorites for this project (syncing from Firestore if online)
+      const localFavsKey = `mellow_live_favs_${proj.id}_${activeCode.trim().toLowerCase()}`;
+      const savedFavs = localStorage.getItem(localFavsKey) || localStorage.getItem(`mellow_favs_${proj.id}`);
+      if (savedFavs) {
+        try {
+          const parsed = JSON.parse(savedFavs);
+          setFavoritedIds(new Set(parsed));
+        } catch {}
+      }
+
+      // Fetch latest synchronized favorites from Firestore
+      if (activeCode) {
+        getLiveFavorites(proj.id, activeCode).then(dbFavs => {
+          if (dbFavs && dbFavs.length > 0) {
+            setFavoritedIds(new Set(dbFavs));
+          }
+        });
       }
 
       // Redirect to main project landing page to unlock if protected and locked
@@ -172,9 +185,10 @@ export const GalleryPage: React.FC = () => {
         showToast("Favorite Added", "Saved item to client selection", "favorite");
       }
 
-      // Persist to localStorage
+      // Persist to localStorage and Firestore
       if (project) {
         localStorage.setItem(`mellow_favs_${project.id}`, JSON.stringify(Array.from(next)));
+        saveLiveFavorites(project.id, clientCode || "public", Array.from(next) as string[]);
       }
       return next;
     });
@@ -249,7 +263,9 @@ export const GalleryPage: React.FC = () => {
       let count = 0;
       for (const item of itemsToDownload) {
         try {
-          const imgUrl = getDriveImageUrl(item.driveFileId, 2048) || item.fullUrl;
+          const imgUrl = item.driveFileId && !item.driveFileId.startsWith("http")
+            ? `/api/proxy-image?fileId=${item.driveFileId}`
+            : item.fullUrl;
           const res = await fetch(imgUrl);
           if (res.ok) {
             const blob = await res.blob();
@@ -646,8 +662,13 @@ export const GalleryPage: React.FC = () => {
         }}
         onFavoriteSelected={() => {
           selectedIds.forEach(id => favoritedIds.add(id));
-          setFavoritedIds(new Set(favoritedIds));
+          const updatedFavs = new Set(favoritedIds);
+          setFavoritedIds(updatedFavs);
           setSelectedIds(new Set());
+          if (project) {
+            localStorage.setItem(`mellow_favs_${project.id}`, JSON.stringify(Array.from(updatedFavs)));
+            saveLiveFavorites(project.id, clientCode || "public", Array.from(updatedFavs) as string[]);
+          }
         }}
       />
 

@@ -81,6 +81,47 @@ async function startServer() {
     }
   });
 
+  // Proxy Google Drive Image to bypass browser CORS constraints
+  app.get("/api/proxy-image", async (req, res) => {
+    const { fileId, apiKey } = req.query || {};
+    if (!fileId) {
+      return res.status(400).send("Missing fileId");
+    }
+    const activeApiKey = (apiKey as string) || process.env.GOOGLE_DRIVE_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${activeApiKey}`;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        // Fallback to high-res thumbnail direct URL if alt=media requires extra oauth/scopes
+        const fallbackUrl = `https://lh3.googleusercontent.com/d/${fileId}=s2048`;
+        const fbResponse = await fetch(fallbackUrl);
+        if (!fbResponse.ok) {
+          throw new Error(`Failed to fetch from Google Drive: ${fbResponse.statusText}`);
+        }
+        res.setHeader("Content-Type", fbResponse.headers.get("content-type") || "image/jpeg");
+        const arrayBuffer = await fbResponse.arrayBuffer();
+        return res.send(Buffer.from(arrayBuffer));
+      }
+      res.setHeader("Content-Type", response.headers.get("content-type") || "image/jpeg");
+      const arrayBuffer = await response.arrayBuffer();
+      res.send(Buffer.from(arrayBuffer));
+    } catch (err: any) {
+      console.error("Proxy image error:", err);
+      // Absolute fallback to public thumbnail loader
+      try {
+        const fallbackUrl = `https://lh3.googleusercontent.com/d/${fileId}=s1600`;
+        const fbResponse = await fetch(fallbackUrl);
+        if (fbResponse.ok) {
+          res.setHeader("Content-Type", fbResponse.headers.get("content-type") || "image/jpeg");
+          const arrayBuffer = await fbResponse.arrayBuffer();
+          return res.send(Buffer.from(arrayBuffer));
+        }
+      } catch (innerErr) {}
+      res.status(500).send("Error downloading file: " + err.message);
+    }
+  });
+
   // Test Google Drive Account Credentials Connection
   app.post("/api/drive/test-connection", async (req, res) => {
     const { accountId, apiKey } = req.body || {};
