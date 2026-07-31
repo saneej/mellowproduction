@@ -62,7 +62,6 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   const adminNavItems = [
     { label: "Admin Overview", tab: "overview", icon: <LayoutDashboard size={16} /> },
     { label: "All Projects", tab: "projects", icon: <FolderKanban size={16} /> },
-    { label: "Google Drive Accounts", tab: "drive", icon: <HardDrive size={16} /> },
     { label: "Analytics & Traffic", tab: "analytics", icon: <Settings size={16} /> },
     { label: "Client Favorites", tab: "favorites", icon: <Heart size={16} /> },
     { label: "Download History", tab: "downloads", icon: <Download size={16} /> },

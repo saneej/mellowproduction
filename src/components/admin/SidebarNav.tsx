@@ -66,7 +66,6 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({
     { id: "overview", label: "Overview", icon: <LayoutDashboard size={18} />, allowed: true },
     { id: "projects", label: "Projects", icon: <FolderKanban size={18} />, allowed: true },
     { id: "admins", label: "Admin Users", icon: <Users size={18} />, allowed: canManageAdmins },
-    { id: "drive", label: "Drive Accounts", icon: <HardDrive size={18} />, allowed: canManageDrive },
     { id: "analytics", label: "Analytics", icon: <BarChart3 size={18} />, allowed: canViewAnalytics },
     { id: "favorites", label: "Favorites", icon: <Heart size={18} />, allowed: true },
     { id: "downloads", label: "Downloads", icon: <Download size={18} />, allowed: true },
