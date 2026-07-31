@@ -95,15 +95,25 @@ async function startServer() {
     try {
       const response = await fetch(url);
       if (!response.ok) {
-        // Fallback to high-res thumbnail direct URL if alt=media requires extra oauth/scopes
-        const fallbackUrl = `https://lh3.googleusercontent.com/d/${fileId}=s2048`;
+        // Fallback 1: Direct high-res thumbnail endpoint (w2048) - extremely robust & does not require API key
+        const fallbackUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w2048`;
         const fbResponse = await fetch(fallbackUrl);
-        if (!fbResponse.ok) {
-          throw new Error(`Failed to fetch from Google Drive: ${fbResponse.statusText}`);
+        if (fbResponse.ok) {
+          res.setHeader("Content-Type", fbResponse.headers.get("content-type") || "image/jpeg");
+          const arrayBuffer = await fbResponse.arrayBuffer();
+          return res.send(Buffer.from(arrayBuffer));
         }
-        res.setHeader("Content-Type", fbResponse.headers.get("content-type") || "image/jpeg");
-        const arrayBuffer = await fbResponse.arrayBuffer();
-        return res.send(Buffer.from(arrayBuffer));
+
+        // Fallback 2: Direct lh3 high-res direct URL (s2048)
+        const lh3Url = `https://lh3.googleusercontent.com/d/${fileId}=s2048`;
+        const lh3Response = await fetch(lh3Url);
+        if (lh3Response.ok) {
+          res.setHeader("Content-Type", lh3Response.headers.get("content-type") || "image/jpeg");
+          const arrayBuffer = await lh3Response.arrayBuffer();
+          return res.send(Buffer.from(arrayBuffer));
+        }
+
+        throw new Error(`Failed to fetch from Google Drive or public fallbacks`);
       }
       res.setHeader("Content-Type", response.headers.get("content-type") || "image/jpeg");
       const arrayBuffer = await response.arrayBuffer();
@@ -112,7 +122,7 @@ async function startServer() {
       console.error("Proxy image error:", err);
       // Absolute fallback to public thumbnail loader
       try {
-        const fallbackUrl = `https://lh3.googleusercontent.com/d/${fileId}=s1600`;
+        const fallbackUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`;
         const fbResponse = await fetch(fallbackUrl);
         if (fbResponse.ok) {
           res.setHeader("Content-Type", fbResponse.headers.get("content-type") || "image/jpeg");

@@ -74,7 +74,9 @@ export const FavoritesDrawer: React.FC<FavoritesDrawerProps> = ({
       let count = 0;
       for (const item of favoritedItems) {
         try {
-          const imgUrl = getDriveImageUrl(item.driveFileId, 2048) || item.fullUrl;
+          const imgUrl = item.driveFileId && !item.driveFileId.startsWith("http")
+            ? `/api/proxy-image?fileId=${item.driveFileId}`
+            : item.fullUrl;
           const res = await fetch(imgUrl);
           if (res.ok) {
             const blob = await res.blob();

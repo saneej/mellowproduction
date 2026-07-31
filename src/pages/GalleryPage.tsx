@@ -141,18 +141,31 @@ export const GalleryPage: React.FC = () => {
       // Restore stored favorites for this project (syncing from Firestore if online)
       const localFavsKey = `mellow_live_favs_${proj.id}_${activeCode.trim().toLowerCase()}`;
       const savedFavs = localStorage.getItem(localFavsKey) || localStorage.getItem(`mellow_favs_${proj.id}`);
+      let currentFavsSet = new Set<string>();
       if (savedFavs) {
         try {
           const parsed = JSON.parse(savedFavs);
-          setFavoritedIds(new Set(parsed));
+          currentFavsSet = new Set(parsed);
+          setFavoritedIds(currentFavsSet);
         } catch {}
       }
 
       // Fetch latest synchronized favorites from Firestore
       if (activeCode) {
         getLiveFavorites(proj.id, activeCode).then(dbFavs => {
-          if (dbFavs && dbFavs.length > 0) {
-            setFavoritedIds(new Set(dbFavs));
+          if (dbFavs) {
+            if (dbFavs.length > 0) {
+              const merged = new Set([...Array.from(currentFavsSet), ...dbFavs]);
+              setFavoritedIds(merged);
+              localStorage.setItem(localFavsKey, JSON.stringify(Array.from(merged)));
+              // Save back to db if merged size is larger (to sync local favorites up to cloud)
+              if (merged.size > dbFavs.length) {
+                saveLiveFavorites(proj.id, activeCode, Array.from(merged));
+              }
+            } else if (currentFavsSet.size > 0) {
+              // DB has 0 but local has some -> Sync local to DB so we don't lose them!
+              saveLiveFavorites(proj.id, activeCode, Array.from(currentFavsSet));
+            }
           }
         });
       }
@@ -195,7 +208,9 @@ export const GalleryPage: React.FC = () => {
 
       // Persist to localStorage and Firestore
       if (project) {
+        const key = (clientCode || "public").trim().toLowerCase();
         localStorage.setItem(`mellow_favs_${project.id}`, JSON.stringify(Array.from(next)));
+        localStorage.setItem(`mellow_live_favs_${project.id}_${key}`, JSON.stringify(Array.from(next)));
         saveLiveFavorites(project.id, clientCode || "public", Array.from(next) as string[]);
       }
       return next;
@@ -470,6 +485,16 @@ export const GalleryPage: React.FC = () => {
               >
                 <Heart size={14} className={favoritedIds.size > 0 ? "fill-white text-white" : ""} /> Favorites ({favoritedIds.size})
               </button>
+
+              {favoritedIds.size > 0 && (
+                <button
+                  onClick={() => setIsFavoritesDrawerOpen(true)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse"
+                >
+                  <CheckSquare size={14} />
+                  <span>Submit Selection ({favoritedIds.size})</span>
+                </button>
+              )}
             </div>
 
           </div>
