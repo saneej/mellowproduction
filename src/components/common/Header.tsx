@@ -92,7 +92,7 @@ export const GalleryHeader: React.FC<{
                 <LogOut size={16} />
               </button>
             </div>
-          ) : (
+          ) : !clientMode && (
             <Link 
               to="/admin" 
               className="text-xs uppercase tracking-widest font-bold py-1.5 px-4 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white transition-all flex items-center gap-2"
