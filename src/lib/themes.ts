@@ -70,6 +70,34 @@ export const getThemeStyles = (theme?: string): ThemeStyles => {
         accentBadge: 'text-[#2B4938] border border-[#2B4938]/30 bg-[#2B4938]/5',
         footerBg: 'bg-[#F2EADA] border-t border-[#E1D4BB]',
       };
+    case 'modern_minimalist':
+      return {
+        bg: 'bg-white text-black selection:bg-black selection:text-white',
+        text: 'text-black',
+        textMuted: 'text-gray-400',
+        cardBg: 'bg-white border-none shadow-2xl',
+        accent: 'bg-black hover:bg-gray-800 text-white',
+        accentText: 'text-black',
+        borderColor: 'border-transparent',
+        fontDisplay: 'font-sans tracking-tighter font-medium',
+        buttonClass: 'bg-black hover:bg-gray-800 text-white font-sans uppercase tracking-widest text-[10px] sm:text-xs rounded-none',
+        accentBadge: 'text-black border border-black bg-white',
+        footerBg: 'bg-gray-50 border-t border-gray-100',
+      };
+    case 'romantic_blush':
+      return {
+        bg: 'bg-[#FFF0F5] text-[#4A3036] selection:bg-[#E0B0B6] selection:text-white',
+        text: 'text-[#4A3036]',
+        textMuted: 'text-[#8E6D74]',
+        cardBg: 'bg-white border border-[#F5DADD] shadow-sm rounded-3xl',
+        accent: 'bg-[#C28C93] hover:bg-[#A9767C] text-white',
+        accentText: 'text-[#C28C93]',
+        borderColor: 'border-[#F5DADD]',
+        fontDisplay: 'font-serif italic font-light tracking-wide',
+        buttonClass: 'bg-[#C28C93] hover:bg-[#A9767C] text-white font-serif tracking-wider text-[11px] sm:text-xs rounded-full',
+        accentBadge: 'text-[#C28C93] border border-[#C28C93]/30 bg-[#C28C93]/5',
+        footerBg: 'bg-[#FCE6EC] border-t border-[#F5DADD]',
+      };
     case 'classic_editorial':
     default:
       return {

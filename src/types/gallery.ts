@@ -93,7 +93,7 @@ export interface Project {
   driveFolders?: DriveFolderConfig[];
   accessCodes?: AccessCode[];
   layout?: 'grid' | 'masonry' | 'timeline';
-  theme?: 'classic_editorial' | 'dark_luxury' | 'earthy_sand' | 'clean_nordic' | 'vintage_warmth';
+  theme?: 'classic_editorial' | 'dark_luxury' | 'earthy_sand' | 'clean_nordic' | 'vintage_warmth' | 'modern_minimalist' | 'romantic_blush';
   progressiveLoading?: boolean;
   defaultEventId?: string;
   allowClientDownloads?: boolean;

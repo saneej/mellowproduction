@@ -93,7 +93,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
     {
       id: "code-1",
       name: "Client Main Pass",
-      code: "MELLOW2026",
+      code: "MELLOW1234",
       enabled: true,
       permissions: { canView: true, canDownload: true, canFavorite: true },
     },
@@ -818,6 +818,8 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                     <option value="earthy_sand">Earthy Sand (Beige & Terracotta)</option>
                     <option value="clean_nordic">Clean Nordic (Cool Gray & Slate)</option>
                     <option value="vintage_warmth">Vintage Warmth (Sepia & Pine Green)</option>
+                    <option value="modern_minimalist">Modern Minimalist (Pure B&W)</option>
+                    <option value="romantic_blush">Romantic Blush (Soft Pink & Rose)</option>
                   </select>
                 </div>
               </div>

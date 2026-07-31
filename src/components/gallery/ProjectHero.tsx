@@ -20,6 +20,73 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   const isVintage = project.theme === 'vintage_warmth';
   const isEarthy = project.theme === 'earthy_sand';
   const isNordic = project.theme === 'clean_nordic';
+  const isMinimal = project.theme === 'modern_minimalist';
+  const isRomantic = project.theme === 'romantic_blush';
+
+  if (isMinimal) {
+    return (
+      <div className="relative w-full flex flex-col items-center bg-white pt-20 pb-10">
+        <div className="text-center space-y-6 mb-16 max-w-2xl px-6">
+          <p className="text-[10px] font-sans tracking-[0.4em] uppercase text-black font-semibold">
+            {project.clientName} • {project.date}
+          </p>
+          <h1 className="text-5xl md:text-7xl font-sans tracking-tighter uppercase font-medium text-black leading-none">
+            {project.title}
+          </h1>
+        </div>
+        <div className="relative w-full max-w-6xl aspect-[16/9] overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.img 
+              key={currentCoverIndex}
+              src={activeCoverUrl}
+              alt={project.title}
+              referrerPolicy="no-referrer"
+              initial={{ opacity: 0, filter: 'grayscale(100%)' }}
+              animate={{ opacity: 1, filter: 'grayscale(100%)' }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5 }}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          </AnimatePresence>
+        </div>
+      </div>
+    );
+  }
+
+  if (isRomantic) {
+    return (
+      <div className="relative w-full min-h-[70vh] flex flex-col items-center justify-center bg-[#FFF0F5] overflow-hidden rounded-[3rem] p-6 shadow-sm border border-[#F5DADD]">
+        <div className="absolute inset-0 z-0">
+          <AnimatePresence mode="wait">
+            <motion.img 
+              key={currentCoverIndex}
+              src={activeCoverUrl}
+              alt={project.title}
+              referrerPolicy="no-referrer"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 0.15, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2 }}
+              className="absolute inset-0 w-full h-full object-cover blur-sm"
+            />
+          </AnimatePresence>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FFF0F5] to-transparent" />
+        </div>
+        
+        <div className="relative z-10 w-full max-w-4xl bg-white/70 backdrop-blur-md p-10 md:p-16 rounded-[2rem] border border-[#F5DADD] text-center flex flex-col items-center shadow-xl">
+          <div className="w-16 h-[1px] bg-[#C28C93] mb-8" />
+          <h1 className="text-4xl md:text-6xl font-serif italic font-light tracking-wide text-[#4A3036] leading-tight mb-6">
+            {project.title}
+          </h1>
+          <div className="flex items-center gap-4 text-xs font-serif tracking-widest text-[#8E6D74] uppercase">
+            <span>{project.clientName}</span>
+            <span className="text-[#C28C93]">✧</span>
+            <span>{project.date}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isVintage) {
     return (

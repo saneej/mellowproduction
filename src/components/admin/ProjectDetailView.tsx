@@ -776,7 +776,51 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           <div className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-6 shadow-2xl">
             <h3 className="text-base font-bold uppercase text-white pb-3 border-b border-white/10">Project Controls</h3>
 
-            <div className="space-y-4 text-xs">
+            <div className="space-y-6 text-xs">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-black border border-white/10 rounded-2xl gap-4">
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-white uppercase">Visibility (List on /projects)</div>
+                  <div className="text-[10px] text-white/50 font-mono">
+                    If enabled, this project will appear on the public projects landing page.
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={project.isPublished}
+                    onChange={async (e) => {
+                      const val = e.target.checked;
+                      setProject({ ...project, isPublished: val });
+                      await updateProject(project.id, { isPublished: val });
+                    }}
+                  />
+                  <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-black border border-white/10 rounded-2xl gap-4">
+                <div className="space-y-1">
+                  <div className="text-sm font-bold text-white uppercase">Privacy Protection</div>
+                  <div className="text-[10px] text-white/50 font-mono">
+                    If enabled, visitors will need an Access Code to view the gallery.
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer"
+                    checked={project.isPinProtected}
+                    onChange={async (e) => {
+                      const val = e.target.checked;
+                      setProject({ ...project, isPinProtected: val });
+                      await updateProject(project.id, { isPinProtected: val });
+                    }}
+                  />
+                  <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-red"></div>
+                </label>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-white/70 uppercase">Event Category (Optional)</label>
                 <input
@@ -828,6 +872,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     <option value="earthy_sand">Earthy Sand (Beige & Terracotta)</option>
                     <option value="clean_nordic">Clean Nordic (Cool Gray & Slate)</option>
                     <option value="vintage_warmth">Vintage Warmth (Sepia & Pine Green)</option>
+                    <option value="modern_minimalist">Modern Minimalist (Pure B&W)</option>
+                    <option value="romantic_blush">Romantic Blush (Soft Pink & Rose)</option>
                   </select>
                 </div>
               </div>
