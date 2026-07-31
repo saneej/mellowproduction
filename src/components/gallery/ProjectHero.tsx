@@ -116,8 +116,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-xs font-serif tracking-[0.2em] text-[#8A7E74] uppercase">
-            <span className="font-semibold text-[#2D2621]">{project.clientName}</span>
-            <span className="text-[#C59B6C]">❦</span>
             <span>{project.date}</span>
           </div>
         </div>
@@ -145,9 +143,11 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
     return (
       <div className="relative w-full flex flex-col items-center bg-white pt-20 pb-10">
         <div className="text-center space-y-6 mb-16 max-w-2xl px-6">
-          <p className="text-[10px] font-sans tracking-[0.4em] uppercase text-black font-semibold">
-            {project.clientName} • {project.date}
-          </p>
+          {project.date && (
+            <p className="text-[10px] font-sans tracking-[0.4em] uppercase text-black font-semibold">
+              {project.date}
+            </p>
+          )}
           <h1
             style={titleFontStyle}
             className="text-5xl md:text-7xl font-sans tracking-tighter uppercase font-medium text-black leading-none"
@@ -203,8 +203,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
             {project.title}
           </h1>
           <div className="flex items-center gap-4 text-xs font-serif tracking-widest text-[#8E6D74] uppercase">
-            <span>{project.clientName}</span>
-            <span className="text-[#C28C93]">✧</span>
             <span>{project.date}</span>
           </div>
         </div>
@@ -242,8 +240,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               "Every picture tells a story."
             </p>
             <div className="pt-2 flex items-center justify-center gap-4 text-xs font-mono text-[#5E7265] tracking-widest uppercase">
-              <span>{project.clientName}</span>
-              <span>•</span>
               <span>{project.date}</span>
             </div>
           </div>
@@ -278,8 +274,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
             {project.title}
           </h1>
           <div className="flex items-center justify-center gap-4 text-xs font-mono text-[#92867B] tracking-widest uppercase">
-            <span>{project.clientName}</span>
-            <span className="text-[#C5846B]">|</span>
             <span>{project.date}</span>
           </div>
         </div>
@@ -302,7 +296,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           </h1>
           <div className="w-16 h-[2px] bg-slate-900" />
           <div className="flex flex-col space-y-2 text-xs font-mono text-slate-500 tracking-widest uppercase font-bold pt-4">
-            <span>CLIENT: {project.clientName}</span>
             <span>DATE: {project.date}</span>
           </div>
         </div>
@@ -379,7 +372,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
           {!brideName && !groomName && (
             <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
-              EXCLUSIVELY CURATED FOR
+              EVENT GALLERY
             </p>
           )}
           
@@ -397,8 +390,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           )}
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono text-zinc-300 tracking-widest uppercase font-bold">
-            <span>{project.clientName}</span>
-            <span className="hidden sm:inline text-brand-red font-black">•</span>
             <span>{project.date}</span>
           </div>
         </motion.div>

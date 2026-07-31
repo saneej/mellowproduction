@@ -137,7 +137,7 @@ export const AnalyticsTab: React.FC<{ projects: Project[] }> = ({ projects }) =>
                   />
                   <div>
                     <div className="font-bold text-white text-sm">{project.title}</div>
-                    <div className="text-white/40 text-[10px] uppercase">{project.category || "Gallery"} • {project.clientName}</div>
+                    <div className="text-white/40 text-[10px] uppercase">{project.category || "Gallery"}{project.date ? ` • ${project.date}` : ""}</div>
                   </div>
                 </div>
 

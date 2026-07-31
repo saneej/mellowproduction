@@ -487,15 +487,6 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     </div>
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase text-white/50 block mb-1">Client Name</label>
-                    <input
-                      type="text"
-                      value={editClientName}
-                      onChange={e => setEditClientName(e.target.value)}
-                      className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
-                    />
-                  </div>
-                  <div>
                     <label className="text-[10px] uppercase text-white/50 block mb-1">Groom Name</label>
                     <input
                       type="text"
@@ -644,8 +635,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   className="w-full h-56 object-cover"
                 />
                 <div className="p-5 space-y-3">
-                  <div className="text-xs uppercase text-white/50">Client Name</div>
-                  <div className="text-lg font-bold text-white uppercase">{project.clientName}</div>
+                  <div className="text-xs uppercase text-white/50">Category</div>
+                  <div className="text-lg font-bold text-white uppercase">{project.category || "Gallery"}</div>
                   {project.groomName && <div className="text-xs text-white/60">Groom: {project.groomName}</div>}
                   {project.brideName && <div className="text-xs text-white/60">Bride: {project.brideName}</div>}
                 </div>

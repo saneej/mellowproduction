@@ -77,8 +77,8 @@ export const ProjectPage: React.FC = () => {
         : `sent a quick reaction: ${emoji}`;
       
       await addNotification(
-        `Client Feedback: ${project.clientName}`,
-        `${project.clientName} responded to "${project.title}" gallery: ${displayMsg}`,
+        `Gallery Feedback: ${project.title}`,
+        `Visitor responded to "${project.title}" gallery: ${displayMsg}`,
         "success"
       );
       setReactionSent(true);

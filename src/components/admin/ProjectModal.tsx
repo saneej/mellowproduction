@@ -68,7 +68,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !clientName) return;
+    if (!title) return;
 
     setSaving(true);
     try {
@@ -78,7 +78,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       await onSave({
         title,
         slug: finalSlug,
-        clientName,
+        clientName: clientName || title,
         clientEmail,
         category,
         date,
@@ -177,15 +177,16 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-mono text-white/50 uppercase mb-1">Client Name</label>
-              <input
-                type="text"
-                required
-                value={clientName}
-                onChange={e => setClientName(e.target.value)}
-                placeholder="Ahmed & Amina"
-                className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
-              />
+              <label className="block text-[11px] font-mono text-white/50 uppercase mb-1">Event Category</label>
+              <select
+                value={category}
+                onChange={e => setCategory(e.target.value as EventCategory)}
+                className="w-full bg-zinc-900 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red transition-colors"
+              >
+                {CATEGORIES.map(cat => (
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
+                ))}
+              </select>
             </div>
 
             <div>

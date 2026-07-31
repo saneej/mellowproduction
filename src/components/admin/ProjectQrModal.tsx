@@ -242,9 +242,11 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
 
     ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
     ctx.font = "24px monospace";
-    const subInfo = `${project.clientName}${project.date ? ` • ${project.date}` : ""}`;
-    ctx.fillText(subInfo, width / 2, currentY);
-    currentY += 50;
+    const subInfo = project.date || "";
+    if (subInfo) {
+      ctx.fillText(subInfo, width / 2, currentY);
+      currentY += 50;
+    }
 
     // 5. PIN CODE BADGE IF PROTECTED
     if (project.isPinProtected && project.pin) {
@@ -473,9 +475,11 @@ export const ProjectQrModal: React.FC<ProjectQrModalProps> = ({
                 >
                   {project.title}
                 </h4>
-                <p className="text-[11px] font-mono text-white/90 font-medium">
-                  {project.clientName} {project.date ? `• ${project.date}` : ""}
-                </p>
+                {project.date && (
+                  <p className="text-[11px] font-mono text-white/90 font-medium">
+                    {project.date}
+                  </p>
+                )}
               </div>
 
               {/* PIN Badge if protected */}

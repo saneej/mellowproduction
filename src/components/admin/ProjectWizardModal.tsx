@@ -164,7 +164,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   if (!isOpen) return null;
 
   // STEP 1 Validation
-  const isStep1Valid = Boolean(clientName && eventName && slug && !slugError && !checkingSlug);
+  const isStep1Valid = Boolean(eventName && slug && !slugError && !checkingSlug);
 
   // Drive Folder Actions
   const handleAddFolder = () => {
@@ -270,7 +270,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   };
 
   const steps = [
-    { num: 1, title: "Client Details", icon: Sliders },
+    { num: 1, title: "Event Details", icon: Sliders },
     { num: 2, title: "Cover Media", icon: coverMediaType === "video" ? Film : ImageIcon },
     { num: 3, title: "Google Drive", icon: HardDrive },
     { num: 4, title: "Access Codes", icon: Key },
@@ -345,27 +345,19 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
             })}
           </div>
 
-          {/* STEP 1: CLIENT DETAILS */}
+          {/* STEP 1: EVENT DETAILS */}
           {currentStep === 1 && (
             <div className="space-y-6 animate-fade-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs uppercase text-white/70">Client Name *</label>
-                  <input
-                    type="text"
-                    value={clientName}
-                    onChange={e => setClientName(e.target.value)}
-                    placeholder="e.g., Ahmed & Amina"
-                    className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-red"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 sm:col-span-2">
                   <label className="text-xs uppercase text-white/70">Event Name *</label>
                   <input
                     type="text"
                     value={eventName}
-                    onChange={e => setEventName(e.target.value)}
+                    onChange={e => {
+                      setEventName(e.target.value);
+                      setClientName(e.target.value);
+                    }}
                     placeholder="e.g., Wedding Celebration"
                     className="w-full bg-black border border-white/10 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-red"
                   />

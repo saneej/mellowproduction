@@ -354,7 +354,7 @@ export const AdminDashboardPage: React.FC = () => {
                               />
                               <div className="p-4 space-y-1">
                                 <div className="font-bold text-white text-base truncate group-hover:text-brand-red transition-colors">{p.title}</div>
-                                <div className="text-xs font-mono text-white/50">{p.clientName} • {p.date}</div>
+                                <div className="text-xs font-mono text-white/50">{p.date || p.category || "Gallery"}</div>
                               </div>
                             </div>
                           ))}
@@ -512,7 +512,7 @@ export const AdminDashboardPage: React.FC = () => {
                                     {project.title}
                                   </h3>
                                   <div className="flex items-center justify-between text-xs font-mono text-white/60">
-                                    <span>Client: <strong className="text-white">{project.clientName}</strong></span>
+                                    <span>Category: <strong className="text-white">{project.category || "Gallery"}</strong></span>
                                     <span>{project.date}</span>
                                   </div>
                                 </div>

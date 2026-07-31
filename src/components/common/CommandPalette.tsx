@@ -154,7 +154,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
                         </div>
                         <div>
                           <div className="font-bold text-sm text-white group-hover:text-brand-red transition-colors">{p.title}</div>
-                          <div className="text-[10px] text-white/50">{p.clientName} • {p.category}</div>
+                          <div className="text-[10px] text-white/50">{p.category || "Gallery"}{p.date ? ` • ${p.date}` : ""}</div>
                         </div>
                       </div>
 

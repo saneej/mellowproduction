@@ -133,9 +133,9 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           </h1>
           <p className={`text-sm font-mono tracking-wider ${themeStyles.textMuted}`}>
             {event ? (
-              <span>Part of <strong className={themeStyles.text}>{project.title}</strong> gallery for <strong className={`${themeStyles.accentText} font-bold`}>{project.clientName}</strong></span>
+              <span>Part of <strong className={themeStyles.text}>{project.title}</strong> gallery</span>
             ) : (
-              <span>Exclusively captured for <strong className={`${themeStyles.accentText} font-bold`}>{project.clientName}</strong></span>
+              <span>Official Media Collection</span>
             )}
           </p>
         </div>

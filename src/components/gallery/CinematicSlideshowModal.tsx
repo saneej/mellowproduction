@@ -511,7 +511,7 @@ export const CinematicSlideshowModal: React.FC<CinematicSlideshowModalProps> = (
                       {currentItem.fileName}
                     </h3>
                     <p className="text-[10px] font-mono text-white/50 tracking-wider uppercase mt-0.5">
-                      {projectTitle} {clientName ? `• ${clientName}` : ""}
+                      {projectTitle}
                     </p>
                   </div>
 
@@ -576,14 +576,14 @@ export const CinematicSlideshowModal: React.FC<CinematicSlideshowModalProps> = (
                     {projectTitle}
                   </motion.h1>
 
-                  {clientName && (
+                  {projectDate && (
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.7 }}
                       className="text-xs sm:text-sm font-serif italic text-amber-200/70 tracking-[0.2em] uppercase"
                     >
-                      {clientName} {projectDate ? `• ${projectDate}` : ""}
+                      {projectDate}
                     </motion.p>
                   )}
 
