@@ -65,8 +65,8 @@ export const AdminLogin: React.FC = () => {
           <h2 className="text-2xl font-display font-extrabold uppercase tracking-tight">
             Mellow <span className="text-brand-red font-light">Admin</span>
           </h2>
-          <p className="text-xs font-mono text-white/50 tracking-wider">
-            Role-Based Admin Control Panel
+          <p className="text-xs font-mono text-white/70 tracking-wider">
+            Sign in to <span className="text-brand-red font-bold">mellowproduction.in</span>
           </p>
         </div>
 

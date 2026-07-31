@@ -194,6 +194,25 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         </div>
       </div>
 
+      {/* Beautiful logo-based preloader */}
+      {!isLoaded && (
+        <div className="absolute inset-0 bg-zinc-950 flex flex-col items-center justify-center gap-2 z-10 transition-opacity duration-300 pointer-events-none">
+          <div className="relative flex items-center justify-center">
+            {/* Soft pulsing glowing ring behind the logo */}
+            <div className="absolute inset-[-12px] rounded-full bg-brand-red/15 blur-lg animate-ping duration-1000" />
+            <img
+              src="https://i.postimg.cc/j250f7G7/logo-white.png"
+              alt="Mellow"
+              className="w-12 h-10 object-contain opacity-60 animate-pulse"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <span className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase animate-pulse font-bold mt-1">
+            Mellow
+          </span>
+        </div>
+      )}
+
       {/* Loading Pulse Bar if initial stage */}
       {!isLoaded && (
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer pointer-events-none" />
