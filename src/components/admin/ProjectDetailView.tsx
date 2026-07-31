@@ -423,7 +423,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     onClick={() => setSyncingEventId(evt.id)}
                     className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
                   >
-                    <HardDrive size={13} /> Sync
+                    <HardDrive size={13} /> GDrive
                   </button>
 
                   <a

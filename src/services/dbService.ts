@@ -15,7 +15,7 @@ import {
   writeBatch
 } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { extractDriveFolderId } from "./driveService";
+import { extractDriveFolderId, syncDriveFolder } from "./driveService";
 import { 
   Project, 
   EventFolder, 
@@ -609,6 +609,66 @@ export const deleteEvent = async (id: string): Promise<void> => {
 // --- Media Items Functions ---
 
 export const getMediaByEvent = async (eventId: string, includeDeleted = false): Promise<MediaItem[]> => {
+  let eventFolder: EventFolder | undefined = localEventsState.find(e => e.id === eventId);
+  if (!eventFolder) {
+    try {
+      const docSnap = await getDoc(doc(db, EVENTS_COL, eventId));
+      if (docSnap.exists()) {
+        eventFolder = { id: docSnap.id, ...docSnap.data() } as EventFolder;
+      }
+    } catch (err) {
+      console.warn("Error getting event folder for live media fetch:", err);
+    }
+  }
+
+  if (eventFolder && eventFolder.driveFolderId) {
+    try {
+      let apiKey: string | undefined;
+      const project = localProjectsState.find(p => p.id === eventFolder!.projectId) || await getProjectById(eventFolder!.projectId);
+      if (project && project.driveFolders) {
+        const folderConfig = project.driveFolders.find(
+          f => f.id === eventFolder!.id || f.driveFolderId === eventFolder!.driveFolderId
+        );
+        if (folderConfig) {
+          apiKey = folderConfig.apiKey;
+        }
+      }
+
+      console.log(`Live loading files from Google Drive for folder: ${eventFolder.driveFolderId}`);
+      const items = await syncDriveFolder(
+        eventFolder.projectId,
+        eventFolder.id,
+        eventFolder.driveFolderId,
+        apiKey
+      );
+
+      const mapped = items.map((item, idx) => ({
+        id: item.id || `live-${eventFolder!.id}-${idx}`,
+        projectId: eventFolder!.projectId,
+        eventId: eventFolder!.id,
+        driveFileId: item.driveFileId || item.id || "",
+        fileName: item.fileName || "",
+        mimeType: item.mimeType || "",
+        fileSize: item.fileSize,
+        width: item.width,
+        height: item.height,
+        thumbnailUrl: item.thumbnailUrl || "",
+        fullUrl: item.fullUrl || "",
+        isVideo: !!item.isVideo,
+        videoUrl: item.videoUrl,
+        order: item.order || (idx + 1),
+        modifiedDate: item.modifiedDate || new Date().toISOString(),
+        isDeleted: false,
+        createdAt: item.createdAt || new Date().toISOString(),
+        updatedAt: item.updatedAt || new Date().toISOString()
+      } as MediaItem));
+
+      return mapped;
+    } catch (err) {
+      console.error("Failed to live-load Google Drive folder, falling back to local/Firestore storage:", err);
+    }
+  }
+
   try {
     const colRef = collection(db, MEDIA_COL);
     const q = query(colRef, where("eventId", "==", eventId));
@@ -626,6 +686,66 @@ export const getMediaByEvent = async (eventId: string, includeDeleted = false): 
 };
 
 export const getMediaByProject = async (projectId: string, includeDeleted = false): Promise<MediaItem[]> => {
+  const events = await getEventsByProject(projectId);
+  if (events && events.length > 0 && events.some(e => e.driveFolderId)) {
+    try {
+      const allLiveItemsPromises = events.map(async (eventFolder) => {
+        if (eventFolder.driveFolderId) {
+          try {
+            let apiKey: string | undefined;
+            const project = localProjectsState.find(p => p.id === projectId) || await getProjectById(projectId);
+            if (project && project.driveFolders) {
+              const folderConfig = project.driveFolders.find(
+                f => f.id === eventFolder.id || f.driveFolderId === eventFolder.driveFolderId
+              );
+              if (folderConfig) {
+                apiKey = folderConfig.apiKey;
+              }
+            }
+
+            const items = await syncDriveFolder(
+              projectId,
+              eventFolder.id,
+              eventFolder.driveFolderId,
+              apiKey
+            );
+
+            return items.map((item, idx) => ({
+              id: item.id || `live-${eventFolder.id}-${idx}`,
+              projectId: projectId,
+              eventId: eventFolder.id,
+              driveFileId: item.driveFileId || item.id || "",
+              fileName: item.fileName || "",
+              mimeType: item.mimeType || "",
+              fileSize: item.fileSize,
+              width: item.width,
+              height: item.height,
+              thumbnailUrl: item.thumbnailUrl || "",
+              fullUrl: item.fullUrl || "",
+              isVideo: !!item.isVideo,
+              videoUrl: item.videoUrl,
+              order: item.order || (idx + 1),
+              modifiedDate: item.modifiedDate || new Date().toISOString(),
+              isDeleted: false,
+              createdAt: item.createdAt || new Date().toISOString(),
+              updatedAt: item.updatedAt || new Date().toISOString()
+            } as MediaItem));
+          } catch (e) {
+            console.warn(`Failed live load in getMediaByProject for event ${eventFolder.id}:`, e);
+            return [];
+          }
+        } else {
+          return getMediaByEvent(eventFolder.id, includeDeleted);
+        }
+      });
+
+      const results = await Promise.all(allLiveItemsPromises);
+      return results.flat().sort((a, b) => a.order - b.order);
+    } catch (err) {
+      console.warn("Live aggregation by project failed, falling back to Firestore:", err);
+    }
+  }
+
   try {
     const colRef = collection(db, MEDIA_COL);
     const q = query(colRef, where("projectId", "==", projectId));

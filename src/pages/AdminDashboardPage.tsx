@@ -536,7 +536,7 @@ export const AdminDashboardPage: React.FC = () => {
                                   <button
                                     onClick={() => setSyncingEvent({ projectId: project.id, eventId: `event-${project.id}-main`, title: project.title })}
                                     className="p-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red"
-                                    title="Sync Drive"
+                                    title="Configure Google Drive"
                                   >
                                     <HardDrive size={15} />
                                   </button>

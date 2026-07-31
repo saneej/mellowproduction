@@ -3,7 +3,7 @@ import { X, RefreshCw, HardDrive, CheckCircle2, AlertCircle, ShieldCheck, FileTe
 import { extractDriveFolderId } from "../../services/driveService";
 import { syncEngine, SyncProgressCallbackData } from "../../services/syncEngine";
 import { storageManager } from "../../services/storage/StorageManager";
-import { getProjectById } from "../../services/dbService";
+import { getProjectById, updateProject, updateEventFolder } from "../../services/dbService";
 import { GoogleDriveGuideModal } from "./GoogleDriveGuideModal";
 
 interface DriveSyncModalProps {
@@ -87,20 +87,52 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
       const project = await getProjectById(projectId);
       if (!project) throw new Error("Project record not found.");
 
-      await syncEngine.syncProject(
-        project,
-        eventId,
-        folderId,
-        apiKey,
-        (data) => setProgress(data)
-      );
+      // 1. Update project's driveFolders config
+      const updatedDriveFolders = (project.driveFolders || []).map(f => {
+        if (f.id === eventId || f.driveFolderId === folderId) {
+          return { ...f, driveFolderId: folderId, apiKey, status: "connected" };
+        }
+        return f;
+      });
+
+      // If the specific folder wasn't in the list yet, add it
+      const hasFolder = updatedDriveFolders.some(f => f.id === eventId || f.driveFolderId === folderId);
+      if (!hasFolder) {
+        updatedDriveFolders.push({
+          id: eventId,
+          name: eventTitle,
+          driveFolderId: folderId,
+          apiKey,
+          status: "connected"
+        });
+      }
+
+      await updateProject(projectId, {
+        driveFolders: updatedDriveFolders,
+        eventCount: updatedDriveFolders.length
+      });
+
+      // 2. Update matching event folder's driveFolderId
+      await updateEventFolder(eventId, {
+        driveFolderId: folderId
+      });
+
+      // Set completed status instantly for feedback
+      setProgress({
+        step: 'completed',
+        message: 'Google Drive folder linked successfully! Media will live-load on access.',
+        filesScanned: 1,
+        filesAdded: 0,
+        filesUpdated: 0,
+        progressPercent: 100
+      });
 
       setTimeout(() => {
         onSyncComplete();
         onClose();
       }, 1500);
     } catch (err: any) {
-      setError(err.message || "Failed to sync drive folder.");
+      setError(err.message || "Failed to update drive folder configuration.");
     } finally {
       setLoading(false);
     }
@@ -246,7 +278,7 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
                 className="px-6 py-2.5 rounded-xl bg-brand-red text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:bg-brand-red/90 transition-colors shadow-lg disabled:opacity-50"
               >
                 <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-                <span>{loading ? "Syncing..." : "Start Sync"}</span>
+                <span>{loading ? "Connecting..." : "Save & Connect"}</span>
               </button>
             </div>
           </form>
