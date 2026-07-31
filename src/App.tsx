@@ -234,9 +234,17 @@ const Navbar = () => {
               </Magnetic>
             ))}
             <Magnetic>
+              <Link 
+                to="/projects"
+                className="text-[10px] font-bold tracking-[0.2em] uppercase px-5 py-2.5 border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500 rounded-full flex items-center gap-2"
+              >
+                Client Portals
+              </Link>
+            </Magnetic>
+            <Magnetic>
               <a 
                 href="#contact" 
-                className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500"
+                className="w-10 h-10 flex items-center justify-center border border-white/20 hover:border-white hover:bg-white hover:text-brand-red transition-all duration-500 rounded-full"
                 aria-label="Contact"
               >
                 <Mail size={16} />
@@ -270,6 +278,13 @@ const Navbar = () => {
                   {link.name}
                 </a>
               ))}
+              <Link 
+                to="/projects"
+                onClick={() => setIsOpen(false)}
+                className="text-xl font-bold uppercase tracking-wider text-white hover:text-white/80 transition-colors"
+              >
+                Client Portals
+              </Link>
               <a 
                 href="#contact" 
                 onClick={() => setIsOpen(false)}
@@ -883,11 +898,17 @@ const Footer = () => {
             </a>
           ))}
           <Link
+            to="/projects"
+            className="text-[10px] uppercase tracking-widest font-extrabold text-white bg-white/10 hover:bg-white/20 border border-white/20 px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5"
+          >
+            Client Portals
+          </Link>
+          <Link
             to="/admin"
             className="text-[10px] uppercase tracking-widest font-extrabold text-white bg-brand-red/90 hover:bg-brand-red px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 shadow-md hover:shadow-brand-red/20"
           >
             <Lock size={11} />
-            <span>Client Login</span>
+            <span>Admin</span>
           </Link>
           <a 
             href="https://www.premiumbeat.com/blog/category/video-production/" 
@@ -1036,6 +1057,7 @@ import { ToastProvider } from "./components/common/Toast";
 import { OfflineBanner } from "./components/common/OfflineBanner";
 import { CommandPalette } from "./components/common/CommandPalette";
 import { AdminDashboardPage } from "./pages/AdminDashboardPage";
+import { ProjectsLandingPage } from "./pages/ProjectsLandingPage";
 import { ProjectPage } from "./pages/ProjectPage";
 import { GalleryPage } from "./pages/GalleryPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
@@ -1064,6 +1086,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<MainWebsite />} />
               <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/projects" element={<ProjectsLandingPage />} />
               <Route path="/projects/:projectSlug" element={<ProjectPage />} />
               <Route path="/projects/:projectSlug/:eventSlug" element={<GalleryPage />} />
               <Route path="*" element={<NotFoundPage />} />
