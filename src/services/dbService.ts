@@ -125,6 +125,9 @@ const STORAGE_FAVORITES = "mellow_favorites_v2";
 
 const loadStorage = <T>(key: string, fallback: T): T => {
   try {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return fallback;
+    }
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : fallback;
   } catch {
@@ -134,6 +137,9 @@ const loadStorage = <T>(key: string, fallback: T): T => {
 
 const saveStorage = (key: string, data: unknown) => {
   try {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") {
+      return;
+    }
     localStorage.setItem(key, JSON.stringify(data));
   } catch (e) {
     console.warn("localStorage write error:", e);

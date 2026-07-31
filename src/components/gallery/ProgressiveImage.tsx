@@ -26,21 +26,53 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   onToggleFavorite,
   onDownload
 }) => {
-  const [currentSrc, setCurrentSrc] = useState<string>("");
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isInView, setIsInView] = useState(false);
+
+  const fallbackImg = item.isVideo
+    ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
+    : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
+
+  const tiny = item.tinyThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 200) : item.thumbnailUrl || fallbackImg);
+
+  const [currentSrc, setCurrentSrc] = useState<string>(tiny);
   const [loadStage, setLoadStage] = useState<'tiny' | 'small' | 'hd' | 'original'>('tiny');
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Intersection Observer to defer larger downloads until visible
   useEffect(() => {
-    const fallbackImg = item.isVideo
-      ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
-      : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
+    if (isHighPriority) {
+      setIsInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+    return () => observer.disconnect();
+  }, [isHighPriority]);
 
-    const tiny = item.tinyThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 200) : item.thumbnailUrl || fallbackImg);
+  useEffect(() => {
+    // Reset source if item changes
+    setCurrentSrc(tiny);
+    setLoadStage('tiny');
+    setIsLoaded(false);
+  }, [item, tiny]);
+
+  useEffect(() => {
+    if (!isInView) return;
+
     const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 800) : item.thumbnailUrl || fallbackImg);
     const hd = item.hdUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 2048) : item.fullUrl || small);
     const original = item.originalUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 2400) : item.fullUrl || hd);
-
-    setCurrentSrc(tiny);
 
     const imgSmall = new Image();
     imgSmall.src = small;
@@ -77,10 +109,11 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       setLoadStage('small');
       setIsLoaded(true);
     };
-  }, [item, isHighPriority, isZoomedOrDownloaded]);
+  }, [item, isHighPriority, isZoomedOrDownloaded, isInView, fallbackImg]);
 
   return (
     <div 
+      ref={containerRef}
       className={`group relative overflow-hidden bg-zinc-950 rounded-2xl border border-white/10 aspect-[4/3] cursor-pointer ${className}`}
     >
       <img

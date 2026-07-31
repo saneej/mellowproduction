@@ -59,6 +59,12 @@ export const ProjectPage: React.FC = () => {
     });
   }, [projectSlug, navigate]);
 
+  useEffect(() => {
+    if (project) {
+      document.title = `${project.title} | Mellow Production`;
+    }
+  }, [project]);
+
   // Slideshow interval for multiple covers
   useEffect(() => {
     if (!project) return;

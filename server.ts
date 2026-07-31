@@ -1,7 +1,9 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
+import { getProjectBySlug, getEventBySlug } from "./src/services/dbService.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -260,12 +262,118 @@ async function startServer() {
     }
   });
 
+  let vite: any = null;
   if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
+    vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
-    app.use(vite.middlewares);
+  }
+
+  // Helper to inject SEO & Open Graph meta tags into index.html
+  function injectMetaTags(html: string, title: string, description: string, imageUrl: string) {
+    let res = html;
+    // Replace title
+    res = res.replace(/<title>[^<]*<\/title>/i, `<title>${title}</title>`);
+    
+    // Replace or inject Open Graph tags
+    if (res.match(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i)) {
+      res = res.replace(/<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:title" content="${title}" />`);
+    } else {
+      res = res.replace("</head>", `  <meta property="og:title" content="${title}" />\n</head>`);
+    }
+    
+    if (res.match(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i)) {
+      res = res.replace(/<meta\s+property="og:description"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:description" content="${description}" />`);
+    } else {
+      res = res.replace("</head>", `  <meta property="og:description" content="${description}" />\n</head>`);
+    }
+    
+    if (res.match(/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/i)) {
+      res = res.replace(/<meta\s+property="og:image"\s+content="[^"]*"\s*\/?>/i, `<meta property="og:image" content="${imageUrl}" />`);
+    } else {
+      res = res.replace("</head>", `  <meta property="og:image" content="${imageUrl}" />\n</head>`);
+    }
+
+    // Replace or inject Twitter tags
+    if (res.match(/<meta\s+(?:property|name)="twitter:title"\s+content="[^"]*"\s*\/?>/i)) {
+      res = res.replace(/<meta\s+(?:property|name)="twitter:title"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:title" content="${title}" />`);
+    } else {
+      res = res.replace("</head>", `  <meta name="twitter:title" content="${title}" />\n</head>`);
+    }
+    
+    if (res.match(/<meta\s+(?:property|name)="twitter:description"\s+content="[^"]*"\s*\/?>/i)) {
+      res = res.replace(/<meta\s+(?:property|name)="twitter:description"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:description" content="${description}" />`);
+    } else {
+      res = res.replace("</head>", `  <meta name="twitter:description" content="${description}" />\n</head>`);
+    }
+    
+    if (res.match(/<meta\s+(?:property|name)="twitter:image"\s+content="[^"]*"\s*\/?>/i)) {
+      res = res.replace(/<meta\s+(?:property|name)="twitter:image"\s+content="[^"]*"\s*\/?>/i, `<meta name="twitter:image" content="${imageUrl}" />`);
+    } else {
+      res = res.replace("</head>", `  <meta name="twitter:image" content="${imageUrl}" />\n</head>`);
+    }
+    
+    return res;
+  }
+
+  // Handle dynamic metadata for social sharing and browser tab titles on project routes
+  app.get("/projects/:projectSlug/:eventSlug?", async (req, res, next) => {
+    const { projectSlug, eventSlug } = req.params;
+    
+    try {
+      const project = await getProjectBySlug(projectSlug);
+      if (!project) {
+        return next();
+      }
+      
+      let title = `${project.title} | Mellow Production`;
+      let description = `Exclusive private media collection for ${project.clientName}. Powered by Mellow Production.`;
+      
+      let coverImage = project.coverImage || "";
+      if (project.coverImages && project.coverImages.length > 0) {
+        coverImage = project.coverImages[0];
+      }
+      
+      if (eventSlug && eventSlug !== "main") {
+        const event = await getEventBySlug(project.id, eventSlug);
+        if (event) {
+          title = `${event.title} - ${project.title} | Mellow Production`;
+          description = `Explore the ${event.title} collection from the ${project.title} gallery. Powered by Mellow Production.`;
+          if (event.coverImage) {
+            coverImage = event.coverImage;
+          }
+        }
+      }
+      
+      const size = 1200;
+      const imageUrl = coverImage.startsWith("http")
+        ? coverImage
+        : `https://drive.google.com/thumbnail?id=${coverImage}&sz=w${size}`;
+        
+      const templatePath = process.env.NODE_ENV === "production"
+        ? path.join(process.cwd(), "dist", "index.html")
+        : path.join(process.cwd(), "index.html");
+        
+      let html = await fs.promises.readFile(templatePath, "utf-8");
+      
+      if (process.env.NODE_ENV !== "production" && vite) {
+        html = await vite.transformIndexHtml(req.originalUrl, html);
+      }
+      
+      const modifiedHtml = injectMetaTags(html, title, description, imageUrl);
+      res.setHeader("Content-Type", "text/html");
+      return res.send(modifiedHtml);
+    } catch (err) {
+      console.error("Error serving dynamic project metadata:", err);
+      return next();
+    }
+  });
+
+  if (process.env.NODE_ENV !== "production") {
+    if (vite) {
+      app.use(vite.middlewares);
+    }
   } else {
     const distPath = path.join(process.cwd(), "dist");
     

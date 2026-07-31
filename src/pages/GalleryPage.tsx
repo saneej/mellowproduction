@@ -173,6 +173,14 @@ export const GalleryPage: React.FC = () => {
     });
   }, [projectSlug, eventSlug, navigate]);
 
+  useEffect(() => {
+    if (project && eventFolder) {
+      document.title = `${eventFolder.title} - ${project.title} | Mellow Production`;
+    } else if (project) {
+      document.title = `${project.title} | Mellow Production`;
+    }
+  }, [project, eventFolder]);
+
   const toggleFavorite = (id: string) => {
     setFavoritedIds(prev => {
       const next = new Set(prev);
