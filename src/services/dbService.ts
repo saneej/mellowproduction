@@ -631,10 +631,15 @@ export const getMediaByEvent = async (eventId: string, includeDeleted = false): 
         );
         if (folderConfig) {
           apiKey = folderConfig.apiKey;
+          console.log(`[dbService] Folder configuration found for event ${eventFolder!.id}. API Key start: ${apiKey ? apiKey.substring(0, 8) + "..." : "none"}`);
+        } else {
+          console.warn(`[dbService] No matching folderConfig in project.driveFolders for event ${eventFolder!.id} or folderId ${eventFolder!.driveFolderId}`);
         }
+      } else {
+        console.warn(`[dbService] Project driveFolders is missing or project not found for id: ${eventFolder!.projectId}`);
       }
 
-      console.log(`Live loading files from Google Drive for folder: ${eventFolder.driveFolderId}`);
+      console.log(`Live loading files from Google Drive for folder: ${eventFolder.driveFolderId}. API Key provided: ${apiKey ? "YES" : "NO"}`);
       const items = await syncDriveFolder(
         eventFolder.projectId,
         eventFolder.id,

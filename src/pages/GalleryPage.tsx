@@ -215,6 +215,22 @@ export const GalleryPage: React.FC = () => {
     showToast("Download Complete", `${item.fileName} saved.`, "success");
   };
 
+  const handleDownloadAll = () => {
+    if (!clientPermissions.canDownload) {
+      showToast("Download Restricted", "Your access code does not permit downloads.", "access_denied");
+      return;
+    }
+    if (eventFolder && eventFolder.driveFolderId) {
+      showToast("Redirecting to Google Drive", "Opening Google Drive folder for download...", "success");
+      if (project) {
+        logDownload(project.id, project.title, `${eventFolder.title}_Gallery`, 'zip');
+      }
+      window.open(`https://drive.google.com/drive/folders/${eventFolder.driveFolderId}`, "_blank");
+    } else {
+      handleDownloadZipForItems(mediaItems);
+    }
+  };
+
   // Bulk ZIP Download
   const handleDownloadZipForItems = async (itemsToDownload: MediaItem[]) => {
     if (itemsToDownload.length === 0) return;
@@ -375,7 +391,7 @@ export const GalleryPage: React.FC = () => {
           photoCount={mediaItems.filter(m => !m.isVideo).length}
           videoCount={mediaItems.filter(m => m.isVideo).length}
           favoriteCount={favoritedIds.size}
-          onDownloadAll={() => handleDownloadZipForItems(mediaItems)}
+          onDownloadAll={handleDownloadAll}
           onShareClick={() => setIsShareModalOpen(true)}
           onShowQrClick={() => setIsShareModalOpen(true)}
         />

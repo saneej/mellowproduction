@@ -254,11 +254,11 @@ const Navbar = () => {
         <AnimatePresence>
           {isOpen && (
             <motion.div 
-              initial={{ opacity: 0, height: 0, y: -20 }}
-              animate={{ opacity: 1, height: "auto", y: 0 }}
-              exit={{ opacity: 0, height: 0, y: -20 }}
-              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-full left-0 w-full bg-brand-red border-b border-white/10 px-8 py-6 flex flex-col gap-5 md:hidden overflow-hidden"
+              initial={{ opacity: 0, y: -100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -100 }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute top-full left-0 w-full bg-brand-red border-b border-white/10 px-8 py-6 flex flex-col gap-5 md:hidden overflow-hidden shadow-2xl z-50"
             >
               {navLinks.map((link) => (
                 <a 
@@ -277,13 +277,13 @@ const Navbar = () => {
               >
                 Contact
               </a>
-              <div className="pt-4 border-t border-white/10 mt-2">
+              <div className="pt-5 border-t border-white/10 mt-2">
                 <Link
                   to="/admin"
                   onClick={() => setIsOpen(false)}
-                  className="w-full text-center text-xs uppercase tracking-[0.2em] font-extrabold text-white bg-black/40 hover:bg-black/60 border border-white/20 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
+                  className="w-full text-center text-xs uppercase tracking-[0.2em] font-extrabold text-brand-red bg-white hover:bg-zinc-100 border border-white py-4 rounded-xl transition-all flex items-center justify-center gap-2.5 shadow-xl active:scale-[0.98] transform-gpu"
                 >
-                  <Lock size={12} />
+                  <Lock size={13} />
                   <span>Client Login</span>
                 </Link>
               </div>

@@ -35,10 +35,10 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
       : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
 
-    const tiny = item.tinyThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 200) : fallbackImg);
-    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 800) : fallbackImg);
-    const hd = item.hdUrl || item.fullUrl || small;
-    const original = item.originalUrl || item.fullUrl || hd;
+    const tiny = item.tinyThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 200) : item.thumbnailUrl || fallbackImg);
+    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 800) : item.thumbnailUrl || fallbackImg);
+    const hd = item.hdUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 2048) : item.fullUrl || small);
+    const original = item.originalUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 2400) : item.fullUrl || hd);
 
     setCurrentSrc(tiny);
 

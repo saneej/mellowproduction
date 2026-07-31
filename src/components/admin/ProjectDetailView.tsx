@@ -47,6 +47,7 @@ import {
   deleteProject,
   createEvent,
   deleteEvent,
+  updateEventFolder,
   cloneProject,
   exportProjectJson
 } from "../../services/dbService";
@@ -55,6 +56,7 @@ import { ProjectQrModal } from "./ProjectQrModal";
 import { DriveSyncModal } from "./DriveSyncModal";
 import { AccessCodesModal } from "./AccessCodesModal";
 import { AddFolderModal } from "./AddFolderModal";
+import { EditFolderModal } from "./EditFolderModal";
 
 import { extractDriveFolderId } from "../../services/driveService";
 import { SyncEngine } from "../../services/syncEngine";
@@ -92,6 +94,8 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const [showQrModal, setShowQrModal] = useState(false);
   const [showAccessCodesModal, setShowAccessCodesModal] = useState(false);
   const [showAddFolderModal, setShowAddFolderModal] = useState(false);
+  const [showEditFolderModal, setShowEditFolderModal] = useState(false);
+  const [editingFolder, setEditingFolder] = useState<EventFolder | null>(null);
   const [activeParentFolderId, setActiveParentFolderId] = useState<string | null>(null);
   const [syncingEventId, setSyncingEventId] = useState<string | null>(null);
   const [editingCode, setEditingCode] = useState<AccessCode | null>(null);
@@ -260,6 +264,72 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     }
 
     loadProjectData();
+  };
+
+  const handleEditFolderSubmit = async (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string }) => {
+    if (!project || !editingFolder) return;
+
+    const rawName = updatedData.name || "Sub Event";
+    const cleanDriveId = extractDriveFolderId(updatedData.driveFolderId || "");
+    const slug = rawName.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || `event-${Date.now()}`;
+
+    try {
+      // 1. Update the event folder document in Firestore & local events cache
+      await updateEventFolder(editingFolder.id, {
+        title: rawName,
+        slug,
+        driveFolderId: cleanDriveId,
+        order: updatedData.order,
+      });
+
+      // 2. Update the folder configuration in the project's driveFolders array
+      let updatedFolders = [...(project.driveFolders || [])];
+      const idx = updatedFolders.findIndex(
+        f => f.id === editingFolder.id || f.driveFolderId === editingFolder.driveFolderId
+      );
+
+      const updatedConfig: DriveFolderConfig = {
+        id: idx >= 0 ? updatedFolders[idx].id : `folder-${Date.now()}`,
+        name: rawName,
+        driveFolderId: cleanDriveId,
+        apiKey: updatedData.apiKey,
+        status: cleanDriveId ? "connected" : "untested",
+      };
+
+      if (idx >= 0) {
+        updatedFolders[idx] = updatedConfig;
+      } else {
+        updatedFolders.push(updatedConfig);
+      }
+
+      await updateProject(project.id, {
+        driveFolders: updatedFolders,
+      });
+
+      // 3. Trigger auto-sync if folder ID is changed
+      if (cleanDriveId && cleanDriveId !== editingFolder.driveFolderId) {
+        try {
+          const engine = new SyncEngine();
+          await engine.syncProject(project, editingFolder.id, cleanDriveId, updatedData.apiKey);
+        } catch (syncErr) {
+          console.warn("Auto-sync failed for edited sub-event:", syncErr);
+        }
+      }
+
+      alert("Sub-event details updated successfully!");
+    } catch (err: any) {
+      alert(`Failed to update sub-event details: ${err?.message || err}`);
+    }
+
+    loadProjectData();
+  };
+
+  const getEditingFolderApiKey = (): string => {
+    if (!project || !editingFolder || !project.driveFolders) return "";
+    const folderConfig = project.driveFolders.find(
+      f => f.id === editingFolder.id || f.driveFolderId === editingFolder.driveFolderId
+    );
+    return folderConfig?.apiKey || "";
   };
 
   const tabs: { id: ProjectDetailTab; label: string; icon: React.ElementType }[] = [
@@ -595,6 +665,16 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
                 <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-1.5 text-xs">
                   <button
+                    onClick={() => {
+                      setEditingFolder(evt);
+                      setShowEditFolderModal(true);
+                    }}
+                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
+                  >
+                    <Edit3 size={13} /> Edit
+                  </button>
+
+                  <button
                     onClick={() => setSyncingEventId(evt.id)}
                     className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
                   >
@@ -792,6 +872,18 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         isOpen={showAddFolderModal}
         onClose={() => setShowAddFolderModal(false)}
         onAddFolder={handleAddFolderSubmit}
+      />
+
+      {/* EDIT FOLDER MODAL */}
+      <EditFolderModal
+        isOpen={showEditFolderModal}
+        folder={editingFolder}
+        currentApiKey={getEditingFolderApiKey()}
+        onClose={() => {
+          setShowEditFolderModal(false);
+          setEditingFolder(null);
+        }}
+        onSave={handleEditFolderSubmit}
       />
 
     </div>
