@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { X, RefreshCw, HardDrive, CheckCircle2, AlertCircle, ShieldCheck, FileText, Image as ImageIcon, Film } from "lucide-react";
+import { X, RefreshCw, HardDrive, CheckCircle2, AlertCircle, ShieldCheck, FileText, HelpCircle, Image as ImageIcon, Film } from "lucide-react";
 import { extractDriveFolderId } from "../../services/driveService";
 import { syncEngine, SyncProgressCallbackData } from "../../services/syncEngine";
 import { storageManager } from "../../services/storage/StorageManager";
 import { getProjectById } from "../../services/dbService";
+import { GoogleDriveGuideModal } from "./GoogleDriveGuideModal";
 
 interface DriveSyncModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
   const [testResult, setTestResult] = useState<any | null>(null);
   const [progress, setProgress] = useState<SyncProgressCallbackData | null>(null);
   const [error, setError] = useState("");
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
 
   if (!isOpen) return null;
 
@@ -174,9 +176,18 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
             )}
 
             <div>
-              <label className="block text-[11px] font-mono text-white/50 uppercase mb-1">
-                Google Drive API Key (Optional)
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] font-mono text-white/50 uppercase">
+                  Google Drive API Key (Optional)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsGuideOpen(true)}
+                  className="text-[11px] font-mono text-brand-red hover:underline flex items-center gap-1"
+                >
+                  <HelpCircle size={12} /> Step-by-Step API Key Guide
+                </button>
+              </div>
               <input
                 type="password"
                 value={apiKey}
@@ -185,6 +196,11 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
                 className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
               />
             </div>
+
+            <GoogleDriveGuideModal
+              isOpen={isGuideOpen}
+              onClose={() => setIsGuideOpen(false)}
+            />
 
             {error && (
               <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400 flex items-center gap-2 font-mono">

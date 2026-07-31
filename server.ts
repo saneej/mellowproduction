@@ -24,6 +24,8 @@ async function startServer() {
       return res.status(400).json({ error: "Missing folderId" });
     }
 
+    const activeApiKey = apiKey || process.env.GOOGLE_DRIVE_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+
     try {
       let fileCount = 0;
       let imageCount = 0;
@@ -31,8 +33,8 @@ async function startServer() {
       let folderName = `Google Drive Folder (${folderId.slice(0, 8)})`;
       let accessStatus = "ok";
 
-      if (apiKey) {
-        const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&key=${apiKey}`;
+      if (activeApiKey) {
+        const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType)&pageSize=100&key=${activeApiKey}`;
         const response = await fetch(driveUrl);
         if (response.ok) {
           const data = await response.json();
@@ -46,7 +48,6 @@ async function startServer() {
           accessStatus = response.status === 403 ? "rate_limited" : "denied";
         }
       } else {
-        // Mock / public URL check fallback
         fileCount = 18;
         imageCount = 16;
         videoCount = 2;
@@ -94,32 +95,43 @@ async function startServer() {
       return res.status(400).json({ error: "Missing folderId" });
     }
 
+    const activeApiKey = apiKey || process.env.GOOGLE_DRIVE_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+
     try {
       let files: any[] = [];
 
-      // If Google Drive API key is provided
-      if (apiKey) {
-        const driveApiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,size,imageMediaMetadata)&pageSize=100&key=${apiKey}`;
-        const response = await fetch(driveApiUrl);
-        if (response.ok) {
-          const data = await response.json();
-          files = data.files || [];
-        }
+      // If Google Drive API key is available
+      if (activeApiKey) {
+        let pageToken = "";
+        let pageCount = 0;
+        do {
+          pageCount++;
+          const pageQuery: string = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "";
+          const driveApiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100${pageQuery}&key=${activeApiKey}`;
+          const response = await fetch(driveApiUrl);
+          if (response.ok) {
+            const data = await response.json();
+            const pageFiles = data.files || [];
+            files = files.concat(pageFiles);
+            pageToken = data.nextPageToken || "";
+          } else {
+            console.warn("Drive API sync warning:", response.status, await response.text());
+            break;
+          }
+        } while (pageToken && pageCount < 10);
       }
 
-      // Fallback or public web page parse
+      // Fallback or public web page parse if API key yielded no results
       if (files.length === 0) {
-        // Try fetching public web view to extract file IDs
         const folderWebUrl = `https://drive.google.com/drive/folders/${folderId}`;
         const pageRes = await fetch(folderWebUrl, {
           headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
         });
         if (pageRes.ok) {
           const text = await pageRes.text();
-          // Regex extract Google Drive file IDs
           const matches = text.match(/\["([a-zA-Z0-9_-]{25,50})",\["([a-zA-Z0-9_.-]+)"/g) || [];
           const extractedIds = new Set<string>();
-          
+
           matches.forEach(m => {
             const idMatch = m.match(/\["([a-zA-Z0-9_-]{25,50})"/);
             if (idMatch && idMatch[1] && idMatch[1] !== folderId) {
@@ -130,14 +142,14 @@ async function startServer() {
           extractedIds.forEach(id => {
             files.push({
               id,
-              name: `Mellow_Photo_${id.slice(0, 6)}.jpg`,
+              name: `Photo_${id.slice(0, 6)}.jpg`,
               mimeType: "image/jpeg"
             });
           });
         }
       }
 
-      // If still empty (e.g. dummy/demo folder ID), generate high quality sample gallery images
+      // Fallback sample photos if empty (for demo folders)
       if (files.length === 0) {
         const demoPhotos = [
           { id: "1y8O84iZ7G3I3Z-kE8B_eH3_N2p6XqR7m", name: "Mellow_Wedding_Highlights_01.jpg", mime: "image/jpeg" },
@@ -168,11 +180,15 @@ async function startServer() {
           driveFileId: f.id,
           fileName: f.name || `Photo_${idx + 1}.jpg`,
           mimeType: f.mimeType || (isVid ? "video/mp4" : "image/jpeg"),
+          fileSize: f.size ? parseInt(f.size, 10) : undefined,
+          width: f.imageMediaMetadata?.width || f.videoMediaMetadata?.width,
+          height: f.imageMediaMetadata?.height || f.videoMediaMetadata?.height,
           thumbnailUrl: isDriveId ? `https://lh3.googleusercontent.com/d/${f.id}=s800` : f.id,
           fullUrl: isDriveId ? `https://lh3.googleusercontent.com/d/${f.id}=s2048` : f.id,
           isVideo: isVid,
           videoUrl: isVid ? `https://drive.google.com/file/d/${f.id}/preview` : undefined,
-          order: idx + 1
+          order: idx + 1,
+          modifiedDate: f.modifiedTime || f.createdTime || new Date().toISOString()
         };
       });
 

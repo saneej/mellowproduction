@@ -6,7 +6,7 @@ import { GalleryHeader } from "../components/common/Header";
 import { Footer } from "../components/common/Footer";
 import { PinModal } from "../components/gallery/PinModal";
 import { NotFoundPage } from "./NotFoundPage";
-import { getProjectBySlug, getEventsByProject } from "../services/dbService";
+import { getProjectBySlug, getEventsByProject, incrementProjectViews } from "../services/dbService";
 import { Project, EventFolder } from "../types/gallery";
 
 export const ProjectPage: React.FC = () => {
@@ -29,6 +29,7 @@ export const ProjectPage: React.FC = () => {
       }
 
       setProject(proj);
+      incrementProjectViews(proj.id);
       if (!proj.isPinProtected) {
         setIsUnlocked(true);
       }

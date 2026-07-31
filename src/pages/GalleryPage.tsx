@@ -32,7 +32,7 @@ import { GalleryHero } from "../components/gallery/GalleryHero";
 import { ShareModal } from "../components/gallery/ShareModal";
 import { MultiSelectionBar } from "../components/gallery/MultiSelectionBar";
 import { Breadcrumbs } from "../components/common/Breadcrumbs";
-import { getProjectBySlug, getEventBySlug, getMediaByEvent, getSortedMedia, logDownload } from "../services/dbService";
+import { getProjectBySlug, getEventBySlug, getMediaByEvent, getSortedMedia, logDownload, incrementProjectViews } from "../services/dbService";
 import { Project, EventFolder, MediaItem, AccessCode } from "../types/gallery";
 import { getDriveDownloadUrl, getDriveImageUrl } from "../services/driveService";
 import { useToast } from "../components/common/Toast";
@@ -104,6 +104,7 @@ export const GalleryPage: React.FC = () => {
         return;
       }
       setProject(proj);
+      incrementProjectViews(proj.id);
 
       // Restore stored favorites for this project
       const savedFavs = localStorage.getItem(`mellow_favs_${proj.id}`);

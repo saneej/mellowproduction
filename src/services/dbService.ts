@@ -3,6 +3,7 @@ import {
   doc, 
   getDocs, 
   getDoc, 
+  setDoc,
   addDoc, 
   updateDoc, 
   deleteDoc, 
@@ -159,14 +160,26 @@ export const getProjects = async (): Promise<Project[]> => {
   try {
     const colRef = collection(db, PROJECTS_COL);
     const snap = await getDocs(colRef);
-    if (!snap.empty) {
-      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-      const docIds = new Set(docs.map(d => d.id));
-      const unSyncedLocal = localProjectsState.filter(p => !docIds.has(p.id));
+    const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+    
+    // Auto-sync any unsynced local projects to Firestore
+    const docIds = new Set(docs.map(d => d.id));
+    const unSyncedLocal = localProjectsState.filter(p => !docIds.has(p.id));
+    if (unSyncedLocal.length > 0) {
+      for (const p of unSyncedLocal) {
+        try {
+          await setDoc(doc(db, PROJECTS_COL, p.id), p);
+        } catch (e) {
+          console.warn("Failed to sync local project to Firestore:", e);
+        }
+      }
       localProjectsState = [...docs, ...unSyncedLocal];
-      saveStorage(STORAGE_PROJECTS, localProjectsState);
-      return localProjectsState;
+    } else {
+      localProjectsState = docs;
     }
+
+    saveStorage(STORAGE_PROJECTS, localProjectsState);
+    return localProjectsState;
   } catch (err) {
     console.warn("Firestore fetch projects fallback to local storage:", err);
   }
@@ -176,10 +189,6 @@ export const getProjects = async (): Promise<Project[]> => {
 export const getProjectBySlug = async (slug: string): Promise<Project | null> => {
   if (!slug) return null;
   const cleanSlug = slug.toLowerCase().trim();
-
-  // First check local state/storage for immediate hit
-  const localMatch = localProjectsState.find(p => p.slug === slug || p.slug === cleanSlug || p.id === slug);
-  if (localMatch) return localMatch;
 
   try {
     const colRef = collection(db, PROJECTS_COL);
@@ -194,11 +203,13 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
     if (!snap.empty) {
       const docData = snap.docs[0];
       const p = { id: docData.id, ...docData.data() } as Project;
-      // update local cache
-      if (!localProjectsState.some(existing => existing.id === p.id)) {
+      const idx = localProjectsState.findIndex(existing => existing.id === p.id);
+      if (idx >= 0) {
+        localProjectsState[idx] = p;
+      } else {
         localProjectsState.push(p);
-        saveStorage(STORAGE_PROJECTS, localProjectsState);
       }
+      saveStorage(STORAGE_PROJECTS, localProjectsState);
       return p;
     }
 
@@ -208,10 +219,13 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const p = { id: docSnap.id, ...docSnap.data() } as Project;
-        if (!localProjectsState.some(existing => existing.id === p.id)) {
+        const idx = localProjectsState.findIndex(existing => existing.id === p.id);
+        if (idx >= 0) {
+          localProjectsState[idx] = p;
+        } else {
           localProjectsState.push(p);
-          saveStorage(STORAGE_PROJECTS, localProjectsState);
         }
+        saveStorage(STORAGE_PROJECTS, localProjectsState);
         return p;
       }
     } catch {
@@ -225,24 +239,24 @@ export const getProjectBySlug = async (slug: string): Promise<Project | null> =>
 };
 
 export const getProjectById = async (id: string): Promise<Project | null> => {
-  const localMatch = localProjectsState.find(p => p.id === id);
-  if (localMatch) return localMatch;
-
   try {
     const docRef = doc(db, PROJECTS_COL, id);
     const snap = await getDoc(docRef);
     if (snap.exists()) {
       const p = { id: snap.id, ...snap.data() } as Project;
-      if (!localProjectsState.some(existing => existing.id === p.id)) {
+      const idx = localProjectsState.findIndex(existing => existing.id === p.id);
+      if (idx >= 0) {
+        localProjectsState[idx] = p;
+      } else {
         localProjectsState.push(p);
-        saveStorage(STORAGE_PROJECTS, localProjectsState);
       }
+      saveStorage(STORAGE_PROJECTS, localProjectsState);
       return p;
     }
   } catch (err) {
     // ignore
   }
-  return null;
+  return localProjectsState.find(p => p.id === id) || null;
 };
 
 export const createProject = async (projectData: Partial<Project> & { title: string; clientName: string; slug: string }): Promise<Project> => {
@@ -253,8 +267,9 @@ export const createProject = async (projectData: Partial<Project> & { title: str
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-");
 
+  const projectId = projectData.id || `proj-${Date.now()}`;
+
   const newProject: Project = {
-    id: `proj-${Date.now()}`,
     title: projectData.title,
     clientName: projectData.clientName,
     category: projectData.category || "",
@@ -267,15 +282,16 @@ export const createProject = async (projectData: Partial<Project> & { title: str
     downloadsCount: projectData.downloadsCount || 0,
     favoritesCount: projectData.favoritesCount || 0,
     ...projectData,
+    id: projectId,
     slug: cleanSlug,
     createdAt: now,
     updatedAt: now,
   };
 
   try {
-    const colRef = collection(db, PROJECTS_COL);
-    const docRef = await addDoc(colRef, newProject);
-    newProject.id = docRef.id;
+    const docRef = doc(db, PROJECTS_COL, newProject.id);
+    await setDoc(docRef, newProject);
+    console.log("Successfully saved project to Firestore:", newProject.id);
   } catch (err) {
     console.warn("Saving project locally due to Firestore error:", err);
   }
@@ -290,7 +306,7 @@ export const updateProject = async (id: string, projectData: Partial<Project>): 
   const now = new Date().toISOString();
   try {
     const docRef = doc(db, PROJECTS_COL, id);
-    await updateDoc(docRef, { ...projectData, updatedAt: now });
+    await setDoc(docRef, { ...projectData, updatedAt: now }, { merge: true });
   } catch (err) {
     console.warn("Updating project locally:", err);
   }
@@ -377,18 +393,19 @@ export const getEventBySlug = async (projectId: string, eventSlug: string): Prom
 
 export const createEvent = async (eventData: Omit<EventFolder, "id" | "createdAt">): Promise<EventFolder> => {
   const now = new Date().toISOString();
+  const eventId = `event-${Date.now()}`;
   const newEvent: EventFolder = {
-    id: `event-${Date.now()}`,
+    id: eventId,
     ...eventData,
     createdAt: now
   };
 
   try {
-    const colRef = collection(db, EVENTS_COL);
-    const docRef = await addDoc(colRef, { ...eventData, createdAt: now });
-    newEvent.id = docRef.id;
+    const docRef = doc(db, EVENTS_COL, newEvent.id);
+    await setDoc(docRef, newEvent);
+    console.log("Successfully created event in Firestore:", newEvent.id);
   } catch (err) {
-    console.warn("Creating event locally:", err);
+    console.warn("Creating event locally due to Firestore error:", err);
   }
 
   localEventsState.push(newEvent);
@@ -534,6 +551,22 @@ export const deleteMedia = async (id: string): Promise<void> => {
 
 // --- Client Favorites Selection Functions ---
 
+export const incrementProjectViews = async (projectId: string): Promise<void> => {
+  if (!projectId) return;
+  try {
+    const docRef = doc(db, PROJECTS_COL, projectId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const cur = (snap.data().viewsCount || 0) + 1;
+      await updateDoc(docRef, { viewsCount: cur, updatedAt: new Date().toISOString() });
+    }
+  } catch (err) {
+    console.warn("Increment views fallback:", err);
+  }
+  localProjectsState = localProjectsState.map(p => p.id === projectId ? { ...p, viewsCount: (p.viewsCount || 0) + 1 } : p);
+  saveStorage(STORAGE_PROJECTS, localProjectsState);
+};
+
 export const saveFavorites = async (
   projectId: string, 
   eventId: string, 
@@ -559,9 +592,21 @@ export const saveFavorites = async (
     const colRef = collection(db, FAVORITES_COL);
     const docRef = await addDoc(colRef, favObj);
     favObj.id = docRef.id;
+
+    if (projectId) {
+      const pRef = doc(db, PROJECTS_COL, projectId);
+      const pSnap = await getDoc(pRef);
+      if (pSnap.exists()) {
+        const curFavs = (pSnap.data().favoritesCount || 0) + selectedMediaIds.length;
+        await updateDoc(pRef, { favoritesCount: curFavs });
+      }
+    }
   } catch (err) {
     console.warn("Save favorites local fallback:", err);
   }
+
+  localProjectsState = localProjectsState.map(p => p.id === projectId ? { ...p, favoritesCount: (p.favoritesCount || 0) + selectedMediaIds.length } : p);
+  saveStorage(STORAGE_PROJECTS, localProjectsState);
 
   localFavoritesState.unshift(favObj);
   logActivity("FAVORITE", `Client ${clientName} selected ${selectedMediaIds.length} favorites`, { projectId, eventId });
@@ -803,9 +848,21 @@ export const logDownload = async (
   try {
     const colRef = collection(db, DOWNLOADS_COL);
     await addDoc(colRef, downloadLog);
+
+    if (projectId) {
+      const pRef = doc(db, PROJECTS_COL, projectId);
+      const pSnap = await getDoc(pRef);
+      if (pSnap.exists()) {
+        const curDl = (pSnap.data().downloadsCount || 0) + 1;
+        await updateDoc(pRef, { downloadsCount: curDl });
+      }
+    }
   } catch (err) {
     // local fallback
   }
+
+  localProjectsState = localProjectsState.map(p => p.id === projectId ? { ...p, downloadsCount: (p.downloadsCount || 0) + 1 } : p);
+  saveStorage(STORAGE_PROJECTS, localProjectsState);
 
   localDownloadsState.unshift(downloadLog);
   logActivity("DOWNLOAD", `Downloaded ${downloadType} asset: ${fileName} (${projectTitle})`);

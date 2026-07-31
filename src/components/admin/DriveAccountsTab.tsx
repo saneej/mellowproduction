@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { HardDrive, Plus, RefreshCw, CheckCircle2, AlertCircle, Trash2, Edit3, Power, ShieldCheck, Folder } from "lucide-react";
+import { HardDrive, Plus, RefreshCw, CheckCircle2, AlertCircle, Trash2, Edit3, Power, ShieldCheck, Folder, HelpCircle } from "lucide-react";
 import { getDriveAccounts, addDriveAccount, updateDriveAccount, deleteDriveAccount } from "../../services/dbService";
 import { storageManager } from "../../services/storage/StorageManager";
 import { DriveAccount } from "../../types/gallery";
+import { GoogleDriveGuideModal } from "./GoogleDriveGuideModal";
 
 export const DriveAccountsTab: React.FC = () => {
   const [accounts, setAccounts] = useState<DriveAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<DriveAccount | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
@@ -95,19 +97,28 @@ export const DriveAccountsTab: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            setEditingAccount(null);
-            setNewName("");
-            setNewEmail("");
-            setNewApiKey("");
-            setIsAddOpen(true);
-          }}
-          className="py-3 px-5 rounded-2xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-brand-red/90 transition-all shadow-xl self-start sm:self-auto"
-        >
-          <Plus size={16} />
-          <span>Connect Drive Account</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setIsGuideOpen(true)}
+            className="py-3 px-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
+          >
+            <HelpCircle size={15} className="text-brand-red" />
+            <span>Setup API Guide</span>
+          </button>
+          <button
+            onClick={() => {
+              setEditingAccount(null);
+              setNewName("");
+              setNewEmail("");
+              setNewApiKey("");
+              setIsAddOpen(true);
+            }}
+            className="py-3 px-5 rounded-2xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-brand-red/90 transition-all shadow-xl"
+          >
+            <Plus size={16} />
+            <span>Connect Drive Account</span>
+          </button>
+        </div>
       </div>
 
       {/* Grid of Accounts */}
@@ -280,6 +291,11 @@ export const DriveAccountsTab: React.FC = () => {
           </div>
         </div>
       )}
+
+      <GoogleDriveGuideModal
+        isOpen={isGuideOpen}
+        onClose={() => setIsGuideOpen(false)}
+      />
     </div>
   );
 };

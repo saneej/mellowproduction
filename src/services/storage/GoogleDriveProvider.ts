@@ -36,7 +36,25 @@ export class GoogleDriveProvider implements IStorageProvider {
   }
 
   async listFolderFiles(folderId: string, apiKey?: string): Promise<any[]> {
-    return [];
+    const syncedItems = await syncDriveFolder("temp", "temp", folderId, apiKey);
+    return syncedItems.map((item: any) => ({
+      id: item.driveFileId,
+      name: item.fileName,
+      mimeType: item.mimeType,
+      size: item.fileSize,
+      modifiedDate: item.modifiedDate || new Date().toISOString(),
+      thumbnailUrls: {
+        tiny: item.thumbnailUrl,
+        small: item.thumbnailUrl,
+        medium: item.thumbnailUrl,
+        hd: item.fullUrl,
+        original: item.fullUrl
+      },
+      isVideo: item.isVideo,
+      videoPreviewUrl: item.videoUrl,
+      duration: item.duration,
+      resolution: item.resolution
+    }));
   }
 
   async getStorageQuota(accountId: string): Promise<StorageQuotaInfo> {

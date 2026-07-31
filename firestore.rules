@@ -7,68 +7,50 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == "msaneejk4@gmail.com" ||
-        exists(/databases/$(database)/documents/admin_users/$(request.auth.uid))
-      );
-    }
-
-    // Projects: Public can read published projects, Admins have full access
+    // Projects collection: Full read & write access
     match /projects/{projectId} {
-      allow read: if resource.data.isPublished == true || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // Events: Public can read, Admins write
+    // Events collection: Full read & write access
     match /events/{eventId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // Media: Public can read, Admins write
+    // Media collection: Full read & write access
     match /media/{mediaId} {
-      allow read: if true;
-      allow create, update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // Favorites: Anyone can submit favorites
+    // Favorites collection: Full read & write access
     match /favorites/{favoriteId} {
-      allow read, create: if true;
-      allow update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
-    // Activity & Download logs
+    // Activity & Download logs: Full read & write access
     match /activity_logs/{logId} {
-      allow read, create: if true;
-      allow update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
     match /download_logs/{downloadId} {
-      allow read, create: if true;
-      allow update, delete: if isAdmin();
+      allow read, write: if true;
     }
 
     // Admin settings, users, drive accounts, notifications
     match /settings/{settingId} {
-      allow read: if true;
-      allow write: if isAdmin();
+      allow read, write: if true;
     }
 
     match /admin_users/{userId} {
-      allow read, write: if isAdmin();
+      allow read, write: if true;
     }
 
     match /drive_accounts/{accountId} {
-      allow read, write: if isAdmin();
+      allow read, write: if true;
     }
 
     match /notifications/{notifId} {
-      allow read, write: if isAdmin();
+      allow read, write: if true;
     }
   }
 }
