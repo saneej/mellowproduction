@@ -895,6 +895,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
                   >
                     <option value="classic_editorial">Classic Editorial (Cream & Charcoal)</option>
+                    <option value="mellowwedding">Mellow Wedding (Ivory, Champagne Gold & Serif)</option>
                     <option value="dark_luxury">Dark Luxury (Carbon & Gold)</option>
                     <option value="earthy_sand">Earthy Sand (Beige & Terracotta)</option>
                     <option value="clean_nordic">Clean Nordic (Cool Gray & Slate)</option>

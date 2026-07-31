@@ -22,6 +22,78 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   const isNordic = project.theme === 'clean_nordic';
   const isMinimal = project.theme === 'modern_minimalist';
   const isRomantic = project.theme === 'romantic_blush';
+  const isMellowWedding = project.theme === 'mellowwedding' || project.theme === 'mellow_wedding';
+
+  if (isMellowWedding) {
+    return (
+      <div className="relative w-full flex flex-col items-center bg-[#FCF9F5] rounded-[2.5rem] overflow-hidden p-4 sm:p-8 border border-[#EBE3D8] shadow-sm">
+        {/* Cover image container with Feathered Bottom Edge */}
+        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:h-[60vh] rounded-[2rem] overflow-hidden shadow-md group bg-[#FAF6F0]">
+          <AnimatePresence>
+            <motion.img 
+              key={currentCoverIndex}
+              src={activeCoverUrl}
+              alt={project.title}
+              referrerPolicy="no-referrer"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.8 }}
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{
+                WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+                maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+              }}
+            />
+          </AnimatePresence>
+
+          {/* Feathered bottom edge gradient overlay */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#FCF9F5] via-[#FCF9F5]/70 to-transparent pointer-events-none" />
+        </div>
+
+        {/* Wedding Content Typography & Ornaments */}
+        <div className="relative z-10 w-full max-w-3xl -mt-16 sm:-mt-28 md:-mt-32 bg-white/95 backdrop-blur-md p-8 sm:p-12 md:p-16 rounded-[2.5rem] border border-[#EBE3D8] text-center flex flex-col items-center shadow-xl space-y-6">
+          <div className="flex items-center gap-3">
+            <span className="w-12 h-[1px] bg-[#C59B6C]/40" />
+            <span className="text-[10px] font-serif uppercase tracking-[0.35em] text-[#C59B6C] font-semibold">
+              ✧ Mellow Wedding ✧
+            </span>
+            <span className="w-12 h-[1px] bg-[#C59B6C]/40" />
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif italic font-normal tracking-wide text-[#2D2621] leading-tight">
+            {project.title}
+          </h1>
+
+          <p className="text-xs sm:text-sm font-serif italic text-[#8A7E74] max-w-lg leading-relaxed">
+            A celebration of love, captured in timeless frames and cherished forever.
+          </p>
+
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-xs font-serif tracking-[0.2em] text-[#8A7E74] uppercase">
+            <span className="font-semibold text-[#2D2621]">{project.clientName}</span>
+            <span className="text-[#C59B6C]">❦</span>
+            <span>{project.date}</span>
+          </div>
+        </div>
+
+        {/* Carousel indicators if multiple cover images */}
+        {coverList.length > 1 && (
+          <div className="flex items-center gap-2 mt-6">
+            {coverList.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentCoverIndex(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  i === currentCoverIndex ? "bg-[#C59B6C] w-8" : "bg-[#EBE3D8] w-2 hover:bg-[#C59B6C]/50"
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (isMinimal) {
     return (
@@ -206,6 +278,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           exit={{ opacity: 0 }}
           transition={{ duration: 1.5 }}
           className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-102 transition-transform duration-[10000ms] ease-out"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
+            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
+          }}
         />
       </AnimatePresence>
       

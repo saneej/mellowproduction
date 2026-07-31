@@ -94,7 +94,7 @@ export interface Project {
   driveFolders?: DriveFolderConfig[];
   accessCodes?: AccessCode[];
   layout?: 'grid' | 'masonry' | 'timeline' | 'justified' | 'carousel' | 'collage';
-  theme?: 'classic_editorial' | 'dark_luxury' | 'earthy_sand' | 'clean_nordic' | 'vintage_warmth' | 'modern_minimalist' | 'romantic_blush';
+  theme?: 'classic_editorial' | 'dark_luxury' | 'earthy_sand' | 'clean_nordic' | 'vintage_warmth' | 'modern_minimalist' | 'romantic_blush' | 'mellowwedding' | 'mellow_wedding';
   progressiveLoading?: boolean;
   defaultEventId?: string;
   allowClientDownloads?: boolean;

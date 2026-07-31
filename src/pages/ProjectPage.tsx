@@ -238,7 +238,14 @@ export const ProjectPage: React.FC = () => {
             <h2 className={`text-3xl uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
               The Collections
             </h2>
-            <div className={`w-12 h-[2px] mx-auto mt-2 ${project.theme === 'dark_luxury' ? 'bg-amber-600' : project.theme === 'earthy_sand' ? 'bg-[#C5846B]' : project.theme === 'vintage_warmth' ? 'bg-[#2B4938]' : project.theme === 'clean_nordic' ? 'bg-slate-900' : 'bg-stone-900'}`} />
+            <div className={`w-12 h-[2px] mx-auto mt-2 ${
+              project.theme === 'dark_luxury' ? 'bg-amber-600' : 
+              project.theme === 'earthy_sand' ? 'bg-[#C5846B]' : 
+              project.theme === 'vintage_warmth' ? 'bg-[#2B4938]' : 
+              project.theme === 'clean_nordic' ? 'bg-slate-900' : 
+              (project.theme === 'mellowwedding' || project.theme === 'mellow_wedding') ? 'bg-[#C59B6C]' :
+              'bg-stone-900'
+            }`} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">

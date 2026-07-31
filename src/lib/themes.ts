@@ -98,6 +98,21 @@ export const getThemeStyles = (theme?: string): ThemeStyles => {
         accentBadge: 'text-[#C28C93] border border-[#C28C93]/30 bg-[#C28C93]/5',
         footerBg: 'bg-[#FCE6EC] border-t border-[#F5DADD]',
       };
+    case 'mellowwedding':
+    case 'mellow_wedding':
+      return {
+        bg: 'bg-[#FCF9F5] text-[#2D2621] selection:bg-[#C59B6C] selection:text-white',
+        text: 'text-[#2D2621]',
+        textMuted: 'text-[#8A7E74]',
+        cardBg: 'bg-white border border-[#EBE3D8] shadow-sm rounded-2xl',
+        accent: 'bg-[#C59B6C] hover:bg-[#B38758] text-white',
+        accentText: 'text-[#C59B6C]',
+        borderColor: 'border-[#EBE3D8]',
+        fontDisplay: 'font-serif italic font-light tracking-widest',
+        buttonClass: 'bg-[#C59B6C] hover:bg-[#B38758] text-white font-serif tracking-widest text-[11px] sm:text-xs rounded-full uppercase shadow-xs',
+        accentBadge: 'text-[#C59B6C] border border-[#C59B6C]/30 bg-[#C59B6C]/5',
+        footerBg: 'bg-[#F7F2EA] border-t border-[#EBE3D8]',
+      };
     case 'classic_editorial':
     default:
       return {
