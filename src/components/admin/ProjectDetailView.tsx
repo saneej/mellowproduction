@@ -58,6 +58,7 @@ import { DriveSyncModal } from "./DriveSyncModal";
 import { AccessCodesModal } from "./AccessCodesModal";
 import { AddFolderModal } from "./AddFolderModal";
 import { EditFolderModal } from "./EditFolderModal";
+import { FavoritesViewerModal } from "./FavoritesViewerModal";
 
 import { extractDriveFolderId } from "../../services/driveService";
 import { SyncEngine } from "../../services/syncEngine";
@@ -100,6 +101,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const [activeParentFolderId, setActiveParentFolderId] = useState<string | null>(null);
   const [syncingEventId, setSyncingEventId] = useState<string | null>(null);
   const [editingCode, setEditingCode] = useState<AccessCode | null>(null);
+  const [selectedFav, setSelectedFav] = useState<FavoriteSelection | null>(null);
 
   // Edit details states
   const [isEditingInfo, setIsEditingInfo] = useState(false);
@@ -794,6 +796,71 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         </div>
       )}
 
+      {/* TAB CONTENT: FAVORITES */}
+      {activeTab === "favorites" && (
+        <div className="space-y-6 animate-fade-in">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div>
+              <h2 className="text-lg font-display font-extrabold uppercase text-white">Client Favorite Selections</h2>
+              <p className="text-xs text-white/50">Submitted album photo picks and client choices for this project</p>
+            </div>
+            {favorites.length > 0 && (
+              <button
+                onClick={() => setSelectedFav(favorites[0])}
+                className="py-2.5 px-4 rounded-2xl bg-brand-red text-white text-xs font-bold uppercase flex items-center gap-1.5 hover:bg-brand-red/90 transition-all shadow-lg"
+              >
+                <Heart size={15} className="fill-white" />
+                <span>View All Selections Modal</span>
+              </button>
+            )}
+          </div>
+
+          {favorites.length === 0 ? (
+            <div className="p-12 text-center bg-zinc-950 border border-white/10 rounded-3xl space-y-3 font-mono">
+              <Heart size={32} className="mx-auto text-white/20" />
+              <p className="text-sm text-white/50">No client favorite selections submitted yet for this project.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {favorites.map(fav => (
+                <div key={fav.id} className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-4 shadow-xl">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-bold text-white text-base">{fav.clientName}</h3>
+                      <p className="text-xs font-mono text-brand-red flex items-center gap-1.5 mt-0.5">
+                        <span>{fav.clientEmail}</span>
+                      </p>
+                    </div>
+
+                    <span className="px-3 py-1 rounded-full bg-brand-red/10 border border-brand-red/30 text-brand-red text-xs font-mono font-bold">
+                      {fav.selectedMediaIds.length} Selected
+                    </span>
+                  </div>
+
+                  {fav.notes && (
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs font-mono text-white/70 italic">
+                      "{fav.notes}"
+                    </div>
+                  )}
+
+                  <div className="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-mono">
+                    <span className="text-white/40">{new Date(fav.createdAt).toLocaleString()}</span>
+
+                    <button
+                      onClick={() => setSelectedFav(fav)}
+                      className="py-2 px-4 rounded-xl bg-white/5 border border-white/15 hover:bg-white/10 text-white font-bold flex items-center gap-2 transition-colors cursor-pointer"
+                    >
+                      <Eye size={14} />
+                      <span>View Selected ({fav.selectedMediaIds.length})</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* TAB CONTENT: SETTINGS */}
       {activeTab === "settings" && (
         <div className="space-y-6 animate-fade-in max-w-2xl">
@@ -998,6 +1065,17 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         }}
         onSave={handleEditFolderSubmit}
       />
+
+      {/* FAVORITES VIEWER MODAL */}
+      {selectedFav && (
+        <FavoritesViewerModal
+          isOpen={true}
+          favorite={selectedFav}
+          projectId={project.id}
+          projectTitle={project.title}
+          onClose={() => setSelectedFav(null)}
+        />
+      )}
 
     </div>
   );

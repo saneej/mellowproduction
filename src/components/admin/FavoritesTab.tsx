@@ -73,7 +73,10 @@ export const FavoritesTab: React.FC<{ favorites: FavoriteSelection[]; projects: 
 
       {selectedFav && (
         <FavoritesViewerModal 
+          isOpen={true}
           favorite={selectedFav} 
+          projectId={selectedFav.projectId}
+          projectTitle={getProjectTitle(selectedFav.projectId)}
           onClose={() => setSelectedFav(null)} 
         />
       )}

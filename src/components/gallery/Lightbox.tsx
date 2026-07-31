@@ -12,7 +12,8 @@ import {
   ZoomOut, 
   Info,
   Maximize,
-  Minimize
+  Minimize,
+  Film
 } from "lucide-react";
 import { MediaItem } from "../../types/gallery";
 import { getDriveImageUrl, getDriveDownloadUrl } from "../../services/driveService";
@@ -27,6 +28,7 @@ interface LightboxProps {
   favoritedIds: Set<string>;
   onToggleFavorite: (id: string) => void;
   theme?: string;
+  onOpenCinematicSlideshow?: (startIndex: number) => void;
 }
 
 export const Lightbox: React.FC<LightboxProps> = ({
@@ -38,6 +40,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
   favoritedIds,
   onToggleFavorite,
   theme,
+  onOpenCinematicSlideshow,
 }) => {
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isSlideshow, setIsSlideshow] = useState(false);
@@ -206,18 +209,32 @@ export const Lightbox: React.FC<LightboxProps> = ({
               {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
             </button>
 
-            {/* Slideshow Button */}
-            <button
-              onClick={() => setIsSlideshow(!isSlideshow)}
-              className={`p-2 rounded-full border transition-all cursor-pointer ${
-                isSlideshow 
-                  ? `${themeStyles.accent} ${themeStyles.borderColor} animate-pulse` 
-                  : "bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
-              }`}
-              title={isSlideshow ? "Pause Slideshow" : "Play Slideshow"}
-            >
-              {isSlideshow ? <Pause size={16} /> : <Play size={16} />}
-            </button>
+            {/* Cinematic Movie Slideshow Button */}
+            {onOpenCinematicSlideshow ? (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenCinematicSlideshow(currentIndex);
+                }}
+                className="px-3 py-1.5 rounded-full bg-brand-red border border-brand-red text-white text-xs font-mono font-bold flex items-center gap-1.5 hover:bg-brand-red/90 transition-all cursor-pointer shadow-md"
+                title="Play Movie Slideshow with Music & Ken Burns Motion"
+              >
+                <Film size={14} />
+                <span className="hidden sm:inline">Movie Slideshow</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsSlideshow(!isSlideshow)}
+                className={`p-2 rounded-full border transition-all cursor-pointer ${
+                  isSlideshow 
+                    ? `${themeStyles.accent} ${themeStyles.borderColor} animate-pulse` 
+                    : "bg-white/5 border-white/10 text-white/70 hover:text-white hover:bg-white/10"
+                }`}
+                title={isSlideshow ? "Pause Slideshow" : "Play Slideshow"}
+              >
+                {isSlideshow ? <Pause size={16} /> : <Play size={16} />}
+              </button>
+            )}
 
             {/* Zoom Controls */}
             {!currentItem.isVideo && (

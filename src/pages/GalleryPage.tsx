@@ -28,6 +28,7 @@ import { GalleryHeader } from "../components/common/Header";
 import { Footer } from "../components/common/Footer";
 import { ProgressiveImage } from "../components/gallery/ProgressiveImage";
 import { Lightbox } from "../components/gallery/Lightbox";
+import { CinematicSlideshowModal } from "../components/gallery/CinematicSlideshowModal";
 import { VideoPlayerModal } from "../components/gallery/VideoPlayerModal";
 import { FavoritesDrawer } from "../components/gallery/FavoritesDrawer";
 import { PinModal } from "../components/gallery/PinModal";
@@ -66,8 +67,10 @@ export const GalleryPage: React.FC = () => {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Lightbox & Video Player
+  // Lightbox & Video Player & Cinematic Slideshow
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isCinematicSlideshowOpen, setIsCinematicSlideshowOpen] = useState(false);
+  const [cinematicStartIndex, setCinematicStartIndex] = useState(0);
   const [activeVideoItem, setActiveVideoItem] = useState<MediaItem | null>(null);
 
   // Share & QR Modal
@@ -482,6 +485,10 @@ export const GalleryPage: React.FC = () => {
           onDownloadAll={handleDownloadAll}
           onShareClick={() => setIsShareModalOpen(true)}
           onShowQrClick={() => setIsShareModalOpen(true)}
+          onPlaySlideshow={() => {
+            setCinematicStartIndex(0);
+            setIsCinematicSlideshowOpen(true);
+          }}
         />
 
         {/* Gallery Toolbar: Search, Filters, Layout Switcher */}
@@ -777,6 +784,10 @@ export const GalleryPage: React.FC = () => {
         totalCount={filteredMedia.length}
         onSelectAll={() => setSelectedIds(new Set(filteredMedia.map(m => m.id)))}
         onClearSelection={() => setSelectedIds(new Set())}
+        onPlaySlideshow={() => {
+          setCinematicStartIndex(0);
+          setIsCinematicSlideshowOpen(true);
+        }}
         onDownloadSelected={() => {
           const itemsToDl = mediaItems.filter(m => selectedIds.has(m.id));
           handleDownloadZipForItems(itemsToDl);
@@ -804,6 +815,30 @@ export const GalleryPage: React.FC = () => {
           onIndexChange={setLightboxIndex}
           favoritedIds={favoritedIds}
           onToggleFavorite={toggleFavorite}
+          onOpenCinematicSlideshow={(idx) => {
+            setCinematicStartIndex(idx);
+            setIsCinematicSlideshowOpen(true);
+          }}
+        />
+      )}
+
+      {/* Cinematic Video-Style Movie Slideshow */}
+      {isCinematicSlideshowOpen && (
+        <CinematicSlideshowModal
+          isOpen={isCinematicSlideshowOpen}
+          onClose={() => setIsCinematicSlideshowOpen(false)}
+          items={
+            selectedIds.size > 0 
+              ? filteredMedia.filter(m => selectedIds.has(m.id) && !m.isVideo) 
+              : filteredMedia.filter(m => !m.isVideo)
+          }
+          startIndex={cinematicStartIndex}
+          projectTitle={project.title}
+          clientName={project.clientName}
+          projectDate={project.date}
+          favoritedIds={favoritedIds}
+          onToggleFavorite={toggleFavorite}
+          theme={project.theme}
         />
       )}
 

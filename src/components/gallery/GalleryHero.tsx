@@ -9,7 +9,8 @@ import {
   QrCode, 
   Play, 
   VolumeX, 
-  Volume2 
+  Volume2,
+  Film
 } from "lucide-react";
 import { Project, EventFolder } from "../../types/gallery";
 import { getThemeStyles } from "../../lib/themes";
@@ -24,6 +25,7 @@ interface GalleryHeroProps {
   onDownloadAll?: () => void;
   onShareClick?: () => void;
   onShowQrClick?: () => void;
+  onPlaySlideshow?: () => void;
 }
 
 export const GalleryHero: React.FC<GalleryHeroProps> = ({
@@ -35,6 +37,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
   onDownloadAll,
   onShareClick,
   onShowQrClick,
+  onPlaySlideshow,
 }) => {
   const [isMuted, setIsMuted] = useState(true);
 
@@ -150,6 +153,18 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 pt-4">
+          {onPlaySlideshow && photoCount > 0 && (
+            <button
+              onClick={onPlaySlideshow}
+              className={`py-3 px-6 rounded-2xl font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-103 transition-all cursor-pointer ${
+                project.theme === 'dark_luxury' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30' : 'bg-brand-red text-white hover:bg-brand-red/90'
+              }`}
+            >
+              <Film size={16} />
+              <span>Play Movie Slideshow</span>
+            </button>
+          )}
+
           {onDownloadAll && project.downloadEnabled !== false && (
             <button
               onClick={onDownloadAll}

@@ -184,15 +184,15 @@ export const FavoritesDrawer: React.FC<FavoritesDrawerProps> = ({
             {favoritedItems.length > 0 && (
               <div className="pt-4 border-t border-white/10">
                 <h4 className="text-xs font-mono uppercase tracking-widest text-white/60 mb-4">
-                  Send Selection to Photographer
+                  Submit Photo Selection
                 </h4>
 
                 {submitted ? (
                   <div className="p-6 bg-brand-red/20 border border-brand-red/40 rounded-2xl text-center space-y-2">
                     <CheckCircle2 size={32} className="mx-auto text-brand-red" />
-                    <h5 className="font-bold text-white uppercase text-sm">Selection Sent!</h5>
+                    <h5 className="font-bold text-white uppercase text-sm">Selection Submitted!</h5>
                     <p className="text-xs text-white/70">
-                      Thank you {clientName}! Your favorited photos have been submitted directly to Mellow Production.
+                      Thank you {clientName}! Your favorited photos have been submitted successfully.
                     </p>
                   </div>
                 ) : (
