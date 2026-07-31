@@ -363,15 +363,15 @@ export const GalleryPage: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-white text-zinc-900 flex flex-col items-center justify-center p-6">
-        <div className="w-12 h-12 rounded-xl bg-brand-red flex items-center justify-center shadow-lg animate-pulse mb-4">
+        <div className="w-10 h-10 rounded-xl bg-brand-red flex items-center justify-center shadow-md animate-pulse mb-3">
           <img 
             src="https://i.postimg.cc/j250f7G7/logo-white.png" 
             alt="Mellow Production" 
-            className="w-7 h-7 object-contain"
+            className="w-6 h-6 object-contain"
           />
         </div>
-        <div className="text-xs font-mono uppercase tracking-widest text-zinc-500 font-bold">
-          Loading Client Gallery...
+        <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 font-bold">
+          LOADING...
         </div>
       </div>
     );

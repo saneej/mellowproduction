@@ -44,8 +44,23 @@ export const Lightbox: React.FC<LightboxProps> = ({
   // Touch Swipe state
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const thumbnailContainerRef = useRef<HTMLDivElement>(null);
 
   const currentItem = items[currentIndex];
+
+  // Scroll active thumbnail into view when currentIndex changes
+  useEffect(() => {
+    if (isOpen && thumbnailContainerRef.current) {
+      const activeElement = thumbnailContainerRef.current.children[currentIndex] as HTMLElement;
+      if (activeElement) {
+        activeElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center"
+        });
+      }
+    }
+  }, [currentIndex, isOpen]);
 
   const handleNext = useCallback(() => {
     setZoomLevel(1);
@@ -322,7 +337,10 @@ export const Lightbox: React.FC<LightboxProps> = ({
         </div>
 
         {/* Bottom Thumbnail Strip */}
-        <div className="h-20 bg-black/60 border-t border-white/10 flex items-center px-6 gap-3 overflow-x-auto scrollbar-none z-20">
+        <div 
+          ref={thumbnailContainerRef}
+          className="h-20 bg-black/60 border-t border-white/10 flex items-center px-6 gap-3 overflow-x-auto scrollbar-none z-20"
+        >
           {items.map((item, idx) => (
             <button
               key={item.id}

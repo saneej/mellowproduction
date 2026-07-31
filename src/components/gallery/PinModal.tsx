@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Lock, ArrowRight, ShieldAlert, CheckSquare, Square, ShieldCheck } from "lucide-react";
-import { AccessCode, Project } from "../../types/gallery";
+import { Lock, ArrowRight, ShieldAlert, CheckSquare, Square } from "lucide-react";
+import { AccessCode } from "../../types/gallery";
 import { checkRateLimit, recordAttempt } from "../../lib/rateLimiter";
 import { accessCodeSchema } from "../../lib/validation";
 
@@ -45,7 +45,7 @@ export const PinModal: React.FC<PinModalProps> = ({
     // Zod validation
     const validationResult = accessCodeSchema.safeParse({ pin: cleanInput });
     if (!validationResult.success) {
-      setErrorMessage(validationResult.error.issues[0]?.message || "Invalid input format");
+      setErrorMessage(validationResult.error.issues[0]?.message || "Invalid format");
       return;
     }
 
@@ -76,21 +76,21 @@ export const PinModal: React.FC<PinModalProps> = ({
     if (matchedCode) {
       if (!matchedCode.enabled) {
         recordAttempt(rateLimitKey, false);
-        setErrorMessage("This access code has been disabled.");
+        setErrorMessage("Access code has been disabled.");
         setPin("");
         return;
       }
 
       if (matchedCode.expirationDate && new Date(matchedCode.expirationDate) < new Date()) {
         recordAttempt(rateLimitKey, false);
-        setErrorMessage("This access code has expired.");
+        setErrorMessage("Access code has expired.");
         setPin("");
         return;
       }
 
       if (matchedCode.maxUses && matchedCode.maxUses > 0 && (matchedCode.usedCount || 0) >= matchedCode.maxUses) {
         recordAttempt(rateLimitKey, false);
-        setErrorMessage("Maximum usage limit reached for this access code.");
+        setErrorMessage("Usage limit reached.");
         setPin("");
         return;
       }
@@ -113,7 +113,7 @@ export const PinModal: React.FC<PinModalProps> = ({
 
     // 3. Invalid code
     recordAttempt(rateLimitKey, false);
-    setErrorMessage("Invalid access code. Please check and try again.");
+    setErrorMessage("Incorrect access code.");
     setPin("");
   };
 
@@ -123,7 +123,7 @@ export const PinModal: React.FC<PinModalProps> = ({
         
         {/* Background Cover Preview blur if available */}
         {coverImage && (
-          <div className="absolute inset-0 overflow-hidden opacity-20 pointer-events-none">
+          <div className="absolute inset-0 overflow-hidden opacity-10 pointer-events-none">
             <img src={coverImage} alt="Cover" className="w-full h-full object-cover filter blur-3xl scale-110" />
           </div>
         )}
@@ -132,17 +132,12 @@ export const PinModal: React.FC<PinModalProps> = ({
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="w-full max-w-md bg-zinc-950/90 border border-white/10 rounded-3xl p-8 text-white space-y-6 text-center shadow-2xl relative overflow-hidden backdrop-blur-xl"
+          className="w-full max-w-sm bg-zinc-950 border border-white/10 rounded-2xl p-8 text-white space-y-6 text-center shadow-2xl relative overflow-hidden"
         >
-          {/* Top Cover / Decorative Badge */}
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-brand-red/10 border border-brand-red/30 text-brand-red flex items-center justify-center shadow-inner">
-            <Lock size={28} />
-          </div>
-
           <div className="space-y-2">
-            <h3 className="text-2xl font-display font-extrabold uppercase tracking-tight">Protected Client Gallery</h3>
-            <p className="text-xs font-mono text-white/50 tracking-wider">
-              Enter Access Code for <span className="text-white font-bold">{projectTitle}</span>
+            <h3 className="text-xs font-mono uppercase tracking-[0.25em] text-white/50">ACCESS CODE REQUIRED</h3>
+            <p className="text-xl font-bold tracking-tight text-white uppercase font-display">
+              {projectTitle}
             </p>
           </div>
 
@@ -156,15 +151,15 @@ export const PinModal: React.FC<PinModalProps> = ({
                   setErrorMessage(null);
                   setPin(e.target.value);
                 }}
-                placeholder="Access Code or PIN"
+                placeholder="ENTER ACCESS CODE"
                 autoFocus
-                className={`w-full text-center text-xl tracking-widest bg-white/5 border rounded-2xl px-4 py-3.5 text-white font-mono placeholder:text-white/20 uppercase focus:outline-none transition-all ${
-                  errorMessage ? "border-red-500 bg-red-500/10" : "border-white/15 focus:border-brand-red"
+                className={`w-full text-center text-lg tracking-widest bg-white/5 border rounded-xl px-4 py-3.5 text-white font-mono placeholder:text-white/20 uppercase focus:outline-none transition-all ${
+                  errorMessage ? "border-red-500 bg-red-500/10" : "border-white/10 focus:border-white/30"
                 }`}
               />
               {errorMessage && (
                 <p className="mt-2 text-xs text-red-400 flex items-center justify-center gap-1.5 font-mono">
-                  <ShieldAlert size={14} className="shrink-0" />
+                  <ShieldAlert size={12} className="shrink-0" />
                   <span>{errorMessage}</span>
                 </p>
               )}
@@ -173,32 +168,31 @@ export const PinModal: React.FC<PinModalProps> = ({
             {/* Remember Device Checkbox */}
             <div 
               onClick={() => setRememberDevice(!rememberDevice)}
-              className="flex items-center justify-center gap-2 text-xs font-mono text-white/60 hover:text-white cursor-pointer select-none py-1"
+              className="flex items-center justify-center gap-2 text-xs font-mono text-white/40 hover:text-white/70 cursor-pointer select-none py-1 transition-colors"
             >
               {rememberDevice ? (
-                <CheckSquare size={16} className="text-brand-red" />
+                <CheckSquare size={14} className="text-white/80" />
               ) : (
-                <Square size={16} className="text-white/30" />
+                <Square size={14} className="text-white/20" />
               )}
-              <span>Remember this device for 30 days</span>
+              <span>Remember this device</span>
             </div>
 
             <button
               type="submit"
-              className="w-full py-3.5 px-6 rounded-2xl bg-brand-red text-white font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 hover:bg-brand-red/90 transition-all shadow-xl"
+              className="w-full py-3.5 px-6 rounded-xl bg-white text-zinc-950 font-semibold uppercase tracking-widest text-[10px] sm:text-xs flex items-center justify-center gap-2 hover:bg-zinc-200 transition-all font-mono"
             >
-              <ShieldCheck size={16} />
-              <span>Continue to Gallery</span>
-              <ArrowRight size={16} />
+              <span>ACCESS GALLERY</span>
+              <ArrowRight size={14} />
             </button>
           </form>
 
-          <div className="pt-2 border-t border-white/5 space-y-1">
-            <p className="text-[11px] text-white/40 font-mono">
-              Exclusive Client Access System by Mellow Production
+          <div className="pt-4 border-t border-white/5 flex flex-col items-center justify-center gap-1">
+            <p className="text-[10px] text-white/30 font-mono tracking-wider">
+              MELLOW PRODUCTION
             </p>
-            <p className="text-[10px] text-white/20 font-mono">
-              Default Access PIN: <span className="font-bold text-white/40">2026</span>
+            <p className="text-[8px] text-white/15 font-mono">
+              PIN: 2026
             </p>
           </div>
         </motion.div>
@@ -206,3 +200,4 @@ export const PinModal: React.FC<PinModalProps> = ({
     </AnimatePresence>
   );
 };
+
