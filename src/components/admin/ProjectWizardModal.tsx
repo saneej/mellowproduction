@@ -124,7 +124,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   // Auto generate slug
   useEffect(() => {
     if (!slugIsCustom && clientName) {
-      const generated = clientName
+      const generated = (clientName || "")
         .toLowerCase()
         .trim()
         .replace(/[^\w\s-]/g, "")

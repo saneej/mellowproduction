@@ -1031,7 +1031,7 @@ export default function App() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setIsCommandPaletteOpen(prev => !prev);
       }

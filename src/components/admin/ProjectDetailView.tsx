@@ -55,6 +55,9 @@ import { DriveSyncModal } from "./DriveSyncModal";
 import { AccessCodesModal } from "./AccessCodesModal";
 import { AddFolderModal } from "./AddFolderModal";
 
+import { extractDriveFolderId } from "../../services/driveService";
+import { SyncEngine } from "../../services/syncEngine";
+
 interface ProjectDetailViewProps {
   projectId: string;
   onBack: () => void;
@@ -165,13 +168,16 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   };
 
   const handleAddFolderSubmit = async (folderData: { name: string; driveFolderId: string; apiKey?: string }) => {
-    const slug = folderData.name.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
-    await createEvent({
+    const rawName = folderData.name || "Sub Event";
+    const cleanDriveId = extractDriveFolderId(folderData.driveFolderId || "");
+    const slug = rawName.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || `event-${Date.now()}`;
+
+    const newEvt = await createEvent({
       projectId: project.id,
-      title: folderData.name,
+      title: rawName,
       slug,
-      coverImage: project.coverImage,
-      driveFolderId: folderData.driveFolderId,
+      coverImage: project.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+      driveFolderId: cleanDriveId,
       order: events.length + 1,
       isPublished: true,
       parentId: activeParentFolderId || null,
@@ -179,10 +185,10 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
     const newFolderConfig: DriveFolderConfig = {
       id: `folder-${Date.now()}`,
-      name: folderData.name,
-      driveFolderId: folderData.driveFolderId,
+      name: rawName,
+      driveFolderId: cleanDriveId,
       apiKey: folderData.apiKey,
-      status: folderData.driveFolderId ? "connected" : "untested",
+      status: cleanDriveId ? "connected" : "untested",
     };
 
     const updatedFolders = [...(project.driveFolders || []), newFolderConfig];
@@ -190,6 +196,15 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       eventCount: (project.eventCount || 0) + 1,
       driveFolders: updatedFolders,
     });
+
+    if (cleanDriveId) {
+      try {
+        const engine = new SyncEngine();
+        await engine.syncProject(project, newEvt.id, cleanDriveId, folderData.apiKey);
+      } catch (err) {
+        console.warn("Auto-sync failed for new sub-event:", err);
+      }
+    }
 
     loadProjectData();
   };
@@ -283,7 +298,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1 rounded-3xl bg-zinc-950 border border-white/10 overflow-hidden shadow-2xl relative">
               <img 
-                src={project.coverImage.startsWith("http") ? project.coverImage : `https://lh3.googleusercontent.com/d/${project.coverImage}=s800`} 
+                src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://lh3.googleusercontent.com/d/${project.coverImage}=s800` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
                 alt={project.title} 
                 className="w-full h-56 object-cover"
               />
@@ -399,19 +414,28 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                   <div>Media Items: <span className="text-white">{evt.mediaCount || 0}</span></div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
+                <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-1.5 text-xs">
                   <button
                     onClick={() => setSyncingEventId(evt.id)}
-                    className="py-1.5 px-3 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1"
+                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
                   >
-                    <HardDrive size={13} /> Sync Drive
+                    <HardDrive size={13} /> Sync
                   </button>
+
+                  <a
+                    href={`${window.location.origin}/projects/${project.slug}/${evt.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1 transition-colors"
+                  >
+                    <ExternalLink size={13} /> View
+                  </a>
 
                   <button
                     onClick={() => handleAddSubEvent(evt.id)}
-                    className="py-1.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1"
+                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1 transition-colors"
                   >
-                    <Plus size={13} /> Nested Folder
+                    <Plus size={13} /> Nested
                   </button>
 
                   <button
@@ -421,7 +445,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                         loadProjectData();
                       }
                     }}
-                    className="p-1.5 text-red-400 hover:text-red-300"
+                    className="p-1.5 text-red-400 hover:text-red-300 transition-colors"
                   >
                     <Trash2 size={15} />
                   </button>

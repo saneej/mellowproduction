@@ -15,10 +15,13 @@ export const DownloadsTab: React.FC = () => {
     });
   }, []);
 
-  const filteredLogs = logs.filter(l => 
-    l.projectTitle.toLowerCase().includes(search.toLowerCase()) ||
-    l.fileName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredLogs = logs.filter(l => {
+    const q = (search || "").toLowerCase();
+    return (
+      (l.projectTitle || "").toLowerCase().includes(q) ||
+      (l.fileName || "").toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div className="space-y-8">

@@ -21,7 +21,7 @@ export const extractDriveFolderId = (urlOrId: string): string => {
 };
 
 export const extractDriveFileId = (urlOrId: string): string => {
-  if (!urlOrId) return "";
+  if (!urlOrId || typeof urlOrId !== "string") return "";
   const trimmed = urlOrId.trim();
   const fileMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
   if (fileMatch && fileMatch[1]) {
@@ -31,7 +31,7 @@ export const extractDriveFileId = (urlOrId: string): string => {
 };
 
 export const getDriveImageUrl = (fileId: string, size: number = 2048): string => {
-  if (!fileId) return "";
+  if (!fileId || typeof fileId !== "string") return "";
   // If it's already a full http URL
   if (fileId.startsWith("http://") || fileId.startsWith("https://")) {
     return fileId;
@@ -40,7 +40,7 @@ export const getDriveImageUrl = (fileId: string, size: number = 2048): string =>
 };
 
 export const getDriveLqipUrl = (fileId: string): string => {
-  if (!fileId) return "";
+  if (!fileId || typeof fileId !== "string") return "";
   if (fileId.startsWith("http://") || fileId.startsWith("https://")) {
     return fileId;
   }

@@ -336,13 +336,21 @@ export const deleteProject = async (id: string): Promise<void> => {
 
 // --- Events Functions ---
 
+const ensureEventSlug = (e: EventFolder): EventFolder => {
+  if (!e.slug || e.slug === "undefined" || e.slug.trim() === "") {
+    const raw = e.title || e.id || "event";
+    e.slug = raw.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || e.id;
+  }
+  return e;
+};
+
 export const getEventsByProject = async (projectId: string): Promise<EventFolder[]> => {
   try {
     const colRef = collection(db, EVENTS_COL);
     const q = query(colRef, where("projectId", "==", projectId));
     const snap = await getDocs(q);
     if (!snap.empty) {
-      const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() } as EventFolder));
+      const docs = snap.docs.map(doc => ensureEventSlug({ id: doc.id, ...doc.data() } as EventFolder));
       const sorted = docs.sort((a, b) => a.order - b.order);
       const docIds = new Set(sorted.map(d => d.id));
       const otherEvents = localEventsState.filter(e => e.projectId !== projectId && !docIds.has(e.id));
@@ -353,7 +361,8 @@ export const getEventsByProject = async (projectId: string): Promise<EventFolder
   } catch (err) {
     console.warn("Firestore fetch events fallback:", err);
   }
-  return localEventsState.filter(e => e.projectId === projectId).sort((a, b) => a.order - b.order);
+  const filtered = localEventsState.filter(e => e.projectId === projectId).map(ensureEventSlug);
+  return filtered.sort((a, b) => a.order - b.order);
 };
 
 export const getEventFolders = getEventsByProject;
@@ -369,8 +378,15 @@ export const updateEventFolder = async (id: string, updates: Partial<EventFolder
 };
 
 export const getEventBySlug = async (projectId: string, eventSlug: string): Promise<EventFolder | null> => {
-  const localMatch = localEventsState.find(e => e.projectId === projectId && e.slug === eventSlug);
-  if (localMatch) return localMatch;
+  const events = await getEventsByProject(projectId);
+  if (!events || events.length === 0) return null;
+
+  if (!eventSlug || eventSlug === "undefined" || eventSlug.trim() === "") {
+    return events[0];
+  }
+
+  const match = events.find(e => e.slug === eventSlug || e.id === eventSlug);
+  if (match) return match;
 
   try {
     const colRef = collection(db, EVENTS_COL);
@@ -378,7 +394,7 @@ export const getEventBySlug = async (projectId: string, eventSlug: string): Prom
     const snap = await getDocs(q);
     if (!snap.empty) {
       const d = snap.docs[0];
-      const ev = { id: d.id, ...d.data() } as EventFolder;
+      const ev = ensureEventSlug({ id: d.id, ...d.data() } as EventFolder);
       if (!localEventsState.some(existing => existing.id === ev.id)) {
         localEventsState.push(ev);
         saveStorage(STORAGE_EVENTS, localEventsState);
@@ -388,15 +404,28 @@ export const getEventBySlug = async (projectId: string, eventSlug: string): Prom
   } catch (err) {
     console.warn("Firestore error event slug match:", err);
   }
-  return null;
+  return events[0] || null;
 };
 
 export const createEvent = async (eventData: Omit<EventFolder, "id" | "createdAt">): Promise<EventFolder> => {
   const now = new Date().toISOString();
   const eventId = `event-${Date.now()}`;
+
+  const rawTitle = eventData.title || "sub-event";
+  let cleanSlug = (eventData.slug || rawTitle)
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-");
+
+  if (!cleanSlug || cleanSlug === "undefined") {
+    cleanSlug = `sub-event-${Date.now().toString().slice(-6)}`;
+  }
+
   const newEvent: EventFolder = {
     id: eventId,
     ...eventData,
+    slug: cleanSlug,
     createdAt: now
   };
 
@@ -469,12 +498,12 @@ export const searchMediaIndex = async (
   const allMedia = await getMediaByProject(projectId);
   if (!searchTerm.trim() && filterType === 'all') return allMedia;
 
-  const term = searchTerm.toLowerCase().trim();
+  const term = (searchTerm || "").toLowerCase().trim();
   return allMedia.filter(m => {
     const matchesTerm = !term || 
-      m.fileName.toLowerCase().includes(term) ||
-      m.eventId.toLowerCase().includes(term) ||
-      m.driveFileId.toLowerCase().includes(term);
+      (m.fileName || "").toLowerCase().includes(term) ||
+      (m.eventId || "").toLowerCase().includes(term) ||
+      (m.driveFileId || "").toLowerCase().includes(term);
 
     const matchesType = filterType === 'all' || 
       (filterType === 'video' && m.isVideo) || 
@@ -508,35 +537,54 @@ export const getSortedMedia = (
   return sorted;
 };
 
-export const saveMediaBatch = async (items: Omit<MediaItem, "id" | "createdAt">[]): Promise<MediaItem[]> => {
+export const saveMediaBatch = async (items: MediaItem[] | Omit<MediaItem, "id" | "createdAt">[]): Promise<MediaItem[]> => {
   const now = new Date().toISOString();
   const createdItems: MediaItem[] = [];
 
   try {
     const batch = writeBatch(db);
     for (const item of items) {
-      const docRef = doc(collection(db, MEDIA_COL));
+      const existingId = (item as any).id;
+      const itemId = existingId && !existingId.startsWith("media-temp-") ? existingId : doc(collection(db, MEDIA_COL)).id;
+      const docRef = doc(db, MEDIA_COL, itemId);
+      
+      const createdAt = (item as any).createdAt || now;
       const newItem: MediaItem = {
-        id: docRef.id,
-        ...item,
-        createdAt: now,
+        ...(item as any),
+        id: itemId,
+        createdAt,
+        updatedAt: now,
       };
-      batch.set(docRef, { ...item, createdAt: now });
+      
+      batch.set(docRef, {
+        ...item,
+        id: itemId,
+        createdAt,
+        updatedAt: now,
+      });
       createdItems.push(newItem);
     }
     await batch.commit();
   } catch (err) {
     console.warn("Saving media locally due to Firestore batch error:", err);
     items.forEach((item, idx) => {
+      const existingId = (item as any).id;
+      const itemId = existingId || `media-${Date.now()}-${idx}`;
       createdItems.push({
-        id: `media-${Date.now()}-${idx}`,
-        ...item,
-        createdAt: now
+        ...(item as any),
+        id: itemId,
+        createdAt: (item as any).createdAt || now,
+        updatedAt: now,
       });
     });
   }
 
+  // Remove duplicate/stale versions of the updated items from local cache
+  const updatedIds = new Set(createdItems.map(i => i.id));
+  localMediaState = localMediaState.filter(m => !updatedIds.has(m.id));
   localMediaState.push(...createdItems);
+  saveStorage(STORAGE_MEDIA, localMediaState);
+
   return createdItems;
 };
 
@@ -701,7 +749,7 @@ export const addAdminUser = async (email: string, role: UserRole, addedBy: strin
   }
 
   // Ensure email is not duplicated in local list
-  localAdminsState = localAdminsState.filter(a => a.email.toLowerCase() !== cleanEmail);
+  localAdminsState = localAdminsState.filter(a => (a.email || "").toLowerCase() !== cleanEmail);
   localAdminsState.push(newAdmin);
 
   // Update allowed admin emails list in local settings state
@@ -734,8 +782,8 @@ export const deleteAdminUser = async (id: string): Promise<void> => {
     console.warn("Delete admin user local fallback:", err);
   }
   localAdminsState = localAdminsState.filter(a => a.id !== id);
-  if (target) {
-    localSettingsState.allowedAdminEmails = localSettingsState.allowedAdminEmails.filter(e => e.toLowerCase() !== target.email.toLowerCase());
+  if (target && target.email) {
+    localSettingsState.allowedAdminEmails = localSettingsState.allowedAdminEmails.filter(e => (e || "").toLowerCase() !== target.email.toLowerCase());
     logActivity("MANAGE_ADMIN", `Revoked admin access for: ${target.email}`);
     addNotification("Admin Removed", `Revoked admin permissions for ${target.email}`, "warning");
   }

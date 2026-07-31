@@ -129,7 +129,11 @@ export const AnalyticsTab: React.FC<{ projects: Project[] }> = ({ projects }) =>
                   <span className="w-6 h-6 rounded-full bg-brand-red/20 text-brand-red font-bold flex items-center justify-center text-xs">
                     0{idx + 1}
                   </span>
-                  <img src={project.coverImage} alt={project.title} className="w-12 h-10 object-cover rounded-xl border border-white/10" />
+                  <img 
+                    src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://lh3.googleusercontent.com/d/${project.coverImage}=s200` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=200"} 
+                    alt={project.title} 
+                    className="w-12 h-10 object-cover rounded-xl border border-white/10" 
+                  />
                   <div>
                     <div className="font-bold text-white text-sm">{project.title}</div>
                     <div className="text-white/40 text-[10px] uppercase">{project.category || "Gallery"} • {project.clientName}</div>

@@ -70,7 +70,7 @@ export const PinModal: React.FC<PinModalProps> = ({
     }
 
     // 2. Check Access Codes list
-    const matchedCode = accessCodes.find(ac => ac.code.trim().toLowerCase() === cleanInput.toLowerCase());
+    const matchedCode = accessCodes.find(ac => (ac.code || "").trim().toLowerCase() === cleanInput.toLowerCase());
 
     if (matchedCode) {
       if (!matchedCode.enabled) {

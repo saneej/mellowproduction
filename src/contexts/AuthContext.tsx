@@ -77,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Fetch allowed admins from Firestore / Service
     const adminUsers = await getAdminUsers();
-    const matchedAdmin = adminUsers.find(a => a.email.toLowerCase() === userEmail);
+    const matchedAdmin = adminUsers.find(a => (a.email || "").toLowerCase() === userEmail);
 
     if (matchedAdmin) {
       setIsAdmin(true);

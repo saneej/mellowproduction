@@ -30,16 +30,17 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Stage 1: Tiny placeholder
-    const tiny = item.tinyThumbnailUrl || item.thumbnailUrl;
-    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || item.thumbnailUrl;
-    const hd = item.hdUrl || item.fullUrl;
-    const original = item.originalUrl || item.fullUrl;
+    const fallbackImg = item.isVideo
+      ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
+      : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
 
-    // Start with tiny blur
+    const tiny = item.tinyThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? `https://lh3.googleusercontent.com/d/${item.driveFileId}=s200` : fallbackImg);
+    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? `https://lh3.googleusercontent.com/d/${item.driveFileId}=s800` : fallbackImg);
+    const hd = item.hdUrl || item.fullUrl || small;
+    const original = item.originalUrl || item.fullUrl || hd;
+
     setCurrentSrc(tiny);
 
-    // Preload Small / Medium
     const imgSmall = new Image();
     imgSmall.src = small;
     imgSmall.onload = () => {
@@ -47,7 +48,6 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       setLoadStage('small');
       setIsLoaded(true);
 
-      // Preload HD preview if high priority or image loaded
       if (isHighPriority || isZoomedOrDownloaded) {
         const imgHd = new Image();
         imgHd.src = hd;
@@ -55,7 +55,6 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           setCurrentSrc(hd);
           setLoadStage('hd');
 
-          // If zoomed or downloaded, load original resolution
           if (isZoomedOrDownloaded && original) {
             const imgOrig = new Image();
             imgOrig.src = original;
@@ -66,6 +65,16 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           }
         };
       }
+    };
+
+    imgSmall.onerror = () => {
+      if (item.driveFileId && !item.driveFileId.startsWith("http")) {
+        setCurrentSrc(`https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=w800`);
+      } else {
+        setCurrentSrc(fallbackImg);
+      }
+      setLoadStage('small');
+      setIsLoaded(true);
     };
   }, [item, isHighPriority, isZoomedOrDownloaded]);
 
@@ -78,9 +87,21 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         alt={alt || item.fileName}
         loading={isHighPriority ? "eager" : "lazy"}
         decoding="async"
+        referrerPolicy="no-referrer"
         onClick={onClick}
+        onError={(e) => {
+          const target = e.currentTarget;
+          if (item.driveFileId && !item.driveFileId.startsWith("http") && !target.src.includes("thumbnail?id=")) {
+            target.src = `https://drive.google.com/thumbnail?id=${item.driveFileId}&sz=w800`;
+          } else {
+            target.src = item.isVideo
+              ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
+              : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
+          }
+          setIsLoaded(true);
+        }}
         className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-700 ease-out ${
-          loadStage === 'tiny' ? "blur-md scale-105 opacity-70" : "blur-0 opacity-100"
+          loadStage === 'tiny' && !isLoaded ? "blur-md scale-105 opacity-70" : "blur-0 opacity-100"
         }`}
       />
 

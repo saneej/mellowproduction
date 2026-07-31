@@ -59,6 +59,8 @@ import {
 import { Project, ActivityLog, FavoriteSelection, AdminNotification } from "../types/gallery";
 import { useAuth } from "../contexts/AuthContext";
 import { AdminLogin } from "../components/admin/AdminLogin";
+import { extractDriveFolderId } from "../services/driveService";
+import { SyncEngine } from "../services/syncEngine";
 
 export const AdminDashboardPage: React.FC = () => {
   const { user, isAdmin, role, adminProfile, canDeleteProjects, canEditProjects } = useAuth();
@@ -164,28 +166,44 @@ export const AdminDashboardPage: React.FC = () => {
 
   const handleCreateSubEvent = async (project: Project) => {
     const title = window.prompt("Enter Sub-Event Title (e.g., Nikah, Reception, Haldi):");
-    if (!title) return;
+    if (!title || !title.trim()) return;
 
-    const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-");
+    const driveFolderInput = window.prompt("Enter Google Drive Folder ID or Link (Optional):") || "";
+    const cleanDriveId = extractDriveFolderId(driveFolderInput);
+
+    const slug = title.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || `event-${Date.now()}`;
     const newEvent = await createEvent({
       projectId: project.id,
-      title,
+      title: title.trim(),
       slug,
-      coverImage: project.coverImage,
-      driveFolderId: "",
+      coverImage: project.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+      driveFolderId: cleanDriveId,
       order: (project.eventCount || 0) + 1,
       isPublished: true,
     });
 
     await updateProject(project.id, { eventCount: (project.eventCount || 0) + 1 });
+
+    if (cleanDriveId) {
+      try {
+        const engine = new SyncEngine();
+        await engine.syncProject(project, newEvent.id, cleanDriveId);
+      } catch (err) {
+        console.warn("Auto sync failed for sub-event:", err);
+      }
+    }
+
     loadData();
     setSyncingEvent({ projectId: project.id, eventId: newEvent.id, title: newEvent.title });
   };
 
-  const filteredProjects = projects.filter(p => 
-    p.title.toLowerCase().includes(search.toLowerCase()) || 
-    p.clientName.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProjects = projects.filter(p => {
+    const q = (search || "").toLowerCase();
+    return (
+      (p.title || "").toLowerCase().includes(q) || 
+      (p.clientName || "").toLowerCase().includes(q)
+    );
+  });
 
   const unreadNotifsCount = notifs.filter(n => !n.isRead).length;
 
@@ -325,7 +343,7 @@ export const AdminDashboardPage: React.FC = () => {
                               className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-xl hover:border-brand-red/50 cursor-pointer transition-all group"
                             >
                               <img 
-                                src={p.coverImage.startsWith("http") ? p.coverImage : `https://lh3.googleusercontent.com/d/${p.coverImage}=s800`} 
+                                src={(p.coverImage || "").startsWith("http") ? p.coverImage : p.coverImage ? `https://lh3.googleusercontent.com/d/${p.coverImage}=s800` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
                                 alt={p.title} 
                                 className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500"
                               />
@@ -467,7 +485,7 @@ export const AdminDashboardPage: React.FC = () => {
                                   className="relative aspect-[16/9] bg-white/5 cursor-pointer overflow-hidden"
                                 >
                                   <img
-                                    src={project.coverImage.startsWith("http") ? project.coverImage : `https://lh3.googleusercontent.com/d/${project.coverImage}=s800`}
+                                    src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://lh3.googleusercontent.com/d/${project.coverImage}=s800` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"}
                                     alt={project.title}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                   />

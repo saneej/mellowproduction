@@ -38,7 +38,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (isOpen) onClose();
         else {
@@ -57,7 +57,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
   if (!isOpen) return null;
 
   // Search filter
-  const q = query.toLowerCase().trim();
+  const q = (query || "").toLowerCase().trim();
 
   const adminNavItems = [
     { label: "Admin Overview", tab: "overview", icon: <LayoutDashboard size={16} /> },
@@ -66,14 +66,19 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose,
     { label: "Client Favorites", tab: "favorites", icon: <Heart size={16} /> },
     { label: "Download History", tab: "downloads", icon: <Download size={16} /> },
     { label: "System Settings", tab: "settings", icon: <Settings size={16} /> },
-  ].filter(i => !q || i.label.toLowerCase().includes(q));
+  ].filter(i => !q || (i.label || "").toLowerCase().includes(q));
 
   const filteredProjects = projects.filter(p => 
-    !q || p.title.toLowerCase().includes(q) || p.clientName.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+    !q || 
+    (p.title || "").toLowerCase().includes(q) || 
+    (p.clientName || "").toLowerCase().includes(q) || 
+    (p.category || "").toLowerCase().includes(q)
   );
 
   const filteredDrive = driveAccounts.filter(d => 
-    !q || d.email.toLowerCase().includes(q) || d.name.toLowerCase().includes(q)
+    !q || 
+    (d.email || "").toLowerCase().includes(q) || 
+    (d.name || "").toLowerCase().includes(q)
   );
 
   const handleSelectProject = (proj: Project) => {

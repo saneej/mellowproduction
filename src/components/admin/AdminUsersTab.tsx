@@ -152,12 +152,12 @@ export const AdminUsersTab: React.FC = () => {
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs text-white">
-                          {admin.email[0].toUpperCase()}
+                          {(admin.email || "A")[0].toUpperCase()}
                         </div>
                         <div>
                           <div className="font-bold text-white flex items-center gap-2">
                             <span>{admin.email}</span>
-                            {admin.email.toLowerCase() === "msaneejk4@gmail.com" && (
+                            {(admin.email || "").toLowerCase() === "msaneejk4@gmail.com" && (
                               <span className="text-[9px] px-2 py-0.5 rounded-full bg-brand-red/20 text-brand-red font-mono uppercase">
                                 System Owner
                               </span>
@@ -169,7 +169,7 @@ export const AdminUsersTab: React.FC = () => {
                     </td>
 
                     <td className="py-4 px-6">
-                      {canManageAdmins && admin.email.toLowerCase() !== "msaneejk4@gmail.com" ? (
+                      {canManageAdmins && (admin.email || "").toLowerCase() !== "msaneejk4@gmail.com" ? (
                         <select
                           value={admin.role}
                           onChange={(e) => handleRoleChange(admin.id, e.target.value as UserRole)}
@@ -190,7 +190,7 @@ export const AdminUsersTab: React.FC = () => {
                     <td className="py-4 px-6 text-white/40">{new Date(admin.addedAt).toLocaleDateString()}</td>
 
                     <td className="py-4 px-6 text-right">
-                      {admin.email.toLowerCase() !== "msaneejk4@gmail.com" && canManageAdmins ? (
+                      {(admin.email || "").toLowerCase() !== "msaneejk4@gmail.com" && canManageAdmins ? (
                         <button
                           onClick={() => handleDelete(admin.id, admin.email)}
                           className="p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 text-white/60 hover:text-red-400 transition-colors"

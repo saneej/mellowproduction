@@ -300,6 +300,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
               <img
                 src={imageSrc}
                 alt={currentItem.fileName}
+                referrerPolicy="no-referrer"
                 style={{ transform: `scale(${zoomLevel})` }}
                 className="max-h-[82vh] max-w-[90vw] object-contain rounded-lg shadow-2xl transition-transform duration-300"
               />
@@ -336,6 +337,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
               <img
                 src={getDriveImageUrl(item.driveFileId, 200) || item.thumbnailUrl}
                 alt={item.fileName}
+                referrerPolicy="no-referrer"
                 className="w-full h-full object-cover"
               />
             </button>

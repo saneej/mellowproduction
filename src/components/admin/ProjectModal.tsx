@@ -42,8 +42,8 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   if (!isOpen) return null;
 
   // Auto generate URL slug from title
-  const generateSlug = (str: string) => {
-    return str
+  const generateSlug = (str: string = "") => {
+    return (str || "")
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, "")

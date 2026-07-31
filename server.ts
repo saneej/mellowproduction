@@ -152,12 +152,12 @@ async function startServer() {
       // Fallback sample photos if empty (for demo folders)
       if (files.length === 0) {
         const demoPhotos = [
-          { id: "1y8O84iZ7G3I3Z-kE8B_eH3_N2p6XqR7m", name: "Mellow_Wedding_Highlights_01.jpg", mime: "image/jpeg" },
-          { id: "1YhQ2qS0-SamplePhoto1", name: "Mellow_Nikah_Ceremony_02.jpg", mime: "image/jpeg" },
-          { id: "1YhQ2qS0-SamplePhoto2", name: "Mellow_Reception_Stage_03.jpg", mime: "image/jpeg" },
-          { id: "1YhQ2qS0-SamplePhoto3", name: "Mellow_Bride_Groom_Portrait.jpg", mime: "image/jpeg" },
-          { id: "1YhQ2qS0-SamplePhoto4", name: "Mellow_Outdoor_Sunset_05.jpg", mime: "image/jpeg" },
-          { id: "1YhQ2qS0-SampleVideo1", name: "Mellow_Teaser_Video.mp4", mime: "video/mp4" }
+          { id: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600", name: "Mellow_Wedding_Highlights_01.jpg", mime: "image/jpeg" },
+          { id: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1600", name: "Mellow_Nikah_Ceremony_02.jpg", mime: "image/jpeg" },
+          { id: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1600", name: "Mellow_Reception_Stage_03.jpg", mime: "image/jpeg" },
+          { id: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1600", name: "Mellow_Bride_Groom_Portrait.jpg", mime: "image/jpeg" },
+          { id: "https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1600", name: "Mellow_Outdoor_Sunset_05.jpg", mime: "image/jpeg" },
+          { id: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", name: "Mellow_Teaser_Video.mp4", mime: "video/mp4" }
         ];
 
         demoPhotos.forEach(dp => {
@@ -171,22 +171,42 @@ async function startServer() {
 
       // Map to MediaItem structure
       const items = files.map((f, idx) => {
-        const isVid = f.mimeType?.includes("video") || f.name?.endsWith(".mp4") || f.name?.endsWith(".mov");
+        const nameLower = (f.name || "").toLowerCase();
+        const isVid = (f.mimeType || "").toLowerCase().includes("video") || 
+                      nameLower.endsWith(".mp4") || 
+                      nameLower.endsWith(".mov") || 
+                      nameLower.endsWith(".m4v") || 
+                      nameLower.endsWith(".webm") || 
+                      nameLower.endsWith(".avi") || 
+                      nameLower.endsWith(".mkv") || 
+                      (f.id && f.id.toLowerCase().includes(".mp4"));
         const isDriveId = f.id && !f.id.startsWith("http");
+
+        const thumbnailUrl = isDriveId 
+          ? (isVid ? `https://drive.google.com/thumbnail?id=${f.id}&sz=w800` : `https://lh3.googleusercontent.com/d/${f.id}=s800`) 
+          : (isVid && f.id.endsWith(".mp4") ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800" : f.id);
+
+        const fullUrl = isDriveId 
+          ? (isVid ? `https://drive.google.com/thumbnail?id=${f.id}&sz=w1600` : `https://lh3.googleusercontent.com/d/${f.id}=s2048`) 
+          : (isVid && f.id.endsWith(".mp4") ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=1600" : f.id);
+
+        const videoUrl = isVid 
+          ? (isDriveId ? `https://drive.google.com/file/d/${f.id}/preview` : f.id) 
+          : undefined;
 
         return {
           projectId,
           eventId,
           driveFileId: f.id,
-          fileName: f.name || `Photo_${idx + 1}.jpg`,
+          fileName: f.name || `Media_${idx + 1}.${isVid ? 'mp4' : 'jpg'}`,
           mimeType: f.mimeType || (isVid ? "video/mp4" : "image/jpeg"),
           fileSize: f.size ? parseInt(f.size, 10) : undefined,
           width: f.imageMediaMetadata?.width || f.videoMediaMetadata?.width,
           height: f.imageMediaMetadata?.height || f.videoMediaMetadata?.height,
-          thumbnailUrl: isDriveId ? `https://lh3.googleusercontent.com/d/${f.id}=s800` : f.id,
-          fullUrl: isDriveId ? `https://lh3.googleusercontent.com/d/${f.id}=s2048` : f.id,
+          thumbnailUrl,
+          fullUrl,
           isVideo: isVid,
-          videoUrl: isVid ? `https://drive.google.com/file/d/${f.id}/preview` : undefined,
+          videoUrl,
           order: idx + 1,
           modifiedDate: f.modifiedTime || f.createdTime || new Date().toISOString()
         };

@@ -25,10 +25,15 @@ export function useProjects(searchQuery: string = "", categoryFilter: string = "
   }, [loadProjects]);
 
   const filteredProjects = projects.filter(p => {
+    const q = (searchQuery || "").toLowerCase();
+    const title = (p.title || "").toLowerCase();
+    const clientName = (p.clientName || "").toLowerCase();
+    const category = (p.category || "").toLowerCase();
+
     const matchesSearch = 
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.category.toLowerCase().includes(searchQuery.toLowerCase());
+      title.includes(q) ||
+      clientName.includes(q) ||
+      category.includes(q);
 
     const matchesCategory = categoryFilter === "all" || p.category === categoryFilter;
 

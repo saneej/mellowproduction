@@ -60,10 +60,10 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
   };
 
   return (
-    <div className="relative rounded-3xl overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl transition-all duration-500">
+    <div className="relative rounded-3xl overflow-hidden bg-white border border-brand-red/15 shadow-xl transition-all duration-500">
       
       {/* Background Media Container */}
-      <div className="absolute inset-0 z-0 overflow-hidden opacity-40">
+      <div className="absolute inset-0 z-0 overflow-hidden opacity-25">
         {isVideoCover ? (
           rawCover.includes("youtube.com") || rawCover.includes("vimeo.com") ? (
             <iframe
@@ -90,7 +90,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
             className="w-full h-full object-cover filter blur-sm scale-105"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/80 to-transparent" />
       </div>
 
       {/* Hero Content */}
@@ -98,10 +98,10 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
         
         {/* Category & Date */}
         <div className="flex flex-wrap items-center gap-3 font-mono text-xs">
-          <span className="px-3 py-1 bg-brand-red text-white rounded-full font-bold uppercase tracking-widest text-[10px]">
+          <span className="px-3.5 py-1 bg-brand-red text-white rounded-full font-bold uppercase tracking-widest text-[10px] shadow-xs">
             {project.category || "Wedding & Events"}
           </span>
-          <span className="text-white/60 flex items-center gap-1.5">
+          <span className="text-zinc-600 font-medium flex items-center gap-1.5">
             <Calendar size={13} className="text-brand-red" />
             {event ? `${event.title} • ${project.date}` : project.date}
           </span>
@@ -109,33 +109,33 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
 
         {/* Title & Client Name */}
         <div className="space-y-2">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight text-white leading-none">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold uppercase tracking-tight text-zinc-900 leading-none">
             {event ? event.title : project.title}
           </h1>
-          <p className="text-sm font-mono text-white/60 tracking-wider">
+          <p className="text-sm font-mono text-zinc-600 tracking-wider">
             {event ? (
-              <span>Part of <strong className="text-white">{project.title}</strong> gallery for <strong className="text-white">{project.clientName}</strong></span>
+              <span>Part of <strong className="text-zinc-900">{project.title}</strong> gallery for <strong className="text-brand-red font-bold">{project.clientName}</strong></span>
             ) : (
-              <span>Exclusively captured for <strong className="text-white">{project.clientName}</strong></span>
+              <span>Exclusively captured for <strong className="text-brand-red font-bold">{project.clientName}</strong></span>
             )}
           </p>
         </div>
 
         {/* Stats Row */}
         <div className="flex flex-wrap items-center gap-4 pt-2 font-mono text-xs">
-          <div className="px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2 text-white">
+          <div className="px-3.5 py-1.5 rounded-xl bg-brand-red/5 border border-brand-red/15 flex items-center gap-2 text-zinc-800 shadow-xs">
             <Camera size={14} className="text-brand-red" />
-            <span><strong className="text-white">{photoCount}</strong> Photos</span>
+            <span><strong className="text-zinc-900">{photoCount}</strong> Photos</span>
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2 text-white">
+          <div className="px-3.5 py-1.5 rounded-xl bg-brand-red/5 border border-brand-red/15 flex items-center gap-2 text-zinc-800 shadow-xs">
             <Video size={14} className="text-brand-red" />
-            <span><strong className="text-white">{videoCount}</strong> Videos</span>
+            <span><strong className="text-zinc-900">{videoCount}</strong> Videos</span>
           </div>
 
-          <div className="px-3.5 py-1.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 flex items-center gap-2 text-white">
+          <div className="px-3.5 py-1.5 rounded-xl bg-brand-red/5 border border-brand-red/15 flex items-center gap-2 text-zinc-800 shadow-xs">
             <Heart size={14} className="text-brand-red fill-brand-red" />
-            <span><strong className="text-white">{favoriteCount}</strong> Saved Favorites</span>
+            <span><strong className="text-zinc-900">{favoriteCount}</strong> Saved Favorites</span>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {onDownloadAll && project.downloadEnabled !== false && (
             <button
               onClick={onDownloadAll}
-              className="py-3 px-6 rounded-2xl bg-brand-red hover:bg-brand-red/90 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-xl hover:scale-105 transition-all"
+              className="py-3 px-6 rounded-2xl bg-brand-red hover:bg-brand-red/90 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg hover:scale-105 transition-all"
             >
               <Download size={16} />
               <span>Download Gallery</span>
@@ -154,7 +154,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {onShareClick && (
             <button
               onClick={onShareClick}
-              className="py-3 px-5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 backdrop-blur-md transition-all"
+              className="py-3 px-5 rounded-2xl bg-brand-red/5 hover:bg-brand-red/10 border border-brand-red/20 text-brand-red font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 backdrop-blur-md transition-all shadow-xs"
             >
               <Share2 size={16} />
               <span>Share</span>
@@ -164,7 +164,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {onShowQrClick && (
             <button
               onClick={onShowQrClick}
-              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white backdrop-blur-md transition-all"
+              className="p-3 rounded-2xl bg-brand-red/5 hover:bg-brand-red/10 border border-brand-red/20 text-brand-red backdrop-blur-md transition-all shadow-xs"
               title="Show QR Code"
             >
               <QrCode size={18} />
@@ -174,7 +174,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
           {isVideoCover && !rawCover.includes("youtube.com") && !rawCover.includes("vimeo.com") && (
             <button
               onClick={() => setIsMuted(!isMuted)}
-              className="p-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 text-white backdrop-blur-md transition-all ml-auto"
+              className="p-3 rounded-2xl bg-brand-red/5 hover:bg-brand-red/10 border border-brand-red/20 text-brand-red backdrop-blur-md transition-all ml-auto shadow-xs"
               title={isMuted ? "Unmute Cover Audio" : "Mute Cover Audio"}
             >
               {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}

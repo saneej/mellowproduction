@@ -17,7 +17,11 @@ export const GalleryHeader: React.FC<{
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-black/80 backdrop-blur-md border-b border-white/10 px-6 py-4 transition-all">
+    <header className={`sticky top-0 z-40 w-full backdrop-blur-md px-6 py-4 transition-all ${
+      clientMode 
+        ? "bg-white/95 border-b border-brand-red/10 text-zinc-900 shadow-sm" 
+        : "bg-black/80 border-b border-white/10 text-white"
+    }`}>
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         {/* Left Side: Logo or Back Button */}
@@ -25,27 +29,33 @@ export const GalleryHeader: React.FC<{
           {backUrl ? (
             <Link 
               to={backUrl} 
-              className="flex items-center gap-2 text-xs uppercase tracking-widest text-white/70 hover:text-white transition-colors py-1 px-3 rounded-full border border-white/10 hover:border-white/30"
+              className={`flex items-center gap-2 text-xs uppercase tracking-widest font-bold py-1 px-3.5 rounded-full border transition-colors ${
+                clientMode 
+                  ? "border-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white" 
+                  : "border-white/10 text-white/70 hover:text-white hover:border-white/30"
+              }`}
             >
               <ArrowLeft size={14} />
               <span>{backText}</span>
             </Link>
           ) : (
             <Link to="/" className="flex items-center gap-3 group">
-              <img 
-                src="https://i.postimg.cc/j250f7G7/logo-white.png" 
-                alt="Mellow Production" 
-                className="w-9 h-7 object-contain group-hover:scale-105 transition-transform"
-              />
-              <span className="font-display font-extrabold text-lg uppercase tracking-tight text-white">
+              <div className="w-8 h-8 rounded-lg bg-brand-red flex items-center justify-center shadow-md">
+                <img 
+                  src="https://i.postimg.cc/j250f7G7/logo-white.png" 
+                  alt="Mellow Production" 
+                  className="w-5 h-5 object-contain group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <span className={`font-display font-extrabold text-lg uppercase tracking-tight ${clientMode ? "text-zinc-900" : "text-white"}`}>
                 Mellow <span className="text-brand-red font-light">Gallery</span>
               </span>
             </Link>
           )}
 
           {title && (
-            <div className="hidden sm:flex items-center gap-2 border-l border-white/10 pl-4 ml-2">
-              <span className="text-xs uppercase font-mono tracking-widest text-white/50">{title}</span>
+            <div className={`hidden sm:flex items-center gap-2 border-l pl-4 ml-2 ${clientMode ? "border-brand-red/15 text-zinc-500" : "border-white/10 text-white/50"}`}>
+              <span className="text-xs uppercase font-mono tracking-widest truncate max-w-[300px]">{title}</span>
             </div>
           )}
         </div>
@@ -54,12 +64,16 @@ export const GalleryHeader: React.FC<{
         <div className="flex items-center gap-3">
           <button
             onClick={openSearch}
-            className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-white/60 hover:text-white bg-white/5 border border-white/10 px-3 py-1.5 rounded-full hover:bg-white/10 transition-all"
+            className={`flex items-center gap-2 text-xs font-mono uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all ${
+              clientMode 
+                ? "bg-brand-red/5 border-brand-red/15 text-brand-red hover:bg-brand-red/10" 
+                : "bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10"
+            }`}
             title="Global Search (⌘K)"
           >
             <Search size={14} className="text-brand-red" />
             <span className="hidden sm:inline">Search</span>
-            <kbd className="hidden md:inline bg-white/10 px-1.5 py-0.5 rounded text-[10px]">⌘K</kbd>
+            <kbd className={`hidden md:inline px-1.5 py-0.5 rounded text-[10px] ${clientMode ? "bg-brand-red/10 text-brand-red" : "bg-white/10 text-white"}`}>⌘K</kbd>
           </button>
 
           {!clientMode && (
@@ -77,8 +91,10 @@ export const GalleryHeader: React.FC<{
                 to="/admin" 
                 className={`text-xs uppercase tracking-widest font-semibold py-1.5 px-4 rounded-full border transition-all ${
                   location.pathname === "/admin" 
-                    ? "bg-brand-red text-white border-brand-red" 
-                    : "border-white/20 text-white hover:bg-white/10"
+                    ? "bg-brand-red text-white border-brand-red shadow-md" 
+                    : clientMode 
+                      ? "border-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white"
+                      : "border-white/20 text-white hover:bg-white/10"
                 }`}
               >
                 <ShieldCheck size={14} className="inline mr-1.5" />
@@ -86,7 +102,7 @@ export const GalleryHeader: React.FC<{
               </Link>
               <button 
                 onClick={logout} 
-                className="p-1.5 text-white/50 hover:text-white transition-colors"
+                className={`p-1.5 transition-colors ${clientMode ? "text-zinc-400 hover:text-brand-red" : "text-white/50 hover:text-white"}`}
                 title="Sign Out"
               >
                 <LogOut size={16} />
