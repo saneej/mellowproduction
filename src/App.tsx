@@ -892,9 +892,9 @@ const Footer = () => {
             href="https://instagram.com/heysaneej" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="bg-brand-red/20 border border-white/10 font-bold text-[10px] text-white/40 px-4 py-2 rounded-full uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-brand-red hover:text-white/100 hover:border-white"
+            className="bg-brand-red/20 border border-white/10 font-bold text-[10px] text-white/80 px-4 py-2 rounded-full uppercase tracking-[0.2em] transition-all hover:bg-white hover:text-brand-red hover:border-white"
           >
-            Built by Saneejified
+            developed by saneejified
           </a>
         </div>
       </div>
@@ -902,9 +902,9 @@ const Footer = () => {
   );
 };
 
-// --- Main App ---
+// --- Main Website Homepage Component ---
 
-export default function App() {
+export function MainWebsite() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -1003,5 +1003,50 @@ export default function App() {
         className="fixed top-3/4 left-0 w-full h-px bg-white/5 pointer-events-none z-0" 
       />
     </div>
+  );
+}
+
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { ToastProvider } from "./components/common/Toast";
+import { OfflineBanner } from "./components/common/OfflineBanner";
+import { CommandPalette } from "./components/common/CommandPalette";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
+import { ProjectPage } from "./pages/ProjectPage";
+import { GalleryPage } from "./pages/GalleryPage";
+
+export default function App() {
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <OfflineBanner />
+          <BrowserRouter>
+            <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} />
+            <Routes>
+              <Route path="/" element={<MainWebsite />} />
+              <Route path="/admin" element={<AdminDashboardPage />} />
+              <Route path="/projects/:projectSlug" element={<ProjectPage />} />
+              <Route path="/projects/:projectSlug/:eventSlug" element={<GalleryPage />} />
+              <Route path="*" element={<MainWebsite />} />
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

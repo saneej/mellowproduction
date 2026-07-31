@@ -1,0 +1,22 @@
+{
+  "short_name": "Mellow Studio",
+  "name": "Mellow Production Studio & Client Galleries",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/1t73ns8z/favicon_cum_logo_red.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://i.postimg.cc/1t73ns8z/favicon_cum_logo_red.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#09090b",
+  "theme_color": "#B90003",
+  "display": "standalone",
+  "orientation": "any",
+  "description": "Premium Video Production & High-Resolution Client Photo Galleries"
+}

@@ -1,5 +1,8 @@
 {
-  "name": "Mellow Production | Best Video Production Studio in Kerala",
-  "description": "Mellow Production: Kerala's top video production studio. We create cinematic ads, event coverage, and viral reels in Malappuram, Calicut, and Valanchery.",
-  "requestFramePermissions": []
+  "name": "Mellow Production | Photography & Client Gallery System",
+  "description": "Mellow Production: Kerala's top video & photography studio with integrated client gallery platform, Google Drive media sync, and Firebase database.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
