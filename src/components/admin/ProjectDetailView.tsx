@@ -50,6 +50,7 @@ import {
   cloneProject,
   exportProjectJson
 } from "../../services/dbService";
+import { getDriveImageUrl } from "../../services/driveService";
 import { ProjectQrModal } from "./ProjectQrModal";
 import { DriveSyncModal } from "./DriveSyncModal";
 import { AccessCodesModal } from "./AccessCodesModal";
@@ -95,11 +96,30 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const [syncingEventId, setSyncingEventId] = useState<string | null>(null);
   const [editingCode, setEditingCode] = useState<AccessCode | null>(null);
 
+  // Edit details states
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editClientName, setEditClientName] = useState("");
+  const [editGroomName, setEditGroomName] = useState("");
+  const [editBrideName, setEditBrideName] = useState("");
+  const [editCoverImage, setEditCoverImage] = useState("");
+  const [editCoverImages, setEditCoverImages] = useState<string[]>([]);
+  const [editDate, setEditDate] = useState("");
+
   const loadProjectData = async () => {
     setLoading(true);
     try {
       const p = await getProjectById(projectId);
-      if (p) setProject(p);
+      if (p) {
+        setProject(p);
+        setEditTitle(p.title);
+        setEditClientName(p.clientName);
+        setEditGroomName(p.groomName || "");
+        setEditBrideName(p.brideName || "");
+        setEditCoverImage(p.coverImage || "");
+        setEditCoverImages(p.coverImages || [p.coverImage].filter(Boolean));
+        setEditDate(p.date || "");
+      }
 
       const evts = await getEventsByProject(projectId);
       setEvents(evts);
@@ -135,6 +155,35 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const projectUrl = `${window.location.origin}/projects/${project.slug}`;
 
   // Actions
+  const handleSaveInfo = async () => {
+    try {
+      const finalCoverImages = editCoverImages.filter(Boolean);
+      const finalCoverImage = finalCoverImages[0] || editCoverImage || "";
+      await updateProject(project.id, {
+        title: editTitle,
+        clientName: editClientName,
+        groomName: editGroomName || undefined,
+        brideName: editBrideName || undefined,
+        coverImage: finalCoverImage,
+        coverImages: finalCoverImages,
+        date: editDate,
+      });
+      setProject({
+        ...project,
+        title: editTitle,
+        clientName: editClientName,
+        groomName: editGroomName || undefined,
+        brideName: editBrideName || undefined,
+        coverImage: finalCoverImage,
+        coverImages: finalCoverImages,
+        date: editDate,
+      });
+      setIsEditingInfo(false);
+    } catch (err: any) {
+      alert("Failed to save project details: " + err.message);
+    }
+  };
+
   const handleClone = async () => {
     if (window.confirm(`Clone project "${project.title}"?`)) {
       const cloned = await cloneProject(project.id);
@@ -300,19 +349,145 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         <div className="space-y-6 animate-fade-in">
           {/* Cover & Quick Stats */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1 rounded-3xl bg-zinc-950 border border-white/10 overflow-hidden shadow-2xl relative">
-              <img 
-                src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://lh3.googleusercontent.com/d/${project.coverImage}=s800` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
-                alt={project.title} 
-                className="w-full h-56 object-cover"
-              />
-              <div className="p-5 space-y-3">
-                <div className="text-xs uppercase text-white/50">Client Name</div>
-                <div className="text-lg font-bold text-white uppercase">{project.clientName}</div>
-                {project.groomName && <div className="text-xs text-white/60">Groom: {project.groomName}</div>}
-                {project.brideName && <div className="text-xs text-white/60">Bride: {project.brideName}</div>}
+            {isEditingInfo ? (
+              <div className="lg:col-span-1 rounded-3xl bg-zinc-950 border border-brand-red/30 p-6 space-y-4 shadow-2xl relative">
+                <h4 className="text-xs font-bold uppercase text-brand-red tracking-wider">Edit Project Details</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">Project Title</label>
+                    <input
+                      type="text"
+                      value={editTitle}
+                      onChange={e => setEditTitle(e.target.value)}
+                      className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">Client Name</label>
+                    <input
+                      type="text"
+                      value={editClientName}
+                      onChange={e => setEditClientName(e.target.value)}
+                      className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">Groom Name</label>
+                    <input
+                      type="text"
+                      value={editGroomName}
+                      onChange={e => setEditGroomName(e.target.value)}
+                      placeholder="Groom Name (Optional)"
+                      className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">Bride Name</label>
+                    <input
+                      type="text"
+                      value={editBrideName}
+                      onChange={e => setEditBrideName(e.target.value)}
+                      placeholder="Bride Name (Optional)"
+                      className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">Cover Images (1 or more URLs or GDrive IDs)</label>
+                    <div className="space-y-2">
+                      {editCoverImages.map((img, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={img}
+                            onChange={e => {
+                              const newImgs = [...editCoverImages];
+                              newImgs[index] = e.target.value;
+                              setEditCoverImages(newImgs);
+                              if (index === 0) setEditCoverImage(e.target.value);
+                            }}
+                            placeholder="Image URL or Drive File ID"
+                            className="flex-1 bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImgs = editCoverImages.filter((_, i) => i !== index);
+                              setEditCoverImages(newImgs);
+                              if (index === 0) setEditCoverImage(newImgs[0] || "");
+                            }}
+                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setEditCoverImages([...editCoverImages, ""])}
+                        className="w-full py-1.5 border border-dashed border-white/20 hover:border-brand-red/50 text-white/60 hover:text-white rounded-xl text-[10px] uppercase tracking-wider font-mono flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        <Plus size={12} /> Add Cover Image
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-white/50 block mb-1">Event Date</label>
+                    <input
+                      type="date"
+                      value={editDate}
+                      onChange={e => setEditDate(e.target.value)}
+                      className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={handleSaveInfo}
+                    className="flex-1 py-2 rounded-xl bg-brand-red hover:bg-brand-red/90 text-white font-bold text-xs uppercase tracking-wider transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditingInfo(false)}
+                    className="flex-1 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold text-xs uppercase tracking-wider transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="lg:col-span-1 rounded-3xl bg-zinc-950 border border-white/10 overflow-hidden shadow-2xl relative group">
+                <div className="absolute top-4 right-4 z-10">
+                  <button
+                    onClick={() => {
+                      setEditTitle(project.title);
+                      setEditClientName(project.clientName);
+                      setEditGroomName(project.groomName || "");
+                      setEditBrideName(project.brideName || "");
+                      setEditCoverImage(project.coverImage || "");
+                      setEditCoverImages(project.coverImages || [project.coverImage].filter(Boolean));
+                      setEditDate(project.date || "");
+                      setIsEditingInfo(true);
+                    }}
+                    className="p-2.5 rounded-full bg-black/60 hover:bg-brand-red text-white transition-all shadow-lg border border-white/10 flex items-center justify-center"
+                    title="Edit Details"
+                  >
+                    <Edit3 size={13} />
+                  </button>
+                </div>
+                <img 
+                  src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? getDriveImageUrl(project.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
+                  alt={project.title} 
+                  className="w-full h-56 object-cover"
+                />
+                <div className="p-5 space-y-3">
+                  <div className="text-xs uppercase text-white/50">Client Name</div>
+                  <div className="text-lg font-bold text-white uppercase">{project.clientName}</div>
+                  {project.groomName && <div className="text-xs text-white/60">Groom: {project.groomName}</div>}
+                  {project.brideName && <div className="text-xs text-white/60">Bride: {project.brideName}</div>}
+                </div>
+              </div>
+            )}
 
             <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-4">
               <div className="p-5 rounded-3xl bg-zinc-950 border border-white/10 space-y-1 shadow-xl">

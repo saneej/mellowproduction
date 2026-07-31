@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Heart, Download, Play } from "lucide-react";
 import { MediaItem } from "../../types/gallery";
+import { getDriveImageUrl } from "../../services/driveService";
 
 interface ProgressiveImageProps {
   item: MediaItem;
@@ -34,8 +35,8 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
       : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
 
-    const tiny = item.tinyThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? `https://lh3.googleusercontent.com/d/${item.driveFileId}=s200` : fallbackImg);
-    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? `https://lh3.googleusercontent.com/d/${item.driveFileId}=s800` : fallbackImg);
+    const tiny = item.tinyThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 200) : fallbackImg);
+    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || item.thumbnailUrl || (item.driveFileId && !item.driveFileId.startsWith("http") ? getDriveImageUrl(item.driveFileId, 800) : fallbackImg);
     const hd = item.hdUrl || item.fullUrl || small;
     const original = item.originalUrl || item.fullUrl || hd;
 

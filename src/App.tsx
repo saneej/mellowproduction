@@ -251,31 +251,45 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu */}
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute top-full left-0 w-full bg-brand-red border-b border-white/10 p-8 flex flex-col gap-6 md:hidden"
-          >
-            {navLinks.map((link) => (
-              <a 
-                key={link.name} 
-                href={link.href} 
-                onClick={() => setIsOpen(false)}
-                className="text-2xl font-bold uppercase tracking-tighter"
-              >
-                {link.name}
-              </a>
-            ))}
-            <a 
-              href="#contact" 
-              onClick={() => setIsOpen(false)}
-              className="text-2xl font-bold uppercase tracking-tighter text-white/50"
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0, y: -20 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -20 }}
+              transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute top-full left-0 w-full bg-brand-red border-b border-white/10 px-8 py-6 flex flex-col gap-5 md:hidden overflow-hidden"
             >
-              Contact
-            </a>
-          </motion.div>
-        )}
+              {navLinks.map((link) => (
+                <a 
+                  key={link.name} 
+                  href={link.href} 
+                  onClick={() => setIsOpen(false)}
+                  className="text-xl font-bold uppercase tracking-wider text-white hover:text-white/80 transition-colors"
+                >
+                  {link.name}
+                </a>
+              ))}
+              <a 
+                href="#contact" 
+                onClick={() => setIsOpen(false)}
+                className="text-xl font-bold uppercase tracking-wider text-white/60 hover:text-white transition-colors"
+              >
+                Contact
+              </a>
+              <div className="pt-4 border-t border-white/10 mt-2">
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full text-center text-xs uppercase tracking-[0.2em] font-extrabold text-white bg-black/40 hover:bg-black/60 border border-white/20 py-3 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Lock size={12} />
+                  <span>Client Login</span>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
     </header>
   );

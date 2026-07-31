@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { 
   Heart, 
@@ -39,6 +39,7 @@ import { useToast } from "../components/common/Toast";
 
 export const GalleryPage: React.FC = () => {
   const { projectSlug, eventSlug } = useParams<{ projectSlug: string; eventSlug: string }>();
+  const navigate = useNavigate();
 
   const [project, setProject] = useState<Project | null>(null);
   const [eventFolder, setEventFolder] = useState<EventFolder | null>(null);
@@ -118,8 +119,10 @@ export const GalleryPage: React.FC = () => {
       }
 
       // Check PIN Protection or saved device token
+      let isLocalUnlocked = false;
       if (!proj.isPinProtected) {
         setIsUnlocked(true);
+        isLocalUnlocked = true;
       } else {
         const savedUnlock = localStorage.getItem(`mellow_unlocked_${proj.id}`);
         if (savedUnlock) {
@@ -127,11 +130,24 @@ export const GalleryPage: React.FC = () => {
             const data = JSON.parse(savedUnlock);
             if (new Date(data.expiresAt) > new Date()) {
               setIsUnlocked(true);
+              isLocalUnlocked = true;
+              
+              // Load custom permissions if they exist
+              const savedPerms = localStorage.getItem(`mellow_permissions_${proj.id}`);
+              if (savedPerms) {
+                setClientPermissions(JSON.parse(savedPerms));
+              }
             }
           } catch {
             // fallback
           }
         }
+      }
+
+      // Redirect to main project landing page to unlock if protected and locked
+      if (proj.isPinProtected && !isLocalUnlocked) {
+        navigate(`/projects/${projectSlug}`, { replace: true });
+        return;
       }
 
       const evt = await getEventBySlug(proj.id, eventSlug || "main");
@@ -142,7 +158,7 @@ export const GalleryPage: React.FC = () => {
       }
       setLoading(false);
     });
-  }, [projectSlug, eventSlug]);
+  }, [projectSlug, eventSlug, navigate]);
 
   const toggleFavorite = (id: string) => {
     setFavoritedIds(prev => {

@@ -228,6 +228,7 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
         category,
         date: eventDate,
         coverImage: coverMediaUrl,
+        coverImages: [coverMediaUrl].filter(Boolean),
         coverMedia: coverMediaData,
         isPinProtected: accessCodes.some(c => c.enabled),
         pin: accessCodes[0]?.code || "1234",

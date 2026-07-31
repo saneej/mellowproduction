@@ -130,7 +130,7 @@ export const AnalyticsTab: React.FC<{ projects: Project[] }> = ({ projects }) =>
                     0{idx + 1}
                   </span>
                   <img 
-                    src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://lh3.googleusercontent.com/d/${project.coverImage}=s200` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=200"} 
+                    src={(project.coverImage || "").startsWith("http") ? project.coverImage : project.coverImage ? `https://drive.google.com/thumbnail?id=${project.coverImage}&sz=w200` : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=200"} 
                     alt={project.title} 
                     className="w-12 h-10 object-cover rounded-xl border border-white/10" 
                   />

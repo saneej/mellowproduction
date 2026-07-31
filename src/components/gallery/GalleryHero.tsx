@@ -12,6 +12,7 @@ import {
   Volume2 
 } from "lucide-react";
 import { Project, EventFolder } from "../../types/gallery";
+import { getDriveImageUrl } from "../../services/driveService";
 
 interface GalleryHeroProps {
   project: Project;
@@ -43,7 +44,7 @@ export const GalleryHero: React.FC<GalleryHeroProps> = ({
   const getPosterUrl = () => {
     if (!rawCover) return "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000";
     if (rawCover.startsWith("http")) return rawCover;
-    return `https://lh3.googleusercontent.com/d/${rawCover}=s1600`;
+    return getDriveImageUrl(rawCover, 1600);
   };
 
   // Helper for embed video URL

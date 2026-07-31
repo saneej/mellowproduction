@@ -36,7 +36,7 @@ export const getDriveImageUrl = (fileId: string, size: number = 2048): string =>
   if (fileId.startsWith("http://") || fileId.startsWith("https://")) {
     return fileId;
   }
-  return `https://lh3.googleusercontent.com/d/${fileId}=s${size}`;
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w${size}`;
 };
 
 export const getDriveLqipUrl = (fileId: string): string => {
@@ -44,7 +44,7 @@ export const getDriveLqipUrl = (fileId: string): string => {
   if (fileId.startsWith("http://") || fileId.startsWith("https://")) {
     return fileId;
   }
-  return `https://lh3.googleusercontent.com/d/${fileId}=s50`;
+  return `https://drive.google.com/thumbnail?id=${fileId}&sz=w50`;
 };
 
 export const getDriveVideoEmbedUrl = (fileId: string): string => {

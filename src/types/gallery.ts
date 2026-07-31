@@ -81,6 +81,7 @@ export interface Project {
   category?: string;
   date: string; // ISO string YYYY-MM-DD
   coverImage: string;
+  coverImages?: string[];
   coverMedia?: CoverMedia;
   isPinProtected: boolean;
   pin?: string;

@@ -90,7 +90,7 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
       // 1. Update project's driveFolders config
       const updatedDriveFolders = (project.driveFolders || []).map(f => {
         if (f.id === eventId || f.driveFolderId === folderId) {
-          return { ...f, driveFolderId: folderId, apiKey, status: "connected" };
+          return { ...f, driveFolderId: folderId, apiKey, status: "connected" as "error" | "connected" | "untested" | "syncing" };
         }
         return f;
       });
@@ -103,7 +103,7 @@ export const DriveSyncModal: React.FC<DriveSyncModalProps> = ({
           name: eventTitle,
           driveFolderId: folderId,
           apiKey,
-          status: "connected"
+          status: "connected" as "error" | "connected" | "untested" | "syncing"
         });
       }
 
