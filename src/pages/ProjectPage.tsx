@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Calendar, Camera, ArrowRight, Lock, CheckCircle2, ChevronRight, Eye, Sparkles, Image as ImageIcon, ShieldCheck } from "lucide-react";
+import { Calendar, Camera, ArrowRight, Lock, CheckCircle2, ChevronRight, Eye, Sparkles, Image as ImageIcon, ShieldCheck, Music, Volume2, VolumeX, Heart, MailOpen, Award, PenTool } from "lucide-react";
 import { GalleryHeader } from "../components/common/Header";
 import { Footer } from "../components/common/Footer";
 import { PinModal } from "../components/gallery/PinModal";
@@ -19,6 +19,46 @@ export const ProjectPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [currentCoverIndex, setCurrentCoverIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Stop music when component unmounts
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  const togglePlay = () => {
+    if (!audioRef.current) {
+      // A beautiful cinematic ambient soundtrack for a luxury, tailored feeling
+      audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3");
+      audioRef.current.loop = true;
+      audioRef.current.volume = 0.35;
+    }
+
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch(err => {
+        console.warn("Audio play error:", err);
+      });
+    }
+  };
+
+  const getMonogram = (name: string) => {
+    if (!name) return "MP";
+    const cleaned = name.replace(/(and|wedding|\+|&)/gi, " ").trim();
+    const parts = cleaned.split(/\s+/).map(p => p.trim()).filter(Boolean);
+    if (parts.length === 0) return "MP";
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return `${parts[0][0].toUpperCase()} • ${parts[1][0].toUpperCase()}`;
+  };
 
   useEffect(() => {
     if (!projectSlug) return;
@@ -254,14 +294,148 @@ export const ProjectPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Dynamic Welcome Message */}
-        <div className="bg-white border border-zinc-200/50 p-6 rounded-2xl space-y-2 text-center md:text-left shadow-xs">
-          <p className="text-xs font-mono uppercase tracking-wider text-brand-red font-bold flex items-center justify-center md:justify-start gap-1">
-            <Sparkles size={12} /> Digital Private Collection
-          </p>
-          <p className="text-sm text-zinc-600 max-w-4xl leading-relaxed">
-            Welcome to your digital private gallery. Here you can explore your professionally processed collections, save your favorite shots securely across your mobile and desktop devices, and download high-resolution archives of your memories.
-          </p>
+        {/* Bespoke Client Hub & Curated Welcome Experience */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          
+          {/* Personalized Digital Invitation/Welcome Letter */}
+          <div className="lg:col-span-8 bg-white border border-zinc-200/70 p-8 md:p-10 rounded-3xl relative overflow-hidden shadow-xl shadow-zinc-100/40 flex flex-col justify-between space-y-8">
+            {/* Fine background details */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-brand-red/5 rounded-bl-full pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-amber-500/5 rounded-tr-full pointer-events-none" />
+            
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-red animate-pulse" />
+                <span className="text-[10px] font-mono tracking-widest uppercase text-zinc-400 font-bold">
+                  Bespoke Client Letter
+                </span>
+              </div>
+              
+              <div className="space-y-4">
+                <h3 className="text-2xl sm:text-3xl font-display font-black text-zinc-900 tracking-tight uppercase">
+                  Dear {project.clientName || "Honored Guest"},
+                </h3>
+                <div className="text-zinc-600 space-y-4 leading-relaxed font-sans text-sm md:text-base max-w-3xl">
+                  <p>
+                    Welcome to your private digital collection. This gallery has been meticulously structured, processed, and polished to capture the essence of your milestones on <span className="font-semibold text-zinc-900">{project.date}</span>.
+                  </p>
+                  <p>
+                    Every snapshot is a timeless chapter of your story. As you explore your curated collections below, you can select and bookmark your absolute favorites to build a bespoke keepsake album, or download full-resolution original copies directly to your devices.
+                  </p>
+                  <p className="text-zinc-500 text-xs italic">
+                    Thank you for letting us tell your beautiful story.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Simulated handwritten-style Signature Block */}
+            <div className="pt-6 border-t border-zinc-100 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-mono uppercase text-zinc-400 tracking-widest">
+                  Art Direction By
+                </p>
+                <p className="text-base font-display font-bold uppercase text-brand-red tracking-tight mt-1">
+                  Mellow Production
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[10px] font-mono uppercase text-zinc-400 tracking-widest">
+                  Curation Code
+                </p>
+                <p className="text-xs font-mono font-extrabold text-zinc-800 tracking-wider mt-1">
+                  MP-{project.id.slice(0, 5).toUpperCase()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Soundtrack & Monogram Crest */}
+          <div className="lg:col-span-4 bg-zinc-900 text-white rounded-3xl p-8 relative overflow-hidden flex flex-col justify-between shadow-2xl space-y-8">
+            {/* Ambient gold/red lighting overlay */}
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-brand-red/20 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="space-y-6 text-center">
+              <span className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-[9px] font-mono uppercase text-white font-bold tracking-widest">
+                Curated Atmosphere
+              </span>
+
+              {/* Dynamic Monogram Emblem */}
+              <div className="flex flex-col items-center justify-center space-y-3 pt-2">
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-white/20 hover:border-brand-red/60 p-1.5 transition-colors duration-500">
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-zinc-800 to-zinc-950 border border-white/10 flex items-center justify-center shadow-inner relative group">
+                    <span className="text-xl font-display font-black tracking-widest text-brand-red select-none">
+                      {getMonogram(project.clientName)}
+                    </span>
+                    <Heart size={10} className="text-brand-red absolute -bottom-1 text-center animate-bounce" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest">
+                    Custom Monogram
+                  </p>
+                  <p className="text-[10px] text-zinc-500 italic">
+                    Tailored exclusively for you
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Luxury Audio Ambient Player */}
+            <div className="bg-white/5 border border-white/10 p-5 rounded-2xl space-y-4 relative z-10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-brand-red/10 border border-brand-red/20 flex items-center justify-center text-brand-red shrink-0">
+                    <Music size={18} className={isPlaying ? "animate-spin-slow" : ""} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white uppercase tracking-tight">
+                      Atmosphere Soundtrack
+                    </p>
+                    <p className="text-[10px] text-zinc-400 font-mono">
+                      {isPlaying ? "Cinematic Piano - Playing" : "Tap to play ambient background"}
+                    </p>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={togglePlay}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                    isPlaying 
+                      ? "bg-brand-red text-white hover:scale-105 shadow-lg shadow-brand-red/35" 
+                      : "bg-white/10 text-white hover:bg-white/20"
+                  }`}
+                  aria-label="Toggle ambient music"
+                >
+                  {isPlaying ? <Volume2 size={16} /> : <VolumeX size={16} />}
+                </button>
+              </div>
+
+              {/* Bouncing Audio Visualizer Frequency Bars */}
+              {isPlaying && (
+                <div className="flex items-end justify-center gap-1 h-6 pt-2">
+                  {[...Array(12)].map((_, i) => {
+                    const delay = [0.1, 0.4, 0.2, 0.6, 0.3, 0.5, 0.1, 0.4, 0.2, 0.7, 0.3, 0.5][i];
+                    return (
+                      <motion.div
+                        key={i}
+                        animate={{ height: ["15%", "100%", "15%"] }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          delay: delay,
+                        }}
+                        className="w-1 bg-brand-red rounded-full"
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         {/* Sub-Events Selection */}
