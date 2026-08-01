@@ -72,7 +72,7 @@ export interface SyncLog {
 }
 
 export interface LandingPageConfig {
-  heroStyle?: 'classic_editorial' | 'split_hero' | 'dark_luxury' | 'romantic_card' | 'minimal_nordic';
+  heroStyle?: 'pic_time_editorial' | 'vogue_magazine' | 'editorial_arch' | 'split_minimalist' | 'cinematic_minimal' | 'classic_editorial' | 'split_hero' | 'dark_luxury' | 'romantic_card' | 'minimal_nordic';
   showBrideGroom?: boolean;
   brideName?: string;
   groomName?: string;

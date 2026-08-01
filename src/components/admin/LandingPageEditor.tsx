@@ -24,6 +24,7 @@ import { Project, LandingPageConfig } from '../../types/gallery';
 import { PRESET_FONTS, ensureFontLoaded } from '../../utils/fontUtils';
 import { ImageUploader } from '../common/ImageUploader';
 import { FontSelector } from '../common/FontSelector';
+import { ProjectHero } from '../gallery/ProjectHero';
 
 interface LandingPageEditorProps {
   project: Project;
@@ -43,7 +44,7 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
   
   // Landing Page Config
   const [cfg, setCfg] = useState<LandingPageConfig>({
-    heroStyle: project.landingPageConfig?.heroStyle || 'classic_editorial',
+    heroStyle: project.landingPageConfig?.heroStyle || 'pic_time_editorial',
     showBrideGroom: project.landingPageConfig?.showBrideGroom ?? true,
     brideName: project.landingPageConfig?.brideName || project.brideName || '',
     groomName: project.landingPageConfig?.groomName || project.groomName || '',
@@ -586,9 +587,9 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                   )}
 
                   <ImageUploader
-                    label="Compress & Upload Hero Cover"
+                    label="Upload High-Res Hero Cover"
                     compress={true}
-                    maxDimension={1200}
+                    maxDimension={2560}
                     onImageUploaded={url => updateCfg('bannerImage', url)}
                   />
 
@@ -619,34 +620,34 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
 
                 {[
                   {
-                    id: 'classic_editorial',
-                    title: 'Classic Editorial (Gold & Calligraphy)',
-                    desc: 'Elegant cream backdrop with romantic cursive bride & groom script & gold dividers',
-                    badge: 'Popular for Weddings',
+                    id: 'pic_time_editorial',
+                    title: 'Pic-Time Asymmetric Editorial (Featured)',
+                    desc: 'High-end magazine collage with offset portraits, overlapping typography & warm alabaster background',
+                    badge: 'Screenshot Template',
                   },
                   {
-                    id: 'romantic_card',
-                    title: 'Romantic Blush Card (Glassmorphism)',
-                    desc: 'Centered soft blurred romance card with couple names & floral accents',
-                    badge: 'Soft & Dreamy',
+                    id: 'vogue_magazine',
+                    title: 'Vogue Cover Minimalist',
+                    desc: 'High-fashion editorial layout with dual vertical portraits and crisp hairline dividers',
+                    badge: 'High Fashion',
                   },
                   {
-                    id: 'dark_luxury',
-                    title: 'Dark Luxury (Onyx & Amber)',
-                    desc: 'Cinematic full-screen dark canvas with glowing gold typography',
-                    badge: 'High Impact',
+                    id: 'editorial_arch',
+                    title: 'Arch Gallery Minimal',
+                    desc: 'Soft curved arch frame with delicate script & warm oat canvas',
+                    badge: 'Romantic',
                   },
                   {
-                    id: 'split_hero',
-                    title: 'Split Hero Layout',
-                    desc: 'Side-by-side photo banner and couple information badge',
-                    badge: 'Modern',
+                    id: 'split_minimalist',
+                    title: 'Split Architectural',
+                    desc: 'Clean left editorial column with scroll cue and right tall photo frame',
+                    badge: 'Minimal Single-Page',
                   },
                   {
-                    id: 'minimal_nordic',
-                    title: 'Clean Minimalist Nordic',
-                    desc: 'High contrast monochrome layout with bold titles & hashtag pill',
-                    badge: 'Contemporary',
+                    id: 'cinematic_minimal',
+                    title: 'Cinematic Full-Bleed Minimal',
+                    desc: 'Full-bleed image backdrop with floating frosted credit badge & glass card',
+                    badge: 'Luxury Dark',
                   },
                 ].map(preset => (
                   <div
@@ -686,125 +687,37 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
           <div
             className={`transition-all duration-300 bg-zinc-950 border border-white/20 rounded-3xl overflow-hidden shadow-2xl my-auto ${
               previewDevice === 'mobile'
-                ? 'w-[360px] h-[680px]'
+                ? 'w-[360px] max-h-[680px] overflow-y-auto'
                 : previewDevice === 'tablet'
-                ? 'w-[600px] h-[750px]'
-                : 'w-full max-w-4xl min-h-[500px]'
+                ? 'w-[600px] max-h-[750px] overflow-y-auto'
+                : 'w-full max-w-4xl max-h-[85vh] overflow-y-auto'
             }`}
           >
-            {/* Simulated Live Client Landing Page Hero */}
-            <div
-              className={`relative min-h-[480px] flex flex-col items-center justify-center p-8 text-center transition-all ${
-                cfg.heroStyle === 'dark_luxury'
-                  ? 'bg-zinc-950 text-white'
-                  : cfg.heroStyle === 'romantic_card'
-                  ? 'bg-rose-950/20 text-[#4A3036]'
-                  : cfg.heroStyle === 'minimal_nordic'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-[#FAF8F5] text-[#2D2621]'
-              }`}
-            >
-              {/* Background Cover Image with Overlay */}
-              {cfg.bannerImage && (
-                <div className="absolute inset-0 z-0 overflow-hidden">
-                  <img
-                    src={cfg.bannerImage}
-                    alt="Cover"
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div
-                    className="absolute inset-0 bg-black"
-                    style={{ opacity: cfg.heroOverlayOpacity ?? 0.4 }}
-                  />
-                </div>
-              )}
-
-              {/* Hero Inner Content Card */}
-              <div className="relative z-10 max-w-2xl mx-auto space-y-4 p-6 sm:p-10 rounded-3xl bg-black/40 backdrop-blur-md border border-white/20 text-white shadow-2xl">
-                {/* Event Hashtag Badge */}
-                {cfg.showHashtagBadge && (cfg.hashtag || hashtag) && (
-                  <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-500/30 to-rose-500/30 border border-amber-400/40 text-amber-300 px-3 py-1 rounded-full text-xs font-mono font-bold tracking-wider uppercase">
-                    <Hash size={12} />
-                    <span>{cfg.hashtag || hashtag}</span>
-                  </div>
-                )}
-
-                {/* Bride & Groom Name in Wedding Cursive Font */}
-                {cfg.showBrideGroom && (brideName || groomName) && (
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/60">
-                      THE WEDDING CELEBRATION OF
-                    </p>
-                    <h2
-                      className="text-4xl sm:text-6xl text-rose-200 tracking-wide font-normal leading-tight"
-                      style={{ fontFamily: loadedCursiveFamily }}
-                    >
-                      {brideName || 'Bride'} & {groomName || 'Groom'}
-                    </h2>
-                  </div>
-                )}
-
-                {/* Main Project Title */}
-                <h1
-                  className="text-2xl sm:text-4xl font-extrabold uppercase tracking-tight text-white drop-shadow"
-                  style={{ fontFamily: loadedTitleFamily !== 'inherit' ? loadedTitleFamily : 'inherit' }}
-                >
-                  {project.title}
-                </h1>
-
-                {/* Welcome Message & Quote */}
-                {cfg.welcomeMessage && (
-                  <p className="text-xs sm:text-sm font-sans text-white/80 max-w-lg mx-auto">
-                    {cfg.welcomeMessage}
-                  </p>
-                )}
-
-                {cfg.quoteText && (
-                  <p
-                    className="text-lg italic text-amber-200/90 font-serif"
-                    style={{ fontFamily: loadedCursiveFamily }}
-                  >
-                    "{cfg.quoteText}"
-                  </p>
-                )}
-
-                {/* Event Date & Location */}
-                <div className="flex items-center justify-center gap-4 text-xs font-mono text-white/70 pt-2 border-t border-white/10">
-                  {cfg.eventDateText && (
-                    <span className="flex items-center gap-1">
-                      <Calendar size={12} style={{ color: cfg.accentColor }} />
-                      {cfg.eventDateText}
-                    </span>
-                  )}
-                  {cfg.locationText && (
-                    <span className="flex items-center gap-1">
-                      <MapPin size={12} style={{ color: cfg.accentColor }} />
-                      {cfg.locationText}
-                    </span>
-                  )}
-                </div>
-
-                {/* Sub-event Folders Sample Preview */}
-                <div className="pt-4 space-y-2">
-                  <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">
-                    Sub-Event Gallery Folders
-                  </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {['Nikah Ceremony', 'Stage Highlights', 'Reception'].map((folderName, i) => (
-                      <div
-                        key={folderName}
-                        className="bg-white/10 border border-white/15 p-2 rounded-xl text-center text-xs font-mono font-medium text-white/90 hover:border-amber-400 transition-colors"
-                      >
-                        <div className="w-full h-12 rounded-lg bg-white/5 mb-1 flex items-center justify-center text-[10px] text-white/40">
-                          Thumbnail
-                        </div>
-                        <span className="truncate block">{folderName}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* Live Client Landing Page Hero Render */}
+            <div className="scale-95 origin-top p-2">
+              <ProjectHero 
+                project={{
+                  ...project,
+                  brideName,
+                  groomName,
+                  hashtag,
+                  titleFontFamily,
+                  customTitleFontUrl,
+                  customTitleFontName,
+                  titleFontSize,
+                  subtitleFontSize,
+                  landingPageConfig: {
+                    ...cfg,
+                    brideName,
+                    groomName,
+                    hashtag,
+                  }
+                }}
+                activeCoverUrl={cfg.bannerImage || project.coverImage}
+                currentCoverIndex={0}
+                coverList={[cfg.bannerImage || project.coverImage].filter(Boolean)}
+                setCurrentCoverIndex={() => {}}
+              />
             </div>
           </div>
         </div>

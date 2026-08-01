@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Calendar, MapPin, Hash, ArrowDown } from 'lucide-react';
 import { Project } from '../../types/gallery';
 import { ensureFontLoaded } from '../../utils/fontUtils';
 
@@ -18,22 +19,24 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   coverList,
   setCurrentCoverIndex,
 }) => {
+  const cfg = project.landingPageConfig;
+
   useEffect(() => {
     ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
-    const cursiveFontId = project.landingPageConfig?.cursiveFont || 'great_vibes';
+    const cursiveFontId = cfg?.cursiveFont || 'great_vibes';
     ensureFontLoaded(cursiveFontId, undefined, 'wedding_cursive');
-  }, [project.titleFontFamily, project.customTitleFontUrl, project.id, project.landingPageConfig?.cursiveFont]);
+  }, [project.titleFontFamily, project.customTitleFontUrl, project.id, cfg?.cursiveFont]);
 
   const loadedFontFamily = ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
-  const titleFontSizeMultiplier = (project.titleFontSize || project.landingPageConfig?.titleFontSize || 100) / 100;
-  const subtitleFontSizeMultiplier = (project.subtitleFontSize || project.landingPageConfig?.subtitleFontSize || 100) / 100;
+  const titleFontSizeMultiplier = (project.titleFontSize || cfg?.titleFontSize || 100) / 100;
+  const subtitleFontSizeMultiplier = (project.subtitleFontSize || cfg?.subtitleFontSize || 100) / 100;
 
   const titleFontStyle: React.CSSProperties = {
     ...(loadedFontFamily !== 'inherit' ? { fontFamily: loadedFontFamily } : {}),
     ...(titleFontSizeMultiplier !== 1 ? { fontSize: `${titleFontSizeMultiplier}em` } : {}),
   };
 
-  const cursiveFontId = project.landingPageConfig?.cursiveFont || 'great_vibes';
+  const cursiveFontId = cfg?.cursiveFont || 'great_vibes';
   const loadedCursiveFamily = ensureFontLoaded(cursiveFontId, undefined, 'wedding_cursive');
   const cursiveFontStyle: React.CSSProperties = { 
     fontFamily: loadedCursiveFamily,
@@ -42,93 +45,185 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
   const subtitleFontStyle: React.CSSProperties = subtitleFontSizeMultiplier !== 1 ? { fontSize: `${subtitleFontSizeMultiplier}em` } : {};
 
-  const brideName = project.brideName || project.landingPageConfig?.brideName;
-  const groomName = project.groomName || project.landingPageConfig?.groomName;
-  const hashtag = project.hashtag || project.landingPageConfig?.hashtag;
-  const welcomeMessage = project.landingPageConfig?.welcomeMessage;
-  const quoteText = project.landingPageConfig?.quoteText;
+  // Extract landing page properties
+  const brideName = cfg?.brideName || project.brideName || '';
+  const groomName = cfg?.groomName || project.groomName || '';
+  const hashtag = cfg?.hashtag || project.hashtag || '';
+  const welcomeMessage = cfg?.welcomeMessage || 'Welcome to our official gallery & moments';
+  const quoteText = cfg?.quoteText;
+  const eventDateText = cfg?.eventDateText || project.date || '2026';
+  const locationText = cfg?.locationText || '';
+  const accentColor = cfg?.accentColor || '#3D2820';
+  const showHashtagBadge = cfg?.showHashtagBadge ?? true;
+  const showBrideGroom = cfg?.showBrideGroom ?? true;
+  const overlayOpacity = cfg?.heroOverlayOpacity ?? 0.3;
+  const mainImage = cfg?.bannerImage || activeCoverUrl;
 
-  const isVintage = project.theme === 'vintage_warmth';
-  const isEarthy = project.theme === 'earthy_sand';
-  const isNordic = project.theme === 'clean_nordic';
-  const isMinimal = project.theme === 'modern_minimalist';
-  const isRomantic = project.theme === 'romantic_blush';
-  const isMellowWedding = project.theme === 'mellowwedding' || project.theme === 'mellow_wedding';
+  // Prepare list of images for multi-photo collage templates
+  const fallbackCollage = [
+    mainImage,
+    "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=800",
+    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=800",
+  ];
 
-  if (isMellowWedding) {
+  const collageImages = Array.from(new Set([
+    mainImage,
+    ...(project.coverImages || []),
+    ...coverList,
+    ...fallbackCollage
+  ])).filter(Boolean);
+
+  const img0 = collageImages[0] || mainImage;
+  const img1 = collageImages[1] || collageImages[0];
+  const img2 = collageImages[2] || collageImages[0];
+  const img3 = collageImages[3] || collageImages[1];
+
+  // Determine effective hero style (Default to 'pic_time_editorial'!)
+  let heroStyle = cfg?.heroStyle;
+  if (!heroStyle) {
+    heroStyle = 'pic_time_editorial';
+  }
+
+  // 1. PIC-TIME EDITORIAL ASYMMETRIC COLLAGE (Exact match to screenshot request!)
+  if (heroStyle === 'pic_time_editorial') {
     return (
-      <div className="relative w-full flex flex-col items-center bg-[#FCF9F5] rounded-[2.5rem] overflow-hidden p-4 sm:p-8 border border-[#EBE3D8] shadow-sm">
-        {/* Cover image container with Feathered Bottom Edge */}
-        <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] md:h-[60vh] rounded-[2rem] overflow-hidden shadow-md group bg-[#FAF6F0]">
-          <AnimatePresence>
-            <motion.img 
-              key={currentCoverIndex}
-              src={activeCoverUrl}
-              alt={project.title}
-              referrerPolicy="no-referrer"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.8 }}
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{
-                WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
-                maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
-              }}
-            />
-          </AnimatePresence>
-
-          {/* Feathered bottom edge gradient overlay */}
-          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#FCF9F5] via-[#FCF9F5]/70 to-transparent pointer-events-none" />
-        </div>
-
-        {/* Wedding Content Typography & Ornaments */}
-        <div className="relative z-10 w-full max-w-3xl -mt-16 sm:-mt-28 md:-mt-32 bg-white/95 backdrop-blur-md p-8 sm:p-12 md:p-16 rounded-[2.5rem] border border-[#EBE3D8] text-center flex flex-col items-center shadow-xl space-y-5">
-          {hashtag && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C59B6C]/10 border border-[#C59B6C]/30 text-[#C59B6C] text-xs font-mono font-bold tracking-wider uppercase mb-1">
-              <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
-            </div>
-          )}
-
-          {(brideName || groomName) && (
-            <div className="space-y-1">
-              <p className="text-[10px] font-serif uppercase tracking-[0.35em] text-[#C59B6C] font-semibold">
-                ✧ WEDDING CELEBRATION ✧
-              </p>
-              <h2 
-                style={cursiveFontStyle}
-                className="text-4xl sm:text-6xl text-[#C59B6C] font-normal leading-tight"
-              >
-                {brideName || 'Bride'} & {groomName || 'Groom'}
-              </h2>
-            </div>
-          )}
-
-          <h1
-            style={titleFontStyle}
-            className="text-3xl sm:text-5xl md:text-6xl font-serif italic font-normal tracking-wide text-[#2D2621] leading-tight"
-          >
-            {project.title}
-          </h1>
-
-          <p style={subtitleFontStyle} className="text-xs sm:text-sm font-serif italic text-[#8A7E74] max-w-lg leading-relaxed">
-            {welcomeMessage || quoteText || 'A celebration of love, captured in timeless frames and cherished forever.'}
+      <div className="relative w-full bg-[#F5F2EC] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-[#E8E2D7] shadow-sm text-[#382C26] my-2">
+        {/* Top Branding Header */}
+        <div className="text-center mb-8 sm:mb-12">
+          <p className="text-xs sm:text-sm font-serif tracking-[0.25em] text-[#6B5A50] uppercase">
+            Gallery by Mellow Production &nbsp;|&nbsp; {project.title}
           </p>
-
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-4 text-xs font-serif tracking-[0.2em] text-[#8A7E74] uppercase">
-            <span>{project.date}</span>
-          </div>
         </div>
 
-        {/* Carousel indicators if multiple cover images */}
+        {/* Asymmetric Editorial Grid */}
+        <div className="max-w-5xl mx-auto relative min-h-[600px] flex flex-col justify-between">
+          
+          {/* Top Row: Left Main Vertical Portrait + Right Texture Accent */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10">
+            {/* Top Left Vertical Portrait */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="md:col-span-6 lg:col-span-5 aspect-[3/4] rounded-2xl overflow-hidden shadow-md border border-[#E2DAD0] bg-white"
+            >
+              <img
+                src={img0}
+                alt={project.title}
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+
+            {/* Top Right Texture / Secondary Photo (Offset) */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.2 }}
+              className="hidden md:block md:col-span-4 md:col-start-9 aspect-square rounded-xl overflow-hidden shadow-sm border border-[#E2DAD0] bg-white mt-8"
+            >
+              <img
+                src={img1}
+                alt="Moment accent"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
+              />
+            </motion.div>
+          </div>
+
+          {/* Overlapping Typography Section in the Center */}
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="my-8 md:-my-16 relative z-20 text-center px-4"
+          >
+            {showHashtagBadge && hashtag && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#382C26]/5 border border-[#382C26]/15 text-[#6B5A50] text-xs font-mono font-bold tracking-wider mb-3">
+                <Hash size={12} />
+                <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
+              </div>
+            )}
+
+            {showBrideGroom && (brideName || groomName) ? (
+              <h1 
+                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.12em] uppercase font-light text-[#382C26] leading-none drop-shadow-sm"
+              >
+                {brideName} &amp; {groomName}
+              </h1>
+            ) : (
+              <h1 
+                style={titleFontStyle}
+                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.12em] uppercase font-light text-[#382C26] leading-none drop-shadow-sm"
+              >
+                {project.title}
+              </h1>
+            )}
+
+            {eventDateText && (
+              <p className="text-xl sm:text-3xl font-serif italic text-[#59483F] mt-3 sm:mt-4 tracking-wide">
+                {eventDateText}
+              </p>
+            )}
+
+            {quoteText && (
+              <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl sm:text-3xl italic mt-3">
+                "{quoteText}"
+              </p>
+            )}
+
+            {locationText && (
+              <p className="text-xs font-mono text-[#8C7A6D] uppercase tracking-widest mt-2">
+                {locationText}
+              </p>
+            )}
+          </motion.div>
+
+          {/* Bottom Row: Left Small Accent Photo + Right Vertical Feature Portrait */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end relative z-10 pt-6">
+            {/* Bottom Left Small Landscape Accent Photo */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              className="md:col-span-5 aspect-[4/3] rounded-2xl overflow-hidden shadow-sm border border-[#E2DAD0] bg-white hidden sm:block"
+            >
+              <img
+                src={img2}
+                alt="Atmosphere"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+
+            {/* Bottom Right Vertical Feature Photo */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.5 }}
+              className="md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-8 aspect-[3/4] rounded-2xl overflow-hidden shadow-md border border-[#E2DAD0] bg-white"
+            >
+              <img
+                src={img3}
+                alt="Feature story"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+              />
+            </motion.div>
+          </div>
+
+        </div>
+
+        {/* Minimalist Slide Navigation if multiple covers */}
         {coverList.length > 1 && (
-          <div className="flex items-center gap-2 mt-6">
+          <div className="flex items-center justify-center gap-2 mt-12">
             {coverList.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentCoverIndex(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  i === currentCoverIndex ? "bg-[#C59B6C] w-8" : "bg-[#EBE3D8] w-2 hover:bg-[#C59B6C]/50"
+                  i === currentCoverIndex ? "bg-[#382C26] w-8" : "bg-[#D8D0C5] w-2 hover:bg-[#382C26]/50"
                 }`}
                 aria-label={`Go to slide ${i + 1}`}
               />
@@ -139,271 +234,255 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
     );
   }
 
-  if (isMinimal) {
+  // 2. VOGUE MAGAZINE COVER (High-Fashion Editorial)
+  if (heroStyle === 'vogue_magazine') {
     return (
-      <div className="relative w-full flex flex-col items-center bg-white pt-20 pb-10">
-        <div className="text-center space-y-6 mb-16 max-w-2xl px-6">
-          {project.date && (
-            <p className="text-[10px] font-sans tracking-[0.4em] uppercase text-black font-semibold">
-              {project.date}
-            </p>
-          )}
-          <h1
-            style={titleFontStyle}
-            className="text-5xl md:text-7xl font-sans tracking-tighter uppercase font-medium text-black leading-none"
-          >
-            {project.title}
-          </h1>
+      <div className="relative w-full bg-[#FAF9F6] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-zinc-200 shadow-sm text-zinc-900 my-2">
+        {/* Top Header Rule */}
+        <div className="border-b border-zinc-300 pb-4 mb-8 flex items-center justify-between text-[11px] font-mono tracking-widest text-zinc-500 uppercase">
+          <span>GALLERY BY MELLOW PRODUCTION</span>
+          <span>{eventDateText}</span>
+          <span>SPECIAL EDITION</span>
         </div>
-        <div className="relative w-full max-w-6xl aspect-[16/9] overflow-hidden">
-          <AnimatePresence>
-            <motion.img 
-              key={currentCoverIndex}
-              src={activeCoverUrl}
-              alt={project.title}
-              referrerPolicy="no-referrer"
-              initial={{ opacity: 0, filter: 'grayscale(100%)' }}
-              animate={{ opacity: 1, filter: 'grayscale(100%)' }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </AnimatePresence>
-        </div>
-      </div>
-    );
-  }
 
-  if (isRomantic) {
-    return (
-      <div className="relative w-full min-h-[70vh] flex flex-col items-center justify-center bg-[#FFF0F5] overflow-hidden rounded-[3rem] p-6 shadow-sm border border-[#F5DADD]">
-        <div className="absolute inset-0 z-0">
-          <AnimatePresence>
-            <motion.img 
-              key={currentCoverIndex}
-              src={activeCoverUrl}
-              alt={project.title}
-              referrerPolicy="no-referrer"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 0.15, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 2 }}
-              className="absolute inset-0 w-full h-full object-cover blur-sm"
-            />
-          </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-t from-[#FFF0F5] to-transparent" />
-        </div>
-        
-        <div className="relative z-10 w-full max-w-4xl bg-white/70 backdrop-blur-md p-10 md:p-16 rounded-[2rem] border border-[#F5DADD] text-center flex flex-col items-center shadow-xl">
-          <div className="w-16 h-[1px] bg-[#C28C93] mb-8" />
-          <h1
-            style={titleFontStyle}
-            className="text-4xl md:text-6xl font-serif italic font-light tracking-wide text-[#4A3036] leading-tight mb-6"
-          >
-            {project.title}
-          </h1>
-          <div className="flex items-center gap-4 text-xs font-serif tracking-widest text-[#8E6D74] uppercase">
-            <span>{project.date}</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isVintage) {
-    return (
-      <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center pt-10">
-        <div className="w-full bg-white p-6 sm:p-10 shadow-xl rotate-[-1deg] border border-[#E7DFC8]">
-          <div className="relative aspect-[4/3] w-full overflow-hidden mb-8">
-            <AnimatePresence>
-              <motion.img 
-                key={currentCoverIndex}
-                src={activeCoverUrl}
-                alt={project.title}
-                referrerPolicy="no-referrer"
-                initial={{ opacity: 0, filter: 'sepia(0.2) contrast(1.1)' }}
-                animate={{ opacity: 1, filter: 'sepia(0.2) contrast(1.1)' }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 1.5 }}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            </AnimatePresence>
-          </div>
-          <div className="text-center space-y-4">
-            <h1
-              style={titleFontStyle}
-              className="text-4xl sm:text-5xl font-serif font-black uppercase tracking-tight text-[#1F3428]"
-            >
+        {/* Center High-Fashion Serif Title */}
+        <div className="text-center my-6">
+          {showBrideGroom && (brideName || groomName) ? (
+            <h1 className="text-4xl sm:text-7xl md:text-8xl font-serif font-extralight tracking-[0.18em] uppercase text-zinc-900 leading-none">
+              {brideName} &amp; {groomName}
+            </h1>
+          ) : (
+            <h1 style={titleFontStyle} className="text-4xl sm:text-7xl md:text-8xl font-serif font-extralight tracking-[0.18em] uppercase text-zinc-900 leading-none">
               {project.title}
             </h1>
-            <p className="text-[#5E7265] font-serif italic text-lg sm:text-xl">
-              "Every picture tells a story."
+          )}
+
+          {hashtag && showHashtagBadge && (
+            <p className="text-xs font-mono tracking-widest text-zinc-400 mt-3 uppercase">
+              {hashtag.startsWith('#') ? hashtag : `#${hashtag}`}
             </p>
-            <div className="pt-2 flex items-center justify-center gap-4 text-xs font-mono text-[#5E7265] tracking-widest uppercase">
-              <span>{project.date}</span>
+          )}
+        </div>
+
+        {/* Dual Side-by-Side Portrait Showcase */}
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 my-8 items-center">
+          <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+            <img src={img0} alt={project.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          </div>
+          <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-zinc-200 md:mt-12">
+            <img src={img1} alt="Cover feature" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          </div>
+        </div>
+
+        {/* Quote & Details */}
+        <div className="text-center max-w-xl mx-auto space-y-2 pt-4">
+          {quoteText && (
+            <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl italic text-zinc-800">
+              "{quoteText}"
+            </p>
+          )}
+          {welcomeMessage && (
+            <p style={subtitleFontStyle} className="text-xs sm:text-sm font-sans text-zinc-500">
+              {welcomeMessage}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 3. EDITORIAL ARCH (Soft Curved Frame Minimalist)
+  if (heroStyle === 'editorial_arch') {
+    return (
+      <div className="relative w-full bg-[#F4F0EA] rounded-[2.5rem] overflow-hidden p-8 sm:p-16 border border-[#E3DCD1] shadow-sm text-[#2C241E] my-2 text-center flex flex-col items-center">
+        {/* Header Tag */}
+        <span className="text-[11px] font-mono tracking-[0.3em] uppercase text-[#8A796C] mb-6">
+          CELEBRATION GALLERY
+        </span>
+
+        {/* Arch Image Frame */}
+        <div className="relative w-full max-w-md aspect-[3/4] rounded-t-[14rem] rounded-b-3xl overflow-hidden shadow-2xl border-4 border-white/80 bg-white">
+          <img src={mainImage} alt={project.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          <div className="absolute inset-0 bg-black/10" />
+        </div>
+
+        {/* Names Over Arch Footer */}
+        <div className="-mt-12 relative z-10 bg-white/90 backdrop-blur-md px-8 py-6 rounded-3xl border border-[#E3DCD1] shadow-xl max-w-lg w-full space-y-2">
+          {showBrideGroom && (brideName || groomName) ? (
+            <h1 className="text-3xl sm:text-5xl font-serif italic text-[#2C241E]">
+              {brideName} &amp; {groomName}
+            </h1>
+          ) : (
+            <h1 style={titleFontStyle} className="text-3xl sm:text-5xl font-serif italic text-[#2C241E]">
+              {project.title}
+            </h1>
+          )}
+
+          {eventDateText && (
+            <p className="text-xs font-mono tracking-widest text-[#8A796C] uppercase">
+              {eventDateText} {locationText ? `— ${locationText}` : ''}
+            </p>
+          )}
+
+          {quoteText && (
+            <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-xl italic">
+              "{quoteText}"
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 4. SPLIT MINIMALIST (Architectural Single-Page Website)
+  if (heroStyle === 'split_minimalist') {
+    return (
+      <div className="relative w-full bg-[#F8F7F4] rounded-[2.5rem] overflow-hidden border border-[#E6E3DC] shadow-sm my-2 text-[#221C18] flex flex-col md:flex-row min-h-[580px]">
+        {/* Left Editorial Content Column */}
+        <div className="flex-1 p-8 sm:p-14 md:p-16 flex flex-col justify-between space-y-8">
+          <div>
+            <p className="text-[10px] font-mono tracking-[0.3em] uppercase text-[#88786C] font-bold">
+              Gallery by Mellow Production
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {showHashtagBadge && hashtag && (
+              <span className="inline-block text-xs font-mono font-bold tracking-widest text-[#A28F81] uppercase">
+                {hashtag.startsWith('#') ? hashtag : `#${hashtag}`}
+              </span>
+            )}
+
+            {showBrideGroom && (brideName || groomName) ? (
+              <h1 className="text-4xl sm:text-6xl font-serif tracking-tight font-normal text-[#221C18] leading-tight">
+                {brideName} <br />
+                <span className="italic font-light text-[#7C695B]">&amp;</span> {groomName}
+              </h1>
+            ) : (
+              <h1 style={titleFontStyle} className="text-4xl sm:text-6xl font-serif tracking-tight font-normal text-[#221C18] leading-tight">
+                {project.title}
+              </h1>
+            )}
+
+            {welcomeMessage && (
+              <p style={subtitleFontStyle} className="text-xs sm:text-sm font-sans text-[#6E5F54] max-w-md leading-relaxed">
+                {welcomeMessage}
+              </p>
+            )}
+
+            {quoteText && (
+              <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl italic">
+                "{quoteText}"
+              </p>
+            )}
+          </div>
+
+          <div className="pt-6 border-t border-[#E6E3DC] flex items-center justify-between text-xs font-mono text-[#88786C]">
+            <div>
+              {eventDateText && <span className="block font-bold">{eventDateText}</span>}
+              {locationText && <span className="block text-[11px]">{locationText}</span>}
+            </div>
+            <div className="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest">
+              <span>EXPLORE</span>
+              <ArrowDown size={14} className="animate-bounce" />
             </div>
           </div>
         </div>
-      </div>
-    );
-  }
 
-  if (isEarthy) {
-    return (
-      <div className="relative w-full rounded-t-full rounded-b-3xl overflow-hidden bg-[#FDFBFA] border-[8px] border-white shadow-xl flex flex-col items-center">
-        <div className="relative w-full aspect-square sm:aspect-video overflow-hidden rounded-t-full">
-          <AnimatePresence>
-            <motion.img 
-              key={currentCoverIndex}
-              src={activeCoverUrl}
-              alt={project.title}
-              referrerPolicy="no-referrer"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </AnimatePresence>
-        </div>
-        <div className="py-12 px-6 text-center space-y-4 w-full bg-[#FDFBFA]">
-          <h1
-            style={titleFontStyle}
-            className="text-4xl sm:text-6xl font-serif italic tracking-wide text-[#3E3832]"
-          >
-            {project.title}
-          </h1>
-          <div className="flex items-center justify-center gap-4 text-xs font-mono text-[#92867B] tracking-widest uppercase">
-            <span>{project.date}</span>
-          </div>
+        {/* Right Tall Feature Photo Frame */}
+        <div className="flex-1 relative min-h-[350px] md:min-h-[580px] bg-zinc-100">
+          <img src={mainImage} alt={project.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+          <div className="absolute inset-0 bg-black/10" />
         </div>
       </div>
     );
   }
 
-  if (isNordic) {
-    return (
-      <div className="relative w-full flex flex-col md:flex-row bg-white border border-slate-200/80 shadow-xs overflow-hidden">
-        <div className="flex-1 p-10 md:p-16 flex flex-col justify-center space-y-8">
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] font-extrabold">
-            PORTFOLIO HIGHLIGHT
-          </p>
-          <h1
-            style={titleFontStyle}
-            className="text-4xl md:text-5xl lg:text-6xl font-sans tracking-[0.1em] uppercase font-semibold text-slate-950 leading-tight"
-          >
-            {project.title}
-          </h1>
-          <div className="w-16 h-[2px] bg-slate-900" />
-          <div className="flex flex-col space-y-2 text-xs font-mono text-slate-500 tracking-widest uppercase font-bold pt-4">
-            <span>DATE: {project.date}</span>
-          </div>
-        </div>
-        <div className="flex-1 relative aspect-square md:aspect-auto">
-          <AnimatePresence>
-            <motion.img 
-              key={currentCoverIndex}
-              src={activeCoverUrl}
-              alt={project.title}
-              referrerPolicy="no-referrer"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1.5 }}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </AnimatePresence>
-        </div>
-      </div>
-    );
-  }
-
-  // Default: Dark Luxury & Classic Editorial (Full bleed)
+  // 5. CINEMATIC MINIMAL (Dark / Light Luxury Full-Bleed Minimalist)
   return (
-    <div className="relative w-full h-[70vh] min-h-[500px] md:h-[75vh] rounded-[2rem] overflow-hidden bg-zinc-950 shadow-2xl group">
+    <div className="relative w-full h-[70vh] min-h-[500px] md:h-[75vh] rounded-[2.5rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl group my-2">
       <AnimatePresence>
         <motion.img 
-          key={currentCoverIndex}
-          src={activeCoverUrl}
+          key={mainImage}
+          src={mainImage}
           alt={project.title}
           referrerPolicy="no-referrer"
           initial={{ opacity: 0, scale: 1.05 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 1.5 }}
-          className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-102 transition-transform duration-[10000ms] ease-out"
-          style={{
-            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
-            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
-          }}
+          className="absolute inset-0 w-full h-full object-cover"
         />
       </AnimatePresence>
       
-      {/* Subtle elegant gradient mask */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/30 to-black/75 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80 pointer-events-none" />
 
-      {/* Centered Editorial Typography Overlay */}
+      {/* Floating Top Credit Badge */}
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 rounded-full bg-black/40 backdrop-blur-md border border-white/15 text-[10px] font-mono text-white/70 tracking-widest uppercase">
+        Gallery by Mellow Production
+      </div>
+
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 md:px-12 z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-4 max-w-4xl"
+          className="space-y-4 max-w-3xl p-8 sm:p-12 rounded-3xl bg-black/35 backdrop-blur-md border border-white/15 text-white shadow-2xl"
         >
-          {hashtag && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-300 text-xs font-mono font-bold tracking-wider uppercase mb-1">
+          {showHashtagBadge && hashtag && (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-mono font-bold tracking-wider mb-1">
+              <Hash size={12} />
               <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
             </div>
           )}
 
-          {(brideName || groomName) && (
+          {showBrideGroom && (brideName || groomName) ? (
             <div className="space-y-1">
-              <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
+              <p className="text-[10px] font-mono text-white/60 uppercase tracking-[0.3em] font-bold">
                 WEDDING CELEBRATION
               </p>
-              <h2
-                style={cursiveFontStyle}
-                className="text-4xl sm:text-6xl text-amber-200 font-normal leading-tight drop-shadow-lg"
-              >
-                {brideName || 'Bride'} & {groomName || 'Groom'}
-              </h2>
+              <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif italic text-white tracking-wide">
+                {brideName} &amp; {groomName}
+              </h1>
             </div>
+          ) : (
+            <h1 style={titleFontStyle} className="text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-wide">
+              {project.title}
+            </h1>
           )}
-
-          {!brideName && !groomName && (
-            <p className="text-[10px] sm:text-xs font-mono text-zinc-300 uppercase tracking-[0.3em] font-extrabold">
-              EVENT GALLERY
-            </p>
-          )}
-          
-          <h1
-            style={titleFontStyle}
-            className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black uppercase tracking-tight text-white leading-tight filter drop-shadow-md"
-          >
-            {project.title}
-          </h1>
 
           {welcomeMessage && (
-            <p className="text-xs sm:text-sm font-sans text-white/80 max-w-xl mx-auto drop-shadow">
+            <p style={subtitleFontStyle} className="text-xs sm:text-sm font-sans text-white/80 max-w-xl mx-auto">
               {welcomeMessage}
             </p>
           )}
 
-          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm font-mono text-zinc-300 tracking-widest uppercase font-bold">
-            <span>{project.date}</span>
-          </div>
-        </motion.div>
+          {quoteText && (
+            <p style={{ ...cursiveFontStyle, color: accentColor || '#FDE68A' }} className="text-xl sm:text-2xl italic">
+              "{quoteText}"
+            </p>
+          )}
 
-        {/* Scroll/Explore Indicator at Bottom */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-          <span className="text-[9px] font-mono tracking-[0.25em] text-white/50 uppercase font-black">
-            Scroll To Explore
-          </span>
-          <div className="w-1.5 h-1.5 rounded-full bg-brand-red" />
-        </div>
+          {(eventDateText || locationText) && (
+            <div className="pt-3 flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-white/70 tracking-widest uppercase border-t border-white/10 w-full">
+              {eventDateText && (
+                <span className="flex items-center gap-1.5">
+                  <Calendar size={13} />
+                  {eventDateText}
+                </span>
+              )}
+              {locationText && (
+                <span className="flex items-center gap-1.5">
+                  <MapPin size={13} />
+                  {locationText}
+                </span>
+              )}
+            </div>
+          )}
+        </motion.div>
       </div>
 
-      {/* Carousel navigation dots */}
       {coverList.length > 1 && (
         <div className="absolute bottom-8 right-8 z-20 flex items-center gap-2">
           {coverList.map((_, i) => (

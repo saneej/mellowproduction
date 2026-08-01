@@ -121,9 +121,9 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
               />
               <ImageUploader 
                 onImageUploaded={url => setCoverImage(url)} 
-                label="Compress & Upload Thumbnail"
+                label="Upload High-Res Thumbnail"
                 compress={true}
-                maxDimension={900}
+                maxDimension={2560}
               />
             </div>
           </div>

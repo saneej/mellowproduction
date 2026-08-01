@@ -204,6 +204,8 @@ export const ProjectPage: React.FC = () => {
 
   const themeStyles = getThemeStyles(project.theme);
 
+  const subEventLayout = project.landingPageConfig?.subEventLayout || 'cards';
+
   return (
     <div className={`min-h-screen ${themeStyles.bg} pb-24 relative overflow-x-hidden transition-all duration-500`}>
       
@@ -270,58 +272,114 @@ export const ProjectPage: React.FC = () => {
             }`} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            {events.map((evt, idx) => {
-              const displayIndex = String(idx + 1).padStart(2, "0");
-              return (
-                <motion.div
-                  key={evt.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1, duration: 0.6 }}
-                >
-                  <Link
-                    to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
-                    className="group block space-y-4"
+          {subEventLayout === 'editorial_list' ? (
+            <div className="space-y-4 max-w-3xl mx-auto">
+              {events.map((evt, idx) => {
+                const displayIndex = String(idx + 1).padStart(2, "0");
+                return (
+                  <motion.div
+                    key={evt.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.5 }}
                   >
-                    {/* Clean Picture Card */}
-                    <div className={`aspect-[3/2] rounded-2xl overflow-hidden relative shadow-sm border ${themeStyles.borderColor} ${project.theme === 'dark_luxury' ? 'bg-zinc-900' : 'bg-white'}`}>
-                      <img
-                        src={
-                          evt.coverImage 
-                            ? getDriveImageUrl(evt.coverImage, 800) 
-                            : project.coverImage 
-                              ? getDriveImageUrl(project.coverImage, 800) 
-                              : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"
-                        }
-                        alt={evt.title}
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
-                      />
-                      
-                      {/* Smooth dark overlay on hover */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
-                    </div>
-
-                    {/* Minimalist Editorial Label underneath */}
-                    <div className="px-1 flex items-baseline justify-between">
-                      <div className="space-y-1">
-                        <span className={`text-[10px] font-mono tracking-widest block font-extrabold ${themeStyles.textMuted}`}>
-                          {displayIndex} — GALLERY
+                    <Link
+                      to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
+                      className={`group flex items-center justify-between p-4 sm:p-5 rounded-2xl border transition-all duration-300 ${themeStyles.borderColor} ${project.theme === 'dark_luxury' ? 'bg-zinc-900/60 hover:bg-zinc-900 border-white/10' : 'bg-white/80 hover:bg-white border-zinc-200'} shadow-sm hover:shadow-md`}
+                    >
+                      <div className="flex items-center gap-4 sm:gap-6">
+                        <span className={`text-xs font-mono font-bold ${themeStyles.textMuted}`}>
+                          {displayIndex}
                         </span>
-                        <h3 className={`text-lg uppercase tracking-tight transition-colors duration-300 ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:opacity-75`}>
-                          {evt.title}
-                        </h3>
+                        <div className="w-16 h-12 rounded-xl overflow-hidden shrink-0 bg-zinc-200 border border-white/10">
+                          <img
+                            src={
+                              evt.coverImage 
+                                ? getDriveImageUrl(evt.coverImage, 400) 
+                                : project.coverImage 
+                                  ? getDriveImageUrl(project.coverImage, 400) 
+                                  : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=400"
+                            }
+                            alt={evt.title}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        </div>
+                        <div>
+                          <h3 className={`text-base font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
+                            {evt.title}
+                          </h3>
+                          <span className={`text-[10px] font-mono tracking-widest uppercase ${themeStyles.textMuted}`}>
+                            Collection
+                          </span>
+                        </div>
                       </div>
-                      <div className={`text-[10px] font-mono tracking-widest transition-colors duration-300 font-extrabold flex items-center gap-1 ${themeStyles.textMuted} group-hover:opacity-75`}>
-                        VIEW <span>→</span>
+                      <div className={`text-xs font-mono tracking-widest font-extrabold flex items-center gap-1.5 ${themeStyles.textMuted} group-hover:translate-x-1 transition-transform`}>
+                        EXPLORE <span>→</span>
                       </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              );
-            })}
-          </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className={`grid gap-8 ${
+              subEventLayout === 'grid' 
+                ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4' 
+                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'
+            }`}>
+              {events.map((evt, idx) => {
+                const displayIndex = String(idx + 1).padStart(2, "0");
+                return (
+                  <motion.div
+                    key={evt.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.1, duration: 0.6 }}
+                  >
+                    <Link
+                      to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
+                      className="group block space-y-4"
+                    >
+                      {/* Clean Picture Card */}
+                      <div className={`aspect-[3/2] rounded-2xl overflow-hidden relative shadow-sm border ${themeStyles.borderColor} ${project.theme === 'dark_luxury' ? 'bg-zinc-900' : 'bg-white'}`}>
+                        <img
+                          src={
+                            evt.coverImage 
+                              ? getDriveImageUrl(evt.coverImage, 800) 
+                              : project.coverImage 
+                                ? getDriveImageUrl(project.coverImage, 800) 
+                                : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"
+                          }
+                          alt={evt.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
+                        />
+                        
+                        {/* Smooth dark overlay on hover */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
+                      </div>
+
+                      {/* Minimalist Editorial Label underneath */}
+                      <div className="px-1 flex items-baseline justify-between">
+                        <div className="space-y-1">
+                          <span className={`text-[10px] font-mono tracking-widest block font-extrabold ${themeStyles.textMuted}`}>
+                            {displayIndex} — GALLERY
+                          </span>
+                          <h3 className={`text-lg uppercase tracking-tight transition-colors duration-300 ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:opacity-75`}>
+                            {evt.title}
+                          </h3>
+                        </div>
+                        <div className={`text-[10px] font-mono tracking-widest transition-colors duration-300 font-extrabold flex items-center gap-1 ${themeStyles.textMuted} group-hover:opacity-75`}>
+                          VIEW <span>→</span>
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
       </main>

@@ -74,9 +74,9 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   useEffect(() => {
     if (!isInView) return;
 
-    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 800) : item.thumbnailUrl || fallbackImg);
-    const hd = item.hdUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2048) : item.fullUrl || small);
-    const original = item.originalUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2400) : item.fullUrl || hd);
+    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 1600) : item.thumbnailUrl || fallbackImg);
+    const hd = item.hdUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2560) : item.fullUrl || small);
+    const original = item.originalUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 3840) : item.fullUrl || hd);
 
     const imgSmall = new Image();
     imgSmall.src = small;
