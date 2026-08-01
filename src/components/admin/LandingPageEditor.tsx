@@ -649,6 +649,18 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                     desc: 'High-end fashion & resort inspired. Layered depth with floating glass cards, gold accents, smooth scroll motion.',
                     badge: 'Luxury Parallax',
                   },
+                  {
+                    id: 'editorial_split_arch',
+                    title: '6. EDITORIAL SPLIT ARCH',
+                    desc: 'Soft curved arch frame, elegant left-column typography layout with script quote & warm oat backdrop.',
+                    badge: 'Romantic Arch',
+                  },
+                  {
+                    id: 'minimalist_diary',
+                    title: '7. MINIMALIST DIARY',
+                    desc: 'Centered polaroid/film portrait header, vintage textured paper, delicate handwritten subheadings & warm minimal layout.',
+                    badge: 'Diary / Retro',
+                  },
                 ].map(preset => (
                   <div
                     key={preset.id}
