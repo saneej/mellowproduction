@@ -357,27 +357,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               </div>
             </div>
           </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-stone-100/60 dark:bg-stone-900/40 border-b border-stone-200/50 dark:border-stone-800 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Sparkles size={16} className={isDark ? 'text-amber-500' : 'text-stone-700'} />
-                <span className={`text-xs font-mono tracking-widest uppercase ${textMuted}`}>
-                  Ready to explore all moments?
-                </span>
-              </div>
-              <button
-                onClick={scrollToCollections}
-                className={`w-full sm:w-auto px-8 py-3 rounded-full text-xs font-mono font-extrabold tracking-widest uppercase transition-all duration-300 hover:scale-102 ${
-                  isDark ? 'bg-amber-500 text-black hover:bg-amber-400' : 'bg-stone-900 text-white hover:bg-black'
-                }`}
-              >
-                View Full Collection
-              </button>
-            </div>
-          </section>
-
           {/* Asymmetric Editorial Collage */}
           <section className="relative py-24 sm:py-32 px-6 sm:px-12 max-w-7xl mx-auto z-20 space-y-24">
             <div className="flex flex-col md:flex-row items-baseline justify-between border-b pb-6 border-stone-200/50 dark:border-stone-800">
@@ -495,21 +474,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               </div>
             </div>
           </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-zinc-950 border-b border-white/5 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className="text-xs font-mono tracking-widest uppercase text-stone-400">
-                Skip layout directly to high-resolution downloads?
-              </span>
-              <button
-                onClick={scrollToCollections}
-                className="w-full sm:w-auto px-8 py-3 bg-amber-500 text-black rounded-full text-xs font-mono font-extrabold tracking-widest uppercase hover:bg-amber-400"
-              >
-                Launch Private Gallery
-              </button>
-            </div>
-          </section>
         </div>
       )}
 
@@ -529,21 +493,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               {project.title}
             </h1>
             <p className={`text-xs font-mono tracking-[0.2em] uppercase ${textMuted}`}>{eventDateText}</p>
-          </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-stone-100/60 dark:bg-stone-900/40 border-b border-stone-200/50 dark:border-stone-800 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className={`text-xs font-mono tracking-widest uppercase ${textMuted}`}>
-                Quick Access: Jump to the private media suites
-              </span>
-              <button
-                onClick={scrollToCollections}
-                className="w-full sm:w-auto px-8 py-3 bg-stone-900 text-white dark:bg-white dark:text-black rounded-full text-xs font-mono font-extrabold tracking-widest uppercase hover:scale-103 transition-transform"
-              >
-                Enter Collections
-              </button>
-            </div>
           </section>
 
           {/* Chapter Timeline Elements */}
@@ -636,21 +585,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               </div>
             </div>
           </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-stone-50 dark:bg-stone-900 border-b border-stone-200/50 dark:border-stone-800 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className={`text-xs font-mono tracking-widest uppercase ${textMuted}`}>
-                Direct link to explore the complete client galleries
-              </span>
-              <button
-                onClick={scrollToCollections}
-                className="w-full sm:w-auto px-8 py-3 bg-stone-900 text-white dark:bg-white dark:text-black rounded-lg text-xs font-mono font-bold tracking-widest uppercase"
-              >
-                Access Galleries
-              </button>
-            </div>
-          </section>
         </div>
       )}
 
@@ -703,21 +637,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
                 className="px-10 py-5 bg-[#D4AF37] hover:bg-[#ebd0a3] text-black font-mono text-xs font-extrabold tracking-[0.2em] rounded-full uppercase transition-all duration-300 shadow-xl hover:shadow-[#D4AF37]/35"
               >
                 ENTER GALLERY COLLECTIONS
-              </button>
-            </div>
-          </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-stone-950 border-b border-white/5 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className="text-xs font-mono tracking-widest uppercase text-stone-400">
-                Proceed instantly to full high-resolution slide deck & downloading suite?
-              </span>
-              <button
-                onClick={scrollToCollections}
-                className="w-full sm:w-auto px-8 py-3 bg-[#D4AF37] text-black rounded-full text-xs font-mono font-extrabold tracking-widest uppercase"
-              >
-                Open Galleries Now
               </button>
             </div>
           </section>
@@ -786,21 +705,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               </motion.div>
             </div>
           </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-stone-100/60 dark:bg-stone-900/40 border-b border-stone-200/50 dark:border-stone-800 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className={`text-xs font-mono tracking-widest uppercase ${textMuted}`}>
-                Would you like to bypass the storytelling and view full image indexes?
-              </span>
-              <button
-                onClick={scrollToCollections}
-                className="w-full sm:w-auto px-8 py-3 bg-stone-950 text-white dark:bg-white dark:text-black rounded-full text-xs font-mono font-bold tracking-widest uppercase"
-              >
-                Explore Archives
-              </button>
-            </div>
-          </section>
         </div>
       )}
 
@@ -852,21 +756,6 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
                   Step Into Private Diary →
                 </button>
               </div>
-            </div>
-          </section>
-
-          {/* IMMEDIATE "ENTER TO COLLECTION" ROW */}
-          <section className="relative py-8 px-6 sm:px-12 bg-[#F5EFE4] dark:bg-stone-900 border-b border-stone-200/50 dark:border-stone-800 z-20">
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <span className="text-xs font-mono tracking-widest uppercase text-stone-700 dark:text-stone-300">
-                Instantly enter the curated photography files
-              </span>
-              <button
-                onClick={scrollToCollections}
-                className="w-full sm:w-auto px-8 py-3 bg-stone-900 text-white dark:bg-white dark:text-black rounded-lg text-xs font-mono font-bold tracking-widest uppercase"
-              >
-                View Curations
-              </button>
             </div>
           </section>
         </div>
