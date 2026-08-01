@@ -243,16 +243,16 @@ export const ProjectPage: React.FC = () => {
         }}
       />
 
-      <main className="max-w-7xl mx-auto px-6 pt-6 space-y-16 relative z-10">
-        
-        <ProjectHero 
-          project={project}
-          activeCoverUrl={activeCoverUrl}
-          currentCoverIndex={currentCoverIndex}
-          coverList={coverList}
-          setCurrentCoverIndex={setCurrentCoverIndex}
-        />
+      <ProjectHero 
+        project={project}
+        activeCoverUrl={activeCoverUrl}
+        currentCoverIndex={currentCoverIndex}
+        coverList={coverList}
+        setCurrentCoverIndex={setCurrentCoverIndex}
+      />
 
+      <main id="gallery-content" className="max-w-7xl mx-auto px-6 pt-16 pb-20 space-y-16 relative z-10">
+        
         {/* Pure Pic-Time Style Gallery List */}
         <div className="space-y-12 pt-8">
           <motion.div 

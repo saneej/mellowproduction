@@ -1,8 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, MapPin, Hash, ArrowDown, Share2, Download, Check, Copy, X, Smartphone, Play, Volume2, VolumeX } from 'lucide-react';
+import { 
+  Calendar, 
+  MapPin, 
+  Hash, 
+  ArrowDown, 
+  Share2, 
+  Check, 
+  Copy, 
+  X, 
+  Smartphone, 
+  Play, 
+  Volume2, 
+  VolumeX, 
+  ChevronRight, 
+  Camera, 
+  Heart,
+  MailOpen,
+  Maximize2
+} from 'lucide-react';
 import { Project } from '../../types/gallery';
 import { ensureFontLoaded } from '../../utils/fontUtils';
+import { getDriveImageUrl } from '../../services/driveService';
 
 interface ProjectHeroProps {
   project: Project;
@@ -21,12 +40,51 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 }) => {
   const cfg = project.landingPageConfig;
 
-  // Modals state
+  // Custom states
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showLoader, setShowLoader] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAppModal, setShowAppModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  const [isHoveredCta, setIsHoveredCta] = useState(false);
 
+  // Parallax Scroll Y position emulation (using lightweight requestAnimationFrame listener)
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Premium loading simulation
+  useEffect(() => {
+    let current = 0;
+    const interval = setInterval(() => {
+      // Premium easing/non-linear counting for loader
+      if (current < 35) {
+        current += Math.floor(Math.random() * 8) + 2;
+      } else if (current < 85) {
+        current += Math.floor(Math.random() * 4) + 1;
+      } else if (current < 99) {
+        current += Math.floor(Math.random() * 2) + 1;
+      } else {
+        current = 100;
+        clearInterval(interval);
+        setTimeout(() => {
+          setShowLoader(false);
+        }, 900);
+      }
+      setLoadingProgress(Math.min(current, 100));
+    }, 45);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Ensure Fonts are Loaded
   useEffect(() => {
     ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
     const cursiveFontId = cfg?.cursiveFont || 'great_vibes';
@@ -35,41 +93,32 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
   const loadedFontFamily = ensureFontLoaded(project.titleFontFamily, project.customTitleFontUrl, project.id);
   const titleFontSizeMultiplier = (project.titleFontSize || cfg?.titleFontSize || 100) / 100;
-  const subtitleFontSizeMultiplier = (project.subtitleFontSize || cfg?.subtitleFontSize || 100) / 100;
 
   const titleFontStyle: React.CSSProperties = {
     ...(loadedFontFamily !== 'inherit' ? { fontFamily: loadedFontFamily } : {}),
-    ...(titleFontSizeMultiplier !== 1 ? { fontSize: `${titleFontSizeMultiplier}em` } : {}),
   };
 
   const cursiveFontId = cfg?.cursiveFont || 'great_vibes';
   const loadedCursiveFamily = ensureFontLoaded(cursiveFontId, undefined, 'wedding_cursive');
   const cursiveFontStyle: React.CSSProperties = { 
     fontFamily: loadedCursiveFamily,
-    ...(subtitleFontSizeMultiplier !== 1 ? { fontSize: `${subtitleFontSizeMultiplier}em` } : {}),
   };
 
-  const subtitleFontStyle: React.CSSProperties = subtitleFontSizeMultiplier !== 1 ? { fontSize: `${subtitleFontSizeMultiplier}em` } : {};
-
-  // Landing page configuration values
+  // Safe configuration fallbacks
   const brideName = cfg?.brideName || project.brideName || '';
   const groomName = cfg?.groomName || project.groomName || '';
   const hashtag = cfg?.hashtag || project.hashtag || '';
   const welcomeMessage = cfg?.welcomeMessage || 'Welcome to our official gallery & moments';
-  const quoteText = cfg?.quoteText;
-  const eventDateText = cfg?.eventDateText || project.date || '2026';
-  const locationText = cfg?.locationText || '';
-  const accentColor = cfg?.accentColor || '#3D2820';
+  const quoteText = cfg?.quoteText || "Two lives, two hearts, joined together in friendship, united forever in love. Let this private digital journal serve as our beautiful permanent monument.";
+  const eventDateText = cfg?.eventDateText || project.date || 'SUMMER 2026';
+  const locationText = cfg?.locationText || 'Amalfi Coast, Italy';
   const logoUrl = cfg?.logoUrl;
   const videoUrl = cfg?.videoUrl || (project.coverMedia?.type === 'video' ? project.coverMedia.url : undefined);
-  const showHashtagBadge = cfg?.showHashtagBadge ?? true;
-  const showBrideGroom = cfg?.showBrideGroom ?? true;
   const showShareButton = cfg?.showShareButton ?? true;
   const showAppButton = cfg?.showAppButton ?? true;
-  const overlayOpacity = cfg?.heroOverlayOpacity ?? 0.35;
   const mainImage = cfg?.bannerImage || activeCoverUrl;
 
-  // Collage image roster for asymmetric templates
+  // Curated imagery roster for premium editorial layouts
   const fallbackCollage = [
     mainImage,
     "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
@@ -85,769 +134,770 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   ])).filter(Boolean);
 
   const img0 = collageImages[0] || mainImage;
-  const img1 = collageImages[1] || collageImages[0];
-  const img2 = collageImages[2] || collageImages[0];
-  const img3 = collageImages[3] || collageImages[1];
+  const img1 = collageImages[1] || fallbackCollage[1];
+  const img2 = collageImages[2] || fallbackCollage[2];
+  const img3 = collageImages[3] || fallbackCollage[3];
 
-  // Map legacy heroStyle string identifiers to 5 distinct core templates
-  let templateKey = cfg?.heroStyle || 'editorial_magazine';
-  if (['pic_time_editorial', 'vogue_magazine', 'editorial_arch', 'classic_editorial', 'split_hero', 'romantic_card', 'minimal_nordic'].includes(templateKey)) {
-    templateKey = 'editorial_magazine';
-  } else if (['cinematic_minimal', 'dark_luxury'].includes(templateKey)) {
-    templateKey = 'fullscreen_cinematic';
-  } else if (['split_minimalist'].includes(templateKey)) {
-    templateKey = 'modern_minimal';
-  }
-
-  // Scroll handler for Enter Gallery CTA
-  const scrollToGallery = () => {
-    const target = document.getElementById('sub-events') || document.getElementById('portfolio-index') || document.getElementById('gallery-content');
+  // Smooth scroll handler targeting collections
+  const scrollToCollections = () => {
+    const target = document.getElementById('gallery-content');
     if (target) {
       target.scrollIntoView({ behavior: 'smooth' });
     } else {
-      window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' });
+      window.scrollTo({ top: window.innerHeight * 1.1, behavior: 'smooth' });
     }
   };
 
-  // Copy link helper
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
+    setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  // Native share helper
-  const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${project.title} | Official Gallery`,
-          text: `View the official gallery for ${project.title}`,
-          url: window.location.href,
-        });
-        return;
-      } catch (err) {
-        // Fallback to modal
-      }
-    }
-    setShowShareModal(true);
-  };
+  const isDark = project.theme === 'dark_luxury';
 
-  // Common Header Logo component
-  const HeaderBranding = ({ dark = false }: { dark?: boolean }) => (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
-      className="text-center mb-6 sm:mb-10"
-    >
-      {logoUrl ? (
-        <img src={logoUrl} alt="Photographer Logo" className="h-8 sm:h-10 object-contain mx-auto mb-2" />
-      ) : (
-        <p className={`text-[11px] sm:text-xs font-serif tracking-[0.25em] uppercase font-normal ${dark ? 'text-white/70' : 'text-[#6B4C43]'}`}>
-          Gallery by Mellow Production &nbsp;|&nbsp; {project.title}
-        </p>
-      )}
-    </motion.div>
-  );
+  // Base canvas colors
+  const pageBg = isDark ? 'bg-[#0E0E0E]' : 'bg-[#FAF9F5]';
+  const textPrimary = isDark ? 'text-[#F5F5F3]' : 'text-[#1D1C1A]';
+  const textMuted = isDark ? 'text-stone-400' : 'text-[#6C6A65]';
+  const borderTone = isDark ? 'border-stone-800' : 'border-stone-200/80';
+  const gradientMask = isDark 
+    ? 'from-transparent via-[#0E0E0E]/40 to-[#0E0E0E]' 
+    : 'from-transparent via-[#FAF9F5]/40 to-[#FAF9F5]';
 
-  // Common Action Bar Component
-  const ActionControls = ({ dark = false }: { dark?: boolean }) => (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: 0.2 }}
-      className="flex flex-wrap items-center justify-center gap-3 pt-6"
-    >
-      <button
-        onClick={scrollToGallery}
-        className={`px-8 py-3.5 rounded-full text-xs font-mono font-bold tracking-widest uppercase transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-md flex items-center gap-2 cursor-pointer ${
-          dark 
-            ? 'bg-white text-zinc-950 hover:bg-zinc-100 shadow-white/10' 
-            : 'bg-[#382C26] text-white hover:bg-[#4A3B34]'
-        }`}
-      >
-        <span>Enter Gallery</span>
-        <ArrowDown size={14} className="animate-bounce" />
-      </button>
-
-      {showShareButton && (
-        <button
-          onClick={handleNativeShare}
-          className={`px-5 py-3.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase transition-all duration-300 flex items-center gap-2 cursor-pointer border ${
-            dark
-              ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
-              : 'bg-white/80 hover:bg-white text-[#382C26] border-[#D8D0C5] shadow-sm'
-          }`}
-          title="Share Gallery"
-        >
-          <Share2 size={14} />
-          <span className="hidden sm:inline">Share</span>
-        </button>
-      )}
-
-      {showAppButton && (
-        <button
-          onClick={() => setShowAppModal(true)}
-          className={`px-5 py-3.5 rounded-full text-xs font-mono font-semibold tracking-wider uppercase transition-all duration-300 flex items-center gap-2 cursor-pointer border ${
-            dark
-              ? 'bg-white/10 hover:bg-white/20 text-white border-white/20'
-              : 'bg-white/80 hover:bg-white text-[#382C26] border-[#D8D0C5] shadow-sm'
-          }`}
-          title="Save as App"
-        >
-          <Smartphone size={14} />
-          <span className="hidden sm:inline">Get App</span>
-        </button>
-      )}
-    </motion.div>
-  );
-
-  // Render Cover Media element (Image or Autoplay Video)
-  const CoverMediaElement = ({ className, alt }: { className: string; alt?: string }) => {
-    if (videoUrl) {
-      return (
-        <div className="relative w-full h-full">
-          <video
-            src={videoUrl}
-            poster={mainImage}
-            autoPlay
-            loop
-            muted={isMuted}
-            playsInline
-            className={className}
-          />
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="absolute bottom-4 right-4 p-2 rounded-full bg-black/50 backdrop-blur-md text-white/80 hover:text-white border border-white/20 z-20 cursor-pointer"
-            title={isMuted ? 'Unmute Video' : 'Mute Video'}
-          >
-            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-          </button>
-        </div>
-      );
-    }
-    return (
-      <img
-        src={mainImage}
-        alt={alt || project.title}
-        referrerPolicy="no-referrer"
-        className={className}
+  return (
+    <div className={`relative w-full ${pageBg} overflow-hidden select-none`}>
+      
+      {/* 2026 Film Grain & Delicate Paper Texture Overlays */}
+      <div 
+        className="pointer-events-none absolute inset-0 z-50 opacity-[0.035]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+        }}
       />
-    );
-  };
 
-  // Render modal dialogs
-  const Modals = () => (
-    <>
-      {/* Share Modal */}
-      <AnimatePresence>
-        {showShareModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-zinc-200 text-zinc-900 relative"
-            >
-              <button
-                onClick={() => setShowShareModal(false)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
+      <AnimatePresence mode="wait">
+        {/* PREMIUM LOADING SCREEN */}
+        {showLoader && (
+          <motion.div
+            key="luxury-loader"
+            initial={{ opacity: 1 }}
+            exit={{ 
+              opacity: 0, 
+              y: -50,
+              transition: { duration: 1.1, ease: [0.76, 0, 0.24, 1] } 
+            }}
+            className={`fixed inset-0 z-[999] flex flex-col justify-between p-8 sm:p-16 ${
+              isDark ? 'bg-[#0E0E0E]' : 'bg-[#FAF9F5]'
+            }`}
+          >
+            {/* Minimalist Top branding */}
+            <div className="flex justify-between items-center w-full">
+              <span className={`text-[10px] tracking-[0.3em] font-sans font-extrabold uppercase ${textMuted}`}>
+                MELLOW PRODUCTION
+              </span>
+              <span className={`text-[10px] tracking-[0.2em] font-serif italic ${textMuted}`}>
+                EST. 2026
+              </span>
+            </div>
+
+            {/* Central typography with animated character spacing */}
+            <div className="text-center space-y-4">
+              <motion.h1 
+                initial={{ letterSpacing: '0.1em', opacity: 0 }}
+                animate={{ letterSpacing: '0.25em', opacity: 1 }}
+                transition={{ duration: 1.5, ease: 'easeOut' }}
+                style={titleFontStyle}
+                className={`text-2xl sm:text-4xl lg:text-5xl font-serif font-light uppercase tracking-[0.2em] leading-none ${textPrimary}`}
               >
-                <X size={18} />
-              </button>
+                {project.title}
+              </motion.h1>
+              <p className={`text-[11px] sm:text-xs tracking-[0.18em] uppercase ${textMuted} font-mono animate-pulse`}>
+                CURATING FINE ART PHOTOGRAPHY
+              </p>
+            </div>
 
-              <div className="text-center space-y-2 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-zinc-900 mx-auto flex items-center justify-center mb-2">
-                  <Share2 size={22} />
-                </div>
-                <h3 className="text-xl font-serif font-bold text-zinc-900">Share Gallery</h3>
-                <p className="text-xs text-zinc-500 font-sans">
-                  Invite friends &amp; family to view {project.title}
-                </p>
+            {/* Bottom loader indicator & progress bar */}
+            <div className="w-full space-y-6">
+              <div className="flex justify-between items-end text-xs font-mono">
+                <span className={textMuted}>PREPARING DIGITAL PRIVATE SUITE</span>
+                <span className={`text-base font-semibold ${textPrimary}`}>
+                  {String(loadingProgress).padStart(3, '0')}%
+                </span>
               </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 p-2 bg-zinc-50 rounded-2xl border border-zinc-200">
-                  <input
-                    type="text"
-                    readOnly
-                    value={window.location.href}
-                    className="flex-1 bg-transparent px-3 text-xs font-mono text-zinc-600 outline-none truncate"
-                  />
-                  <button
-                    onClick={handleCopyLink}
-                    className="px-4 py-2 bg-zinc-900 text-white rounded-xl text-xs font-mono font-bold hover:bg-zinc-800 transition-colors flex items-center gap-1.5 cursor-pointer"
-                  >
-                    {copiedLink ? (
-                      <>
-                        <Check size={14} className="text-emerald-400" />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        <span>Copy</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  <a
-                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Check out the gallery for ${project.title}: ${window.location.href}`)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-mono font-bold text-center hover:bg-emerald-100 transition-colors block"
-                  >
-                    WhatsApp
-                  </a>
-                  <a
-                    href={`mailto:?subject=${encodeURIComponent(project.title)}&body=${encodeURIComponent(`View the official gallery: ${window.location.href}`)}`}
-                    className="p-3 rounded-2xl bg-zinc-100 text-zinc-800 border border-zinc-200 text-xs font-mono font-bold text-center hover:bg-zinc-200 transition-colors block"
-                  >
-                    Email Link
-                  </a>
-                </div>
+              <div className={`relative h-[2px] w-full ${isDark ? 'bg-stone-800' : 'bg-stone-200'} overflow-hidden rounded-full`}>
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${loadingProgress}%` }}
+                  transition={{ ease: 'easeOut' }}
+                  className={`absolute top-0 left-0 h-full ${isDark ? 'bg-amber-500' : 'bg-stone-900'}`}
+                />
               </div>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
-      {/* App Install Modal */}
-      <AnimatePresence>
-        {showAppModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-zinc-200 text-zinc-900 relative"
-            >
-              <button
-                onClick={() => setShowAppModal(false)}
-                className="absolute top-5 right-5 p-2 rounded-full hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700 cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="text-center space-y-2 mb-6">
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-800 mx-auto flex items-center justify-center mb-2">
-                  <Smartphone size={22} />
-                </div>
-                <h3 className="text-xl font-serif font-bold text-zinc-900">Install Client App</h3>
-                <p className="text-xs text-zinc-500 font-sans">
-                  Save this gallery directly to your home screen for instant offline access &amp; full screen experience.
-                </p>
-              </div>
-
-              <div className="space-y-3 text-xs text-zinc-700 font-sans">
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
-                  <p className="font-bold text-zinc-900 flex items-center gap-1.5">
-                    <span> iOS Safari:</span>
-                  </p>
-                  <p className="text-zinc-600 leading-relaxed">
-                    Tap the <strong>Share</strong> icon in your browser menu, then select <strong>"Add to Home Screen"</strong>.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-1">
-                  <p className="font-bold text-zinc-900 flex items-center gap-1.5">
-                    <span>🤖 Android Chrome:</span>
-                  </p>
-                  <p className="text-zinc-600 leading-relaxed">
-                    Tap the <strong>three dots menu</strong> in the top right, then select <strong>"Install App"</strong> or <strong>"Add to Home Screen"</strong>.
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setShowAppModal(false)}
-                className="w-full mt-6 py-3 bg-zinc-900 text-white rounded-2xl text-xs font-mono font-bold hover:bg-zinc-800 transition-colors cursor-pointer"
-              >
-                Got It
-              </button>
-            </motion.div>
-          </div>
+      {/* FLOAT ACTION FLOATING BAR (SHARE / APP SAVE) */}
+      <div className="fixed top-6 right-6 z-[100] flex items-center gap-3">
+        {showShareButton && (
+          <button
+            onClick={() => setShowShareModal(true)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
+              isDark 
+                ? 'bg-black/50 border-white/10 text-stone-200 hover:bg-black/80 hover:border-amber-500/50' 
+                : 'bg-white/65 border-stone-200/80 text-stone-800 hover:bg-white/90 hover:border-stone-400'
+            }`}
+          >
+            <Share2 size={13} />
+            <span className="hidden sm:inline">Share</span>
+          </button>
         )}
-      </AnimatePresence>
-    </>
-  );
+        {showAppButton && (
+          <button
+            onClick={() => setShowAppModal(true)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
+              isDark 
+                ? 'bg-black/50 border-white/10 text-stone-200 hover:bg-black/80 hover:border-amber-500/50' 
+                : 'bg-white/65 border-stone-200/80 text-stone-800 hover:bg-white/90 hover:border-stone-400'
+            }`}
+          >
+            <Smartphone size={13} />
+            <span className="hidden sm:inline">Save as App</span>
+          </button>
+        )}
+      </div>
 
-  // =========================================================================
-  // TEMPLATE 1: EDITORIAL MAGAZINE (Pic-Time / Vogue Asymmetric Collage)
-  // =========================================================================
-  if (templateKey === 'editorial_magazine') {
-    return (
-      <>
-        <div className="relative w-full bg-[#F4F1EA] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-[#E8E2D7] shadow-sm text-[#4A2A25] my-2">
-          {/* Header Branding */}
-          <HeaderBranding />
+      {/* SECTION 1: FULL SCREEN HERO */}
+      <section className="relative w-full h-screen flex flex-col justify-between p-6 sm:p-12 md:p-16 z-10 overflow-hidden">
+        
+        {/* Immersive Background Canvas (Parallax + Feather Edge Mask) */}
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-black/25 z-10" />
+          
+          {/* Edge-to-edge subtle feather/fade mask around borders */}
+          <div className={`absolute inset-0 z-20 bg-gradient-to-b ${gradientMask} pointer-events-none`} />
+          
+          <div 
+            className="w-full h-full transform scale-110"
+            style={{
+              transform: `translateY(${scrollY * 0.12}px) scale(${1.08 - (scrollY * 0.0001)})`,
+              transition: 'transform 0.15s cubic-bezier(0.25, 0.1, 0.25, 1)',
+            }}
+          >
+            {videoUrl ? (
+              <video
+                src={videoUrl}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <img
+                src={getDriveImageUrl(mainImage, 1600)}
+                alt={project.title}
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover select-none"
+              />
+            )}
+          </div>
+        </div>
 
-          {/* Asymmetric Editorial Grid */}
-          <div className="max-w-5xl mx-auto relative min-h-[620px] flex flex-col justify-between">
-            {/* Top Row: Left Main Vertical Portrait + Right Accent */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10">
+        {/* Hero Top: Branding / Logo */}
+        <div className="relative z-30 flex justify-between items-center pt-4">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Photographer Logo" className="h-6 sm:h-8 object-contain" />
+          ) : (
+            <span className="text-[10px] font-mono tracking-[0.3em] font-extrabold text-white/90">
+              MELLOW PRODUCTION • ART JOURNAL
+            </span>
+          )}
+          <span className="text-[9px] font-mono tracking-widest text-white/70 uppercase">
+            {locationText}
+          </span>
+        </div>
+
+        {/* Hero Center: Oversized Floating Typography */}
+        <div className="relative z-30 flex flex-col items-center text-center my-auto max-w-4xl mx-auto space-y-4 pt-16">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 1.2, ease: [0.215, 0.61, 0.355, 1] }}
+            className="space-y-3"
+          >
+            <span className="text-[10px] font-mono tracking-[0.35em] text-amber-100/95 font-extrabold uppercase bg-white/10 px-4 py-1.5 rounded-full backdrop-blur-md">
+              PRIVATE DIGITAL PORTFOLIO
+            </span>
+            
+            <h2 
+              style={titleFontStyle}
+              className="text-4xl sm:text-6xl md:text-8xl font-serif font-light text-white tracking-wide uppercase leading-none drop-shadow-sm pt-4"
+            >
+              {project.title}
+            </h2>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.8 }}
+            transition={{ delay: 0.7, duration: 1.2 }}
+            className="flex items-center gap-2 text-white/80 font-mono text-[10px] sm:text-xs tracking-widest uppercase pt-2"
+          >
+            <span>{eventDateText}</span>
+            <span className="text-white/40">•</span>
+            <span>{locationText}</span>
+          </motion.div>
+        </div>
+
+        {/* Hero Bottom: Scroll Cue Indicator */}
+        <div className="relative z-30 flex flex-col items-center text-center pb-4 cursor-pointer" onClick={scrollToCollections}>
+          <motion.p 
+            animate={{ y: [0, 5, 0] }}
+            transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+            className="text-[9px] font-mono tracking-[0.25em] text-white/80 uppercase mb-2"
+          >
+            SCROLL TO DISCOVER
+          </motion.p>
+          <motion.div 
+            animate={{ y: [0, 6, 0] }}
+            transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+            className="w-6 h-6 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-md"
+          >
+            <ArrowDown size={11} className="text-white" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* SECTION 2: EDITORIAL IMAGE COLLAGE (Asymmetric, Layered Composition) */}
+      <section className="relative py-24 sm:py-32 px-6 sm:px-12 max-w-7xl mx-auto z-20 space-y-24">
+        
+        {/* Section Heading Label */}
+        <div className="flex flex-col md:flex-row items-baseline justify-between border-b pb-6 border-stone-200/50 dark:border-stone-800">
+          <span className={`text-[10px] font-mono tracking-[0.3em] font-black uppercase ${isDark ? 'text-amber-500' : 'text-stone-800'}`}>
+            01 / PORTRAIT COLLAGE
+          </span>
+          <p className={`text-xs tracking-[0.1em] font-serif italic ${textMuted} mt-2 md:mt-0`}>
+            "Capturing the fleeting, silent instances that string lives together."
+          </p>
+        </div>
+
+        {/* Elegant Editorial Collage Frame layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center">
+          
+          {/* Main big editorial frame on left */}
+          <div className="md:col-span-7 space-y-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.98 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              className={`aspect-[4/5] w-full rounded-2xl overflow-hidden shadow-2xl relative group border ${borderTone}`}
+            >
+              <img
+                src={getDriveImageUrl(img0, 1000)}
+                alt="Editorial Collage Focus"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-1000 ease-out select-none"
+              />
+              <div className="absolute inset-0 bg-black/10 mix-blend-multiply transition-opacity duration-700" />
+            </motion.div>
+            <p className={`text-[11px] font-mono tracking-widest uppercase text-right ${textMuted}`}>
+              ✦ PORTRAIT INDEX I
+            </p>
+          </div>
+
+          {/* Right smaller stacked asymmetric images */}
+          <div className="md:col-span-5 space-y-12">
+            
+            {/* Landscape floating portrait */}
+            <div className="space-y-4">
               <motion.div 
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
-                className="md:col-span-6 lg:col-span-5 aspect-[3/4] rounded-2xl overflow-hidden shadow-sm bg-white"
-              >
-                <CoverMediaElement className="w-full h-full object-cover" alt={project.title} />
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95, y: 25 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.9, delay: 0.1, ease: [0.215, 0.61, 0.355, 1.0] }}
-                className="hidden md:block md:col-span-4 md:col-start-9 aspect-square rounded-2xl overflow-hidden shadow-sm bg-white mt-16 lg:mt-24"
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.2 }}
+                className={`aspect-[3/2] w-full rounded-2xl overflow-hidden shadow-xl relative group border ${borderTone}`}
               >
                 <img
-                  src={img1}
-                  alt="Moment accent"
+                  src={getDriveImageUrl(img1, 800)}
+                  alt="Editorial Collage Landscape"
                   referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-700"
+                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-1000 ease-out select-none"
+                />
+              </motion.div>
+              <div className="max-w-xs space-y-1">
+                <span className={`text-[9px] font-mono tracking-widest uppercase font-black ${isDark ? 'text-amber-500' : 'text-stone-900'}`}>
+                  FINE ART GRAIN
+                </span>
+                <p className={`text-xs leading-relaxed ${textMuted}`}>
+                  Every composition utilizes delicate atmospheric contrast to define organic shapes.
+                </p>
+              </div>
+            </div>
+
+            {/* Tall portrait frame */}
+            <div className="space-y-4 md:pl-12">
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.3 }}
+                className={`aspect-[3/4] w-10/12 rounded-2xl overflow-hidden shadow-xl relative group border ${borderTone}`}
+              >
+                <img
+                  src={getDriveImageUrl(img2, 800)}
+                  alt="Editorial Collage Secondary"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-1000 ease-out select-none"
                 />
               </motion.div>
             </div>
 
-            {/* Overlapping Typography Section in the Center */}
-            <motion.div 
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-40px" }}
-              transition={{ duration: 0.9, delay: 0.2, ease: [0.215, 0.61, 0.355, 1.0] }}
-              className="my-8 md:-my-14 relative z-20 text-center px-4"
-            >
-              {showHashtagBadge && hashtag && (
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4A2A25]/5 border border-[#4A2A25]/15 text-[#6B4C43] text-xs font-mono font-bold tracking-wider mb-3">
-                  <Hash size={12} />
-                  <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
-                </div>
-              )}
+          </div>
 
-              {showBrideGroom && (brideName || groomName) ? (
-                <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.14em] uppercase font-light text-[#4A2A25] leading-none">
-                  {brideName} &amp; {groomName}
-                </h1>
+        </div>
+
+      </section>
+
+      {/* SECTION 3: ANIMATED COUPLE / CLIENT NAMES */}
+      <section className={`relative py-32 ${isDark ? 'bg-stone-900/10' : 'bg-stone-100/40'} border-y ${borderTone} z-20 overflow-hidden`}>
+        
+        {/* Atmospheric Floating Graphic Overlay in background */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] select-none pointer-events-none">
+          <Heart size={400} className={isDark ? 'text-white' : 'text-stone-900'} />
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6 text-center space-y-6 relative z-10">
+          <span className={`text-[10px] font-mono tracking-[0.35em] font-extrabold uppercase ${isDark ? 'text-amber-500' : 'text-stone-900'}`}>
+            COMMEMORATING THE CELEBRATION
+          </span>
+
+          <div className="space-y-2 py-4">
+            <motion.h2 
+              initial={{ opacity: 0, letterSpacing: '-0.02em' }}
+              whileInView={{ opacity: 1, letterSpacing: '0.02em' }}
+              viewport={{ once: true }}
+              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+              style={titleFontStyle}
+              className={`text-5xl sm:text-7xl lg:text-9xl font-serif font-light tracking-tight leading-none ${textPrimary}`}
+            >
+              {brideName && groomName ? (
+                <>
+                  <span className="block">{brideName}</span>
+                  <span className={`block my-2 text-2xl sm:text-4xl lg:text-5xl italic font-normal tracking-wide text-stone-400 font-serif`}>&amp;</span>
+                  <span className="block">{groomName}</span>
+                </>
               ) : (
-                <h1 style={titleFontStyle} className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.14em] uppercase font-light text-[#4A2A25] leading-none">
-                  {project.title}
-                </h1>
+                <span className="block uppercase tracking-widest">{project.title}</span>
               )}
+            </motion.h2>
+          </div>
 
-              {eventDateText && (
-                <p className="text-xl sm:text-3xl font-serif text-[#593C33] mt-3 sm:mt-4 tracking-wide font-normal">
-                  {eventDateText}
-                </p>
-              )}
+          <div className="max-w-lg mx-auto h-[1px] bg-stone-200 dark:bg-stone-800 my-8" />
 
-              {welcomeMessage && (
-                <p style={subtitleFontStyle} className="text-xs sm:text-sm font-sans text-[#6B524A] max-w-md mx-auto mt-2">
-                  {welcomeMessage}
-                </p>
-              )}
-
-              {quoteText && (
-                <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl sm:text-3xl italic mt-3">
-                  "{quoteText}"
-                </p>
-              )}
-
-              {locationText && (
-                <p className="text-xs font-mono text-[#8C6D63] uppercase tracking-widest mt-2">
-                  {locationText}
-                </p>
-              )}
-
-              {/* Interactive Action Bar */}
-              <ActionControls />
-            </motion.div>
-
-            {/* Bottom Row: Left Small Accent Photo + Right Vertical Feature Portrait */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end relative z-10 pt-4">
-              <motion.div 
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.8, delay: 0.3, ease: [0.215, 0.61, 0.355, 1.0] }}
-                className="md:col-span-5 aspect-[16/10] rounded-2xl overflow-hidden shadow-sm bg-white hidden sm:block mb-6"
-              >
-                <img src={img2} alt="Atmosphere" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.9, delay: 0.4, ease: [0.215, 0.61, 0.355, 1.0] }}
-                className="md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-8 aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-white"
-              >
-                <img src={img3} alt="Feature story" referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-              </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8 text-center max-w-2xl mx-auto">
+            <div className="space-y-1">
+              <span className={`text-[9px] font-mono uppercase tracking-widest ${textMuted}`}>CALENDAR DATE</span>
+              <p className={`text-xs font-serif italic ${textPrimary}`}>{eventDateText}</p>
+            </div>
+            <div className="space-y-1 col-span-2 md:col-span-1">
+              <span className={`text-[9px] font-mono uppercase tracking-widest ${textMuted}`}>VENUE LOCATION</span>
+              <p className={`text-xs font-serif italic ${textPrimary}`}>{locationText}</p>
+            </div>
+            <div className="space-y-1">
+              <span className={`text-[9px] font-mono uppercase tracking-widest ${textMuted}`}>COLLECTION KEY</span>
+              <p className={`text-xs font-serif italic ${textPrimary}`}>{hashtag ? hashtag : `#MELLOWEST26`}</p>
             </div>
           </div>
         </div>
-        <Modals />
-      </>
-    );
-  }
 
-  // =========================================================================
-  // TEMPLATE 2: FULLSCREEN CINEMATIC (Apple / Netflix Luxury Film Aesthetic)
-  // =========================================================================
-  if (templateKey === 'fullscreen_cinematic') {
-    return (
-      <>
-        <div className="relative w-full min-h-[85vh] h-[85vh] rounded-[2.5rem] overflow-hidden bg-zinc-950 border border-white/10 shadow-2xl my-2 text-white flex flex-col justify-between p-6 sm:p-12">
-          {/* Full-bleed Cover Media */}
-          <div className="absolute inset-0 z-0">
-            <CoverMediaElement className="w-full h-full object-cover" alt={project.title} />
-            <div className="absolute inset-0 bg-black" style={{ opacity: overlayOpacity }} />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/80" />
-          </div>
+      </section>
 
-          {/* Header Branding Overlay */}
-          <div className="relative z-10 w-full">
-            <HeaderBranding dark />
-          </div>
-
-          {/* Center Luxury Typography Card */}
-          <div className="relative z-10 text-center max-w-3xl mx-auto space-y-4 my-auto p-6 sm:p-10 rounded-3xl bg-black/35 backdrop-blur-md border border-white/15 shadow-2xl">
-            {showHashtagBadge && hashtag && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-mono font-bold tracking-wider mb-1"
-              >
-                <Hash size={12} />
-                <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
-              </motion.div>
-            )}
-
-            {showBrideGroom && (brideName || groomName) ? (
-              <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="text-4xl sm:text-6xl md:text-7xl font-serif italic text-white tracking-wide"
-              >
-                {brideName} &amp; {groomName}
-              </motion.h1>
-            ) : (
-              <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                style={titleFontStyle} 
-                className="text-3xl sm:text-5xl md:text-6xl font-serif text-white tracking-wide"
-              >
-                {project.title}
-              </motion.h1>
-            )}
-
-            {welcomeMessage && (
-              <p style={subtitleFontStyle} className="text-xs sm:text-sm font-sans text-white/80 max-w-xl mx-auto leading-relaxed">
-                {welcomeMessage}
-              </p>
-            )}
-
-            {quoteText && (
-              <p style={{ ...cursiveFontStyle, color: accentColor || '#FDE68A' }} className="text-xl sm:text-2xl italic">
-                "{quoteText}"
-              </p>
-            )}
-
-            {(eventDateText || locationText) && (
-              <div className="pt-3 flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-white/70 tracking-widest uppercase border-t border-white/10 w-full">
-                {eventDateText && (
-                  <span className="flex items-center gap-1.5">
-                    <Calendar size={13} />
-                    {eventDateText}
-                  </span>
-                )}
-                {locationText && (
-                  <span className="flex items-center gap-1.5">
-                    <MapPin size={13} />
-                    {locationText}
-                  </span>
-                )}
-              </div>
-            )}
-
-            {/* Action Bar */}
-            <ActionControls dark />
-          </div>
-
-          {/* Bottom Scroll Cue */}
-          <div className="relative z-10 text-center opacity-60 text-[10px] font-mono uppercase tracking-[0.3em] flex items-center justify-center gap-2">
-            <span>Scroll To Discover</span>
-            <ArrowDown size={12} className="animate-bounce" />
-          </div>
+      {/* SECTION 4: STORY & ROMANTIC QUOTE */}
+      <section className="relative py-28 px-6 sm:px-12 max-w-4xl mx-auto z-20 text-center space-y-10">
+        
+        {/* Mini elegant graphic marker */}
+        <div className="flex justify-center items-center gap-2">
+          <div className="w-8 h-[1px] bg-stone-300 dark:bg-stone-700" />
+          <Heart size={12} className={isDark ? 'text-amber-500' : 'text-stone-400'} />
+          <div className="w-8 h-[1px] bg-stone-300 dark:bg-stone-700" />
         </div>
-        <Modals />
-      </>
-    );
-  }
 
-  // =========================================================================
-  // TEMPLATE 3: MEMORY TIMELINE (Apple Photos / Google Photos Storytelling)
-  // =========================================================================
-  if (templateKey === 'memory_timeline') {
-    return (
-      <>
-        <div className="relative w-full bg-[#FAF9F5] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 border border-[#EAE6DF] shadow-sm text-zinc-900 my-2 space-y-12">
-          {/* Timeline Step 1: Branding Header */}
-          <HeaderBranding />
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 1.1, ease: "easeOut" }}
+          style={cursiveFontStyle}
+          className={`text-2xl sm:text-4xl font-serif italic font-light leading-relaxed tracking-wide ${textPrimary}`}
+        >
+          "{quoteText}"
+        </motion.p>
 
-          {/* Timeline Story Container */}
-          <div className="max-w-3xl mx-auto space-y-12 relative before:absolute before:left-1/2 before:top-4 before:bottom-4 before:-translate-x-1/2 before:w-[2px] before:bg-zinc-200 hidden sm:block">
-            {/* Step 1: Cover Frame */}
-            <motion.div 
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="relative z-10 bg-white p-4 sm:p-6 rounded-3xl border border-zinc-200 shadow-md text-center max-w-xl mx-auto space-y-4"
-            >
-              <span className="inline-block px-3 py-1 rounded-full bg-zinc-100 text-zinc-600 text-[10px] font-mono uppercase tracking-widest font-bold">
-                Chapter 01 // Introduction
-              </span>
-              <div className="aspect-[16/10] rounded-2xl overflow-hidden bg-zinc-100 shadow-inner">
-                <CoverMediaElement className="w-full h-full object-cover" alt={project.title} />
-              </div>
-            </motion.div>
+        <p className={`text-[10px] font-mono tracking-[0.2em] uppercase font-bold ${textMuted}`}>
+          — PRESERVED FOREVER IN DIGITAL RESOLUTION
+        </p>
 
-            {/* Step 2: Couple & Date */}
-            <motion.div 
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.1 }}
-              className="relative z-10 bg-[#F4EFE6] p-6 sm:p-10 rounded-3xl border border-[#E5DDD0] shadow-sm text-center max-w-xl mx-auto space-y-3"
-            >
-              <span className="inline-block px-3 py-1 rounded-full bg-[#4A2A25]/10 text-[#4A2A25] text-[10px] font-mono uppercase tracking-widest font-bold">
-                Chapter 02 // The Celebration
-              </span>
+      </section>
 
-              {showBrideGroom && (brideName || groomName) ? (
-                <h2 className="text-3xl sm:text-5xl font-serif text-[#382C26]">
-                  {brideName} &amp; {groomName}
-                </h2>
-              ) : (
-                <h2 style={titleFontStyle} className="text-3xl sm:text-5xl font-serif text-[#382C26]">
-                  {project.title}
-                </h2>
-              )}
-
-              {eventDateText && (
-                <p className="text-sm font-mono tracking-widest text-[#7C6659] uppercase font-bold">
-                  {eventDateText} {locationText ? `— ${locationText}` : ''}
-                </p>
-              )}
-            </motion.div>
-
-            {/* Step 3: Story Quote */}
-            {quoteText && (
-              <motion.div 
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="relative z-10 bg-white p-6 sm:p-8 rounded-3xl border border-zinc-200 shadow-sm text-center max-w-xl mx-auto space-y-2"
-              >
-                <span className="inline-block text-[10px] font-mono text-zinc-400 uppercase tracking-widest">
-                  Chapter 03 // Memory Note
-                </span>
-                <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl sm:text-3xl italic">
-                  "{quoteText}"
-                </p>
-              </motion.div>
-            )}
-
-            {/* Step 4: Enter Gallery Action */}
-            <motion.div 
-              initial={{ opacity: 0, y: 35 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative z-10 text-center space-y-4 pt-4"
-            >
-              <ActionControls />
-            </motion.div>
-          </div>
-
-          {/* Mobile Fallback layout */}
-          <div className="sm:hidden space-y-6 text-center">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-md">
-              <CoverMediaElement className="w-full h-full object-cover" alt={project.title} />
-            </div>
-
-            <div className="space-y-2">
-              <h2 className="text-3xl font-serif font-bold text-zinc-900">
-                {brideName && groomName ? `${brideName} & ${groomName}` : project.title}
-              </h2>
-              {eventDateText && <p className="text-xs font-mono text-zinc-500 uppercase">{eventDateText}</p>}
-              {quoteText && <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-xl italic">"{quoteText}"</p>}
-            </div>
-
-            <ActionControls />
-          </div>
+      {/* SECTION 5: FLOATING IMAGE COMPOSITION (Overlapping layout with Feathered blend masks) */}
+      <section className="relative py-16 sm:py-28 px-6 z-20 max-w-7xl mx-auto overflow-visible">
+        
+        <div className="flex flex-col items-center text-center mb-16 space-y-2">
+          <span className={`text-[10px] font-mono tracking-[0.3em] font-black uppercase ${isDark ? 'text-amber-500' : 'text-stone-800'}`}>
+            02 / FLUID MEMORY ARCHIVE
+          </span>
+          <h3 className={`text-xl sm:text-2xl font-serif font-light uppercase tracking-widest ${textPrimary}`}>
+            Asymmetric Layered Layout
+          </h3>
         </div>
-        <Modals />
-      </>
-    );
-  }
 
-  // =========================================================================
-  // TEMPLATE 4: MODERN MINIMAL (Apple Website / Notion Architectural)
-  // =========================================================================
-  if (templateKey === 'modern_minimal') {
-    return (
-      <>
-        <div className="relative w-full bg-[#FAF9F6] rounded-[2.5rem] overflow-hidden border border-zinc-200 shadow-sm my-2 text-zinc-900 p-6 sm:p-12 md:p-16 flex flex-col md:flex-row gap-8 min-h-[580px] items-center">
-          {/* Left Editorial Content Column */}
-          <div className="flex-1 flex flex-col justify-between space-y-8 w-full">
-            <HeaderBranding />
+        {/* 2026 Interactive Floating Stack */}
+        <div className="relative min-h-[500px] sm:min-h-[650px] w-full flex items-center justify-center">
+          
+          {/* Main Backing Image with soft feathered edge mask */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.4 }}
+            className={`absolute z-10 w-11/12 sm:w-8/12 aspect-[16/10] rounded-3xl overflow-hidden border ${borderTone} shadow-2xl`}
+            style={{
+              maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+              WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+            }}
+          >
+            <img
+              src={getDriveImageUrl(img1, 1000)}
+              alt="Soft Feathered Floating Base"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-cover opacity-85 select-none"
+            />
+          </motion.div>
 
-            <motion.div 
+          {/* Left Foreground Floating Card (partially overlapping) */}
+          <motion.div
+            initial={{ opacity: 0, x: -60, y: 30 }}
+            whileInView={{ opacity: 1, x: 0, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-4 sm:left-12 bottom-6 sm:bottom-12 z-20 w-5/12 sm:w-3/12 aspect-[3/4] rounded-2xl overflow-hidden border border-white/20 shadow-2xl rotate-[-3deg] hover:rotate-0 transition-transform duration-700 bg-black/20 backdrop-blur-xs p-2"
+          >
+            <div className="w-full h-full rounded-xl overflow-hidden">
+              <img
+                src={getDriveImageUrl(img2, 600)}
+                alt="Left Floating Composition Element"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover select-none"
+              />
+            </div>
+          </motion.div>
+
+          {/* Right Foreground Floating Card */}
+          <motion.div
+            initial={{ opacity: 0, x: 60, y: -30 }}
+            whileInView={{ opacity: 1, x: 0, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute right-4 sm:right-12 top-6 sm:top-12 z-20 w-5/12 sm:w-3/12 aspect-[3/4] rounded-2xl overflow-hidden border border-white/20 shadow-2xl rotate-[2deg] hover:rotate-0 transition-transform duration-700 bg-black/20 backdrop-blur-xs p-2"
+          >
+            <div className="w-full h-full rounded-xl overflow-hidden">
+              <img
+                src={getDriveImageUrl(img3, 600)}
+                alt="Right Floating Composition Element"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover select-none"
+              />
+            </div>
+          </motion.div>
+
+        </div>
+
+      </section>
+
+      {/* SECTION 6: GALLERY PREVIEW */}
+      <section className="relative py-20 px-6 sm:px-12 max-w-7xl mx-auto z-20">
+        <div className="flex flex-col md:flex-row items-baseline justify-between border-b pb-6 border-stone-200/50 dark:border-stone-800 mb-12">
+          <span className={`text-[10px] font-mono tracking-[0.3em] font-black uppercase ${isDark ? 'text-amber-500' : 'text-stone-800'}`}>
+            03 / ALBUM PREVIEW
+          </span>
+          <span className={`text-[11px] font-mono text-stone-400`}>
+            {coverList.length} HIGH-RESOLUTION ARCHIVES
+          </span>
+        </div>
+
+        {/* Exquisite 3-Image Horizontal Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {collageImages.slice(1, 4).map((img, idx) => (
+            <motion.div
+              key={idx}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="space-y-4"
+              transition={{ delay: idx * 0.1, duration: 0.8 }}
+              className={`group cursor-pointer rounded-2xl overflow-hidden border ${borderTone} shadow-md relative`}
             >
-              {showHashtagBadge && hashtag && (
-                <span className="inline-block text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase">
-                  {hashtag.startsWith('#') ? hashtag : `#${hashtag}`}
+              <div className="aspect-[3/2] overflow-hidden">
+                <img
+                  src={getDriveImageUrl(img, 600)}
+                  alt={`Gallery Preview ${idx + 1}`}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+              <div className="p-4 bg-white/50 dark:bg-black/40 backdrop-blur-md flex justify-between items-center border-t border-stone-200/20">
+                <span className={`text-[10px] font-mono tracking-widest uppercase font-bold ${textPrimary}`}>
+                  SERIES {String(idx + 1).padStart(2, '0')}
                 </span>
-              )}
-
-              {showBrideGroom && (brideName || groomName) ? (
-                <h1 className="text-4xl sm:text-6xl font-serif tracking-tight font-normal text-zinc-900 leading-tight">
-                  {brideName} <br />
-                  <span className="italic font-light text-zinc-400">&amp;</span> {groomName}
-                </h1>
-              ) : (
-                <h1 style={titleFontStyle} className="text-4xl sm:text-6xl font-serif tracking-tight font-normal text-zinc-900 leading-tight">
-                  {project.title}
-                </h1>
-              )}
-
-              {welcomeMessage && (
-                <p style={subtitleFontStyle} className="text-xs sm:text-sm font-sans text-zinc-600 max-w-md leading-relaxed">
-                  {welcomeMessage}
-                </p>
-              )}
-
-              {quoteText && (
-                <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl italic">
-                  "{quoteText}"
-                </p>
-              )}
-
-              {eventDateText && (
-                <div className="pt-2 text-xs font-mono text-zinc-500 font-bold uppercase tracking-widest">
-                  {eventDateText} {locationText ? `— ${locationText}` : ''}
-                </div>
-              )}
-
-              <ActionControls />
+                <span className={`text-[9px] font-mono tracking-widest ${textMuted} uppercase`}>
+                  PHOTOGRAPHY INDEX
+                </span>
+              </div>
             </motion.div>
+          ))}
+        </div>
+      </section>
 
-            <div className="pt-4 border-t border-zinc-200 text-[10px] font-mono text-zinc-400 uppercase tracking-widest flex items-center justify-between">
-              <span>Minimalist Collection</span>
-              <span>Mellow Production</span>
-            </div>
+      {/* SECTION 7: ENTER GALLERY CTA (Oversized, Majestic, Magnetic Hover Experience) */}
+      <section className="relative py-32 px-6 z-20 text-center flex flex-col items-center justify-center">
+        
+        {/* Soft elegant glowing ambient aura */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30 select-none">
+          <div className="w-96 h-96 rounded-full bg-amber-500/15 blur-3xl animate-pulse-slow" />
+        </div>
+
+        <div className="relative z-10 space-y-8 max-w-2xl">
+          <div className="space-y-3">
+            <span className={`text-[10px] font-mono tracking-[0.4em] font-black uppercase ${isDark ? 'text-amber-500' : 'text-stone-900'}`}>
+              ✦ CURATED EXHIBITION ✦
+            </span>
+            <h2 className={`text-3xl sm:text-5xl font-serif font-light uppercase tracking-wide ${textPrimary}`}>
+              Step Into the Complete Collection
+            </h2>
+            <p className={`text-xs sm:text-sm max-w-md mx-auto leading-relaxed ${textMuted}`}>
+              Open the secure cloud-hosted archive containing all curated moments, high-resolution downloads, and customized slideshow selections.
+            </p>
           </div>
 
-          {/* Right Single Large Hero Cover Container */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9 }}
-            className="flex-1 w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-zinc-200 bg-zinc-100 relative"
+          {/* Majestic Magnetic Enter Gallery Trigger */}
+          <motion.button
+            onClick={scrollToCollections}
+            onHoverStart={() => setIsHoveredCta(true)}
+            onHoverEnd={() => setIsHoveredCta(false)}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.98 }}
+            className={`relative group inline-flex items-center justify-center gap-4 px-10 py-5 rounded-full text-xs font-mono font-extrabold tracking-[0.25em] uppercase cursor-pointer overflow-hidden transition-shadow duration-500 ${
+              isDark 
+                ? 'bg-[#E5C384] text-black hover:shadow-[0_0_35px_rgba(229,195,132,0.45)]' 
+                : 'bg-[#1D1C1A] text-white hover:shadow-[0_0_35px_rgba(29,28,26,0.35)]'
+            }`}
           >
-            <CoverMediaElement className="w-full h-full object-cover" alt={project.title} />
-          </motion.div>
+            {/* Smooth glowing/sliding overlay */}
+            <span className="absolute inset-0 w-full h-full bg-white/10 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-700 ease-[0.16,1,0.3,1]" />
+            
+            <span>ENTER THE ARCHIVE</span>
+            <motion.span
+              animate={isHoveredCta ? { x: 5 } : { x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              →
+            </motion.span>
+          </motion.button>
         </div>
-        <Modals />
-      </>
-    );
-  }
 
-  // =========================================================================
-  // TEMPLATE 5: LUXURY PARALLAX (High-End Fashion & Resort Photography)
-  // =========================================================================
-  return (
-    <>
-      <div className="relative w-full bg-[#12100E] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-amber-900/20 shadow-2xl text-amber-50 my-2 space-y-16">
-        {/* Parallax Header */}
-        <HeaderBranding dark />
+      </section>
 
-        {/* Hero Overlapping Layers */}
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center relative">
-          {/* Main Parallax Card */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, ease: [0.215, 0.61, 0.355, 1.0] }}
-            className="md:col-span-8 aspect-[16/10] rounded-3xl overflow-hidden border border-amber-500/20 shadow-2xl relative"
-          >
-            <CoverMediaElement className="w-full h-full object-cover" alt={project.title} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-          </motion.div>
-
-          {/* Floating Text Glass Overlay */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1, delay: 0.2 }}
-            className="md:col-span-6 md:-ml-20 relative z-20 bg-black/60 backdrop-blur-xl p-8 sm:p-10 rounded-3xl border border-amber-500/30 shadow-2xl space-y-4"
-          >
-            <span className="text-[10px] font-mono tracking-[0.3em] uppercase text-amber-400 font-bold block">
-              Luxury Editorial
-            </span>
-
-            {showBrideGroom && (brideName || groomName) ? (
-              <h1 className="text-3xl sm:text-5xl font-serif text-white italic tracking-wide">
-                {brideName} &amp; {groomName}
-              </h1>
-            ) : (
-              <h1 style={titleFontStyle} className="text-3xl sm:text-5xl font-serif text-white tracking-wide">
-                {project.title}
-              </h1>
-            )}
-
-            {eventDateText && (
-              <p className="text-xs font-mono tracking-widest text-amber-200/80 uppercase">
-                {eventDateText} {locationText ? `— ${locationText}` : ''}
-              </p>
-            )}
-
-            {quoteText && (
-              <p style={{ ...cursiveFontStyle, color: accentColor || '#FDE68A' }} className="text-xl italic">
-                "{quoteText}"
-              </p>
-            )}
-
-            <ActionControls dark />
-          </motion.div>
+      {/* SECTION 8: MINIMALIST FOOTER */}
+      <footer className={`relative py-12 px-6 border-t ${borderTone} text-center z-20`}>
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+          <span className={`text-[10px] font-mono tracking-widest ${textMuted} uppercase`}>
+            © 2026 MELLOW PRODUCTION • ALL RIGHTS RESERVED
+          </span>
+          <div className="flex items-center gap-2 text-[10px] font-mono tracking-widest uppercase">
+            <span className={textMuted}>POWERED BY</span>
+            <span className={`font-extrabold ${textPrimary}`}>MELLOW</span>
+          </div>
         </div>
-      </div>
-      <Modals />
-    </>
+      </footer>
+
+      {/* SHARE DIALOG MODAL */}
+      <AnimatePresence>
+        {showShareModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowShareModal(false)}
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            />
+
+            {/* Content card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className={`relative w-full max-w-md rounded-3xl border p-6 sm:p-8 overflow-hidden z-10 ${
+                isDark ? 'bg-zinc-950 border-stone-800' : 'bg-white border-stone-200'
+              }`}
+            >
+              {/* Grain & Paper texture */}
+              <div 
+                className="pointer-events-none absolute inset-0 z-0 opacity-[0.035]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+                }}
+              />
+
+              <div className="relative z-10 space-y-6">
+                <div className="flex justify-between items-center border-b pb-4 border-stone-200/50 dark:border-stone-800">
+                  <span className={`text-[10px] font-mono tracking-widest uppercase font-bold ${textMuted}`}>
+                    SHARE PRIVATE ACCESS
+                  </span>
+                  <button 
+                    onClick={() => setShowShareModal(false)} 
+                    className={`p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 ${textPrimary}`}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className={`text-lg font-serif font-light uppercase tracking-wide ${textPrimary}`}>
+                    Invite Loved Ones to the Gallery
+                  </h4>
+                  <p className={`text-xs ${textMuted} leading-relaxed`}>
+                    Provide friends and family access to view, favorite, and download these beautiful high-resolution files directly.
+                  </p>
+                </div>
+
+                {/* Copier URL input */}
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    readOnly
+                    value={window.location.href}
+                    className={`flex-1 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none border ${
+                      isDark 
+                        ? 'bg-black border-stone-800 text-stone-300' 
+                        : 'bg-stone-50 border-stone-200 text-stone-700'
+                    }`}
+                  />
+                  <button
+                    onClick={handleCopyLink}
+                    className={`px-4 py-3 rounded-xl flex items-center justify-center font-mono text-[11px] tracking-widest uppercase font-bold border cursor-pointer transition-all duration-300 ${
+                      copiedLink
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : isDark
+                          ? 'bg-white text-black border-white hover:bg-stone-200'
+                          : 'bg-stone-900 text-white border-stone-900 hover:bg-stone-800'
+                    }`}
+                  >
+                    {copiedLink ? <Check size={14} /> : 'Copy'}
+                  </button>
+                </div>
+
+                <div className="text-center">
+                  <span className={`text-[9px] font-mono tracking-widest ${textMuted} uppercase`}>
+                    MELLOW SEAMLESS CLOUD TRANSMISSION
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* SAVE TO MOBILE DIALOG MODAL */}
+      <AnimatePresence>
+        {showAppModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAppModal(false)}
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            />
+
+            {/* Content card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className={`relative w-full max-w-md rounded-3xl border p-6 sm:p-8 overflow-hidden z-10 ${
+                isDark ? 'bg-zinc-950 border-stone-800' : 'bg-white border-stone-200'
+              }`}
+            >
+              {/* Grain & Paper texture */}
+              <div 
+                className="pointer-events-none absolute inset-0 z-0 opacity-[0.035]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
+                }}
+              />
+
+              <div className="relative z-10 space-y-6">
+                <div className="flex justify-between items-center border-b pb-4 border-stone-200/50 dark:border-stone-800">
+                  <span className={`text-[10px] font-mono tracking-widest uppercase font-bold ${textMuted}`}>
+                    INSTALL PRIVATE GALLERY APP
+                  </span>
+                  <button 
+                    onClick={() => setShowAppModal(false)} 
+                    className={`p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 ${textPrimary}`}
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="space-y-2">
+                  <h4 className={`text-lg font-serif font-light uppercase tracking-wide ${textPrimary}`}>
+                    Save to Your Mobile Home Screen
+                  </h4>
+                  <p className={`text-xs ${textMuted} leading-relaxed`}>
+                    Convert this collection into a private, lightweight mobile app with a custom home screen icon, rapid offline caching, and instant access.
+                  </p>
+                </div>
+
+                <div className={`p-4 rounded-2xl border text-xs leading-relaxed space-y-3 ${
+                  isDark ? 'bg-black/50 border-stone-800' : 'bg-stone-50 border-stone-200'
+                }`}>
+                  <div className="flex gap-3 items-start">
+                    <span className="w-5 h-5 rounded-full bg-stone-900 text-white flex items-center justify-center font-mono font-bold shrink-0">1</span>
+                    <p className={textPrimary}>Open this link in <b>Safari (iOS)</b> or <b>Chrome (Android)</b> on your mobile device.</p>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="w-5 h-5 rounded-full bg-stone-900 text-white flex items-center justify-center font-mono font-bold shrink-0">2</span>
+                    <p className={textPrimary}>Tap the <b>Share Icon</b> (iOS Safari bottom bar) or <b>Menu Buttons</b> (Android Chrome top-right).</p>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="w-5 h-5 rounded-full bg-stone-900 text-white flex items-center justify-center font-mono font-bold shrink-0">3</span>
+                    <p className={textPrimary}>Select <b>'Add to Home Screen'</b> to pin this luxurious memory capsule.</p>
+                  </div>
+                </div>
+
+                <div className="text-center pt-2">
+                  <button
+                    onClick={() => setShowAppModal(false)}
+                    className={`w-full py-3.5 rounded-xl font-mono text-xs tracking-widest uppercase font-extrabold cursor-pointer transition-colors duration-300 ${
+                      isDark 
+                        ? 'bg-white text-black hover:bg-stone-200' 
+                        : 'bg-stone-900 text-white hover:bg-stone-800'
+                    }`}
+                  >
+                    Got It
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+    </div>
   );
 };
