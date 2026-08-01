@@ -613,64 +613,128 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
 
             {/* TAB 3: HERO LAYOUT PRESETS */}
             {activeTab === 'layout' && (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <span className="text-xs font-mono font-bold uppercase text-white block">
-                  Select Hero Layout Architecture
+                  Select Landing Page Template
                 </span>
 
                 {[
                   {
-                    id: 'pic_time_editorial',
-                    title: 'Pic-Time Asymmetric Editorial (Featured)',
-                    desc: 'High-end magazine collage with offset portraits, overlapping typography & warm alabaster background',
-                    badge: 'Screenshot Template',
+                    id: 'editorial_magazine',
+                    title: '1. EDITORIAL MAGAZINE',
+                    desc: 'Pic-Time & Vogue inspired. Asymmetric multi-photo collage, soft cream background, large serif typography, elegant whitespace.',
+                    badge: 'Pic-Time / Vogue',
                   },
                   {
-                    id: 'vogue_magazine',
-                    title: 'Vogue Cover Minimalist',
-                    desc: 'High-fashion editorial layout with dual vertical portraits and crisp hairline dividers',
-                    badge: 'High Fashion',
+                    id: 'fullscreen_cinematic',
+                    title: '2. FULLSCREEN CINEMATIC',
+                    desc: 'Apple & Netflix inspired. Full-bleed cover image or autoplay muted video, dark glass card, center luxury typography.',
+                    badge: 'Video / Cinema',
                   },
                   {
-                    id: 'editorial_arch',
-                    title: 'Arch Gallery Minimal',
-                    desc: 'Soft curved arch frame with delicate script & warm oat canvas',
-                    badge: 'Romantic',
+                    id: 'memory_timeline',
+                    title: '3. MEMORY TIMELINE',
+                    desc: 'Apple & Google Photos inspired. Storytelling timeline flow with sequential chapters, photo backdrops & cursive quote.',
+                    badge: 'Storytelling',
                   },
                   {
-                    id: 'split_minimalist',
-                    title: 'Split Architectural',
-                    desc: 'Clean left editorial column with scroll cue and right tall photo frame',
-                    badge: 'Minimal Single-Page',
+                    id: 'modern_minimal',
+                    title: '4. MODERN MINIMAL',
+                    desc: 'Apple & Notion inspired. Architectural split layout, pristine whitespace, single rounded cover frame, ultra-clean typography.',
+                    badge: 'Apple / Notion',
                   },
                   {
-                    id: 'cinematic_minimal',
-                    title: 'Cinematic Full-Bleed Minimal',
-                    desc: 'Full-bleed image backdrop with floating frosted credit badge & glass card',
-                    badge: 'Luxury Dark',
+                    id: 'luxury_parallax',
+                    title: '5. LUXURY PARALLAX',
+                    desc: 'High-end fashion & resort inspired. Layered depth with floating glass cards, gold accents, smooth scroll motion.',
+                    badge: 'Luxury Parallax',
                   },
                 ].map(preset => (
                   <div
                     key={preset.id}
                     onClick={() => updateCfg('heroStyle', preset.id as any)}
                     className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                      cfg.heroStyle === preset.id
+                      cfg.heroStyle === preset.id || 
+                      (preset.id === 'editorial_magazine' && ['pic_time_editorial', 'vogue_magazine'].includes(cfg.heroStyle || '')) ||
+                      (preset.id === 'fullscreen_cinematic' && ['cinematic_minimal', 'dark_luxury'].includes(cfg.heroStyle || '')) ||
+                      (preset.id === 'modern_minimal' && ['split_minimalist'].includes(cfg.heroStyle || ''))
                         ? 'bg-brand-red/10 border-brand-red ring-1 ring-brand-red'
                         : 'bg-black/50 border-white/10 hover:border-white/30'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="text-xs font-mono font-bold text-white flex items-center gap-2">
-                        {cfg.heroStyle === preset.id && <Check size={14} className="text-brand-red" />}
+                        {(cfg.heroStyle === preset.id ||
+                          (preset.id === 'editorial_magazine' && ['pic_time_editorial', 'vogue_magazine'].includes(cfg.heroStyle || '')) ||
+                          (preset.id === 'fullscreen_cinematic' && ['cinematic_minimal', 'dark_luxury'].includes(cfg.heroStyle || '')) ||
+                          (preset.id === 'modern_minimal' && ['split_minimalist'].includes(cfg.heroStyle || ''))) && (
+                          <Check size={14} className="text-brand-red" />
+                        )}
                         {preset.title}
                       </h4>
-                      <span className="text-[9px] font-mono bg-white/10 text-white/70 px-2 py-0.5 rounded-full">
+                      <span className="text-[9px] font-mono bg-white/10 text-white/70 px-2 py-0.5 rounded-full font-bold">
                         {preset.badge}
                       </span>
                     </div>
-                    <p className="text-[11px] text-white/50">{preset.desc}</p>
+                    <p className="text-[11px] text-white/50 leading-relaxed">{preset.desc}</p>
                   </div>
                 ))}
+
+                {/* Additional Media Settings */}
+                <div className="p-4 bg-black/60 rounded-2xl border border-white/10 space-y-3 pt-4">
+                  <span className="text-xs font-mono font-bold uppercase text-white block">
+                    Media &amp; Interactive Buttons
+                  </span>
+
+                  <div>
+                    <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
+                      Video Cover URL (Optional MP4 / WebM)
+                    </label>
+                    <input
+                      type="text"
+                      value={cfg.videoUrl || ''}
+                      onChange={e => updateCfg('videoUrl', e.target.value)}
+                      placeholder="https://example.com/cover-video.mp4"
+                      className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red font-mono"
+                    />
+                    <p className="text-[10px] text-white/40 mt-1 font-mono">Autoplays muted on Fullscreen &amp; Parallax templates</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
+                      Photographer Logo Image URL (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={cfg.logoUrl || ''}
+                      onChange={e => updateCfg('logoUrl', e.target.value)}
+                      placeholder="https://example.com/logo.png"
+                      className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-red font-mono"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-white/80">
+                      <input
+                        type="checkbox"
+                        checked={cfg.showShareButton ?? true}
+                        onChange={e => updateCfg('showShareButton', e.target.checked)}
+                        className="rounded border-white/20 bg-black text-brand-red focus:ring-0"
+                      />
+                      <span>Share Button</span>
+                    </label>
+
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-mono text-white/80">
+                      <input
+                        type="checkbox"
+                        checked={cfg.showAppButton ?? true}
+                        onChange={e => updateCfg('showAppButton', e.target.checked)}
+                        className="rounded border-white/20 bg-black text-brand-red focus:ring-0"
+                      />
+                      <span>App Download Button</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             )}
           </div>

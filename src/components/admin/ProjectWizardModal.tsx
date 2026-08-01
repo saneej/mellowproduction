@@ -109,13 +109,16 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
     },
   ]);
 
-  // STEP 5: Settings
+  // STEP 5: Settings & Landing Page Template
   const [status, setStatus] = useState<ProjectStatus>("active");
   const [allowDownloads, setAllowDownloads] = useState(true);
   const [allowFavorites, setAllowFavorites] = useState(true);
   const [progressiveLoading, setProgressiveLoading] = useState(true);
   const [layout, setLayout] = useState<"grid" | "masonry" | "timeline" | "justified" | "carousel" | "collage">("grid");
   const [theme, setTheme] = useState<Project['theme']>("classic_editorial");
+  const [selectedLandingTemplate, setSelectedLandingTemplate] = useState<
+    'editorial_magazine' | 'fullscreen_cinematic' | 'memory_timeline' | 'modern_minimal' | 'luxury_parallax'
+  >('editorial_magazine');
   const [titleFontFamily, setTitleFontFamily] = useState("default");
   const [customTitleFontUrl, setCustomTitleFontUrl] = useState<string | undefined>();
   const [customTitleFontName, setCustomTitleFontName] = useState<string | undefined>();
@@ -255,6 +258,18 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
         customTitleFontUrl,
         customTitleFontName,
         titleFontSize,
+        landingPageConfig: {
+          heroStyle: selectedLandingTemplate,
+          brideName: brideName || undefined,
+          groomName: groomName || undefined,
+          hashtag: hashtag ? (hashtag.startsWith('#') ? hashtag : `#${hashtag}`) : undefined,
+          showBrideGroom: true,
+          eventDateText: eventDate,
+          welcomeMessage: 'Welcome to our official gallery & moments',
+          showShareButton: true,
+          showAppButton: true,
+          bannerImage: coverMediaUrl,
+        }
       };
 
       const newProject = await createProject(projectData);
@@ -848,7 +863,66 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
                 </div>
               </div>
 
-              {/* Title Font Selector */}
+              {/* Landing Page Template Selector */}
+              <div className="space-y-3 p-4 rounded-2xl bg-zinc-900 border border-white/10">
+                <label className="text-xs uppercase text-amber-300 font-bold block flex items-center justify-between">
+                  <span>Client Landing Page Template (5 Designs)</span>
+                  <span className="text-[10px] text-white/50 font-normal">Selectable during creation</span>
+                </label>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    {
+                      id: 'editorial_magazine',
+                      name: '1. Editorial Magazine',
+                      tag: 'Pic-Time / Vogue',
+                      desc: 'Asymmetric multi-photo collage with large serif typography & soft cream background.'
+                    },
+                    {
+                      id: 'fullscreen_cinematic',
+                      name: '2. Fullscreen Cinematic',
+                      tag: 'Apple / Netflix',
+                      desc: 'Full-bleed cover image/video, dark transparent overlay, centered luxury typography.'
+                    },
+                    {
+                      id: 'memory_timeline',
+                      name: '3. Memory Timeline',
+                      tag: 'Apple / Google Photos',
+                      desc: 'Storytelling flow with sequential chapters, photo backdrop cards & quote note.'
+                    },
+                    {
+                      id: 'modern_minimal',
+                      name: '4. Modern Minimal',
+                      tag: 'Apple / Notion',
+                      desc: 'Architectural split layout, single rounded cover frame, high whitespace.'
+                    },
+                    {
+                      id: 'luxury_parallax',
+                      name: '5. Luxury Parallax',
+                      tag: 'Fashion & Resort',
+                      desc: 'Layered depth with floating glass cards, gold accents & smooth motion.'
+                    },
+                  ].map(tmpl => (
+                    <div
+                      key={tmpl.id}
+                      onClick={() => setSelectedLandingTemplate(tmpl.id as any)}
+                      className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                        selectedLandingTemplate === tmpl.id
+                          ? 'bg-brand-red/10 border-brand-red ring-1 ring-brand-red'
+                          : 'bg-black/50 border-white/10 hover:border-white/30'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-bold text-white">{tmpl.name}</span>
+                        <span className="text-[9px] font-mono bg-white/10 text-white/70 px-2 py-0.5 rounded-full font-bold">
+                          {tmpl.tag}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-white/50 leading-relaxed">{tmpl.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
               <FontSelector
                 titleFontFamily={titleFontFamily}
                 customTitleFontUrl={customTitleFontUrl}

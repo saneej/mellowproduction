@@ -72,7 +72,13 @@ export interface SyncLog {
 }
 
 export interface LandingPageConfig {
-  heroStyle?: 'pic_time_editorial' | 'vogue_magazine' | 'editorial_arch' | 'split_minimalist' | 'cinematic_minimal' | 'classic_editorial' | 'split_hero' | 'dark_luxury' | 'romantic_card' | 'minimal_nordic';
+  heroStyle?: 
+    | 'editorial_magazine' | 'pic_time_editorial' | 'vogue_magazine'
+    | 'fullscreen_cinematic' | 'cinematic_minimal' | 'dark_luxury'
+    | 'memory_timeline'
+    | 'modern_minimal' | 'split_minimalist'
+    | 'luxury_parallax'
+    | 'editorial_arch' | 'classic_editorial' | 'split_hero' | 'romantic_card' | 'minimal_nordic';
   showBrideGroom?: boolean;
   brideName?: string;
   groomName?: string;
@@ -80,11 +86,19 @@ export interface LandingPageConfig {
   welcomeMessage?: string;
   quoteText?: string;
   cursiveFont?: string;
+  logoUrl?: string;
+  videoUrl?: string;
+  fontPairing?: 'cormorant_inter' | 'playfair_manrope' | 'libre_poppins' | 'dm_jakarta' | 'lora_instrument';
+  primaryColor?: string;
   accentColor?: string;
+  backgroundColor?: string;
   showCountdown?: boolean;
   eventDateText?: string;
   locationText?: string;
   showHashtagBadge?: boolean;
+  showShareButton?: boolean;
+  showAppButton?: boolean;
+  galleryButtonStyle?: 'solid' | 'outline' | 'pill' | 'glass';
   heroOverlayOpacity?: number;
   bannerImage?: string;
   subEventLayout?: 'grid' | 'cards' | 'carousel' | 'minimal_list';
