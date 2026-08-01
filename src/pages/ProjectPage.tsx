@@ -255,7 +255,13 @@ export const ProjectPage: React.FC = () => {
 
         {/* Pure Pic-Time Style Gallery List */}
         <div className="space-y-12 pt-8">
-          <div className="text-center space-y-2">
+          <motion.div 
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
+            className="text-center space-y-2"
+          >
             <span className={`text-[10px] font-mono uppercase tracking-[0.25em] font-black block ${themeStyles.accentText}`}>
               ✦ Portfolio Index ✦
             </span>
@@ -270,7 +276,7 @@ export const ProjectPage: React.FC = () => {
               (project.theme === 'mellowwedding' || project.theme === 'mellow_wedding') ? 'bg-[#C59B6C]' :
               'bg-stone-900'
             }`} />
-          </div>
+          </motion.div>
 
           {subEventLayout === 'editorial_list' ? (
             <div className="space-y-4 max-w-3xl mx-auto">
@@ -279,9 +285,10 @@ export const ProjectPage: React.FC = () => {
                 return (
                   <motion.div
                     key={evt.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.08, duration: 0.5 }}
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-30px" }}
+                    transition={{ delay: idx * 0.08, duration: 0.6, ease: [0.215, 0.61, 0.355, 1.0] }}
                   >
                     <Link
                       to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
@@ -333,9 +340,10 @@ export const ProjectPage: React.FC = () => {
                 return (
                   <motion.div
                     key={evt.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1, duration: 0.6 }}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-30px" }}
+                    transition={{ delay: idx * 0.08, duration: 0.6, ease: [0.215, 0.61, 0.355, 1.0] }}
                   >
                     <Link
                       to={`/projects/${projectSlug}/${evt.slug || evt.id}`}

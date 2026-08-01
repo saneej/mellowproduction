@@ -88,13 +88,19 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   // 1. PIC-TIME EDITORIAL ASYMMETRIC COLLAGE (Exact match to screenshot request!)
   if (heroStyle === 'pic_time_editorial') {
     return (
-      <div className="relative w-full bg-[#F5F2EC] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-[#E8E2D7] shadow-sm text-[#382C26] my-2">
+      <div className="relative w-full bg-[#F4F1EA] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-[#E8E2D7] shadow-sm text-[#4A2A25] my-2">
         {/* Top Branding Header */}
-        <div className="text-center mb-8 sm:mb-12">
-          <p className="text-xs sm:text-sm font-serif tracking-[0.25em] text-[#6B5A50] uppercase">
-            Gallery by Mellow Production &nbsp;|&nbsp; {project.title}
+        <motion.div 
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
+          className="text-center mb-8 sm:mb-12"
+        >
+          <p className="text-xs sm:text-sm font-serif tracking-[0.2em] text-[#6B4C43] uppercase font-normal">
+            {cfg?.welcomeMessage || `Gallery by Mellow Production | ${project.title}`}
           </p>
-        </div>
+        </motion.div>
 
         {/* Asymmetric Editorial Grid */}
         <div className="max-w-5xl mx-auto relative min-h-[600px] flex flex-col justify-between">
@@ -103,10 +109,11 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start relative z-10">
             {/* Top Left Vertical Portrait */}
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="md:col-span-6 lg:col-span-5 aspect-[3/4] rounded-2xl overflow-hidden shadow-md border border-[#E2DAD0] bg-white"
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
+              className="md:col-span-6 lg:col-span-5 aspect-[3/4] rounded-xl overflow-hidden shadow-sm bg-white"
             >
               <img
                 src={img0}
@@ -118,10 +125,11 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
             {/* Top Right Texture / Secondary Photo (Offset) */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.9, delay: 0.2 }}
-              className="hidden md:block md:col-span-4 md:col-start-9 aspect-square rounded-xl overflow-hidden shadow-sm border border-[#E2DAD0] bg-white mt-8"
+              initial={{ opacity: 0, scale: 0.95, y: 25 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.9, delay: 0.1, ease: [0.215, 0.61, 0.355, 1.0] }}
+              className="hidden md:block md:col-span-4 md:col-start-9 aspect-square rounded-xl overflow-hidden shadow-sm bg-white mt-16 lg:mt-24"
             >
               <img
                 src={img1}
@@ -134,13 +142,14 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
           {/* Overlapping Typography Section in the Center */}
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="my-8 md:-my-16 relative z-20 text-center px-4"
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.9, delay: 0.2, ease: [0.215, 0.61, 0.355, 1.0] }}
+            className="my-8 md:-my-14 relative z-20 text-center px-4"
           >
             {showHashtagBadge && hashtag && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#382C26]/5 border border-[#382C26]/15 text-[#6B5A50] text-xs font-mono font-bold tracking-wider mb-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#4A2A25]/5 border border-[#4A2A25]/15 text-[#6B4C43] text-xs font-mono font-bold tracking-wider mb-3">
                 <Hash size={12} />
                 <span>{hashtag.startsWith('#') ? hashtag : `#${hashtag}`}</span>
               </div>
@@ -148,21 +157,21 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
             {showBrideGroom && (brideName || groomName) ? (
               <h1 
-                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.12em] uppercase font-light text-[#382C26] leading-none drop-shadow-sm"
+                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.14em] uppercase font-light text-[#4A2A25] leading-none"
               >
                 {brideName} &amp; {groomName}
               </h1>
             ) : (
               <h1 
                 style={titleFontStyle}
-                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.12em] uppercase font-light text-[#382C26] leading-none drop-shadow-sm"
+                className="text-4xl sm:text-6xl md:text-7xl font-serif tracking-[0.14em] uppercase font-light text-[#4A2A25] leading-none"
               >
                 {project.title}
               </h1>
             )}
 
             {eventDateText && (
-              <p className="text-xl sm:text-3xl font-serif italic text-[#59483F] mt-3 sm:mt-4 tracking-wide">
+              <p className="text-xl sm:text-3xl font-serif text-[#593C33] mt-3 sm:mt-4 tracking-wide font-normal">
                 {eventDateText}
               </p>
             )}
@@ -181,13 +190,14 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           </motion.div>
 
           {/* Bottom Row: Left Small Accent Photo + Right Vertical Feature Portrait */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end relative z-10 pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end relative z-10 pt-4">
             {/* Bottom Left Small Landscape Accent Photo */}
             <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="md:col-span-5 aspect-[4/3] rounded-2xl overflow-hidden shadow-sm border border-[#E2DAD0] bg-white hidden sm:block"
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.8, delay: 0.3, ease: [0.215, 0.61, 0.355, 1.0] }}
+              className="md:col-span-5 aspect-[16/10] rounded-xl overflow-hidden shadow-sm bg-white hidden sm:block mb-6"
             >
               <img
                 src={img2}
@@ -199,10 +209,11 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
             {/* Bottom Right Vertical Feature Photo */}
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, delay: 0.5 }}
-              className="md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-8 aspect-[3/4] rounded-2xl overflow-hidden shadow-md border border-[#E2DAD0] bg-white"
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.9, delay: 0.4, ease: [0.215, 0.61, 0.355, 1.0] }}
+              className="md:col-span-6 md:col-start-7 lg:col-span-5 lg:col-start-8 aspect-[3/4] rounded-xl overflow-hidden shadow-md bg-white"
             >
               <img
                 src={img3}
@@ -239,14 +250,26 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
     return (
       <div className="relative w-full bg-[#FAF9F6] rounded-[2.5rem] overflow-hidden p-6 sm:p-12 md:p-16 border border-zinc-200 shadow-sm text-zinc-900 my-2">
         {/* Top Header Rule */}
-        <div className="border-b border-zinc-300 pb-4 mb-8 flex items-center justify-between text-[11px] font-mono tracking-widest text-zinc-500 uppercase">
+        <motion.div 
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
+          className="border-b border-zinc-300 pb-4 mb-8 flex items-center justify-between text-[11px] font-mono tracking-widest text-zinc-500 uppercase"
+        >
           <span>GALLERY BY MELLOW PRODUCTION</span>
           <span>{eventDateText}</span>
           <span>SPECIAL EDITION</span>
-        </div>
+        </motion.div>
 
         {/* Center High-Fashion Serif Title */}
-        <div className="text-center my-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.9, delay: 0.1, ease: [0.215, 0.61, 0.355, 1.0] }}
+          className="text-center my-6"
+        >
           {showBrideGroom && (brideName || groomName) ? (
             <h1 className="text-4xl sm:text-7xl md:text-8xl font-serif font-extralight tracking-[0.18em] uppercase text-zinc-900 leading-none">
               {brideName} &amp; {groomName}
@@ -262,20 +285,38 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               {hashtag.startsWith('#') ? hashtag : `#${hashtag}`}
             </p>
           )}
-        </div>
+        </motion.div>
 
         {/* Dual Side-by-Side Portrait Showcase */}
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 my-8 items-center">
-          <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-zinc-200">
+          <motion.div 
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-zinc-200"
+          >
             <img src={img0} alt={project.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          </div>
-          <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-zinc-200 md:mt-12">
+          </motion.div>
+          <motion.div 
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg border border-zinc-200 md:mt-12"
+          >
             <img src={img1} alt="Cover feature" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          </div>
+          </motion.div>
         </div>
 
         {/* Quote & Details */}
-        <div className="text-center max-w-xl mx-auto space-y-2 pt-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="text-center max-w-xl mx-auto space-y-2 pt-4"
+        >
           {quoteText && (
             <p style={{ ...cursiveFontStyle, color: accentColor }} className="text-2xl italic text-zinc-800">
               "{quoteText}"
@@ -286,7 +327,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               {welcomeMessage}
             </p>
           )}
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -296,18 +337,36 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
     return (
       <div className="relative w-full bg-[#F4F0EA] rounded-[2.5rem] overflow-hidden p-8 sm:p-16 border border-[#E3DCD1] shadow-sm text-[#2C241E] my-2 text-center flex flex-col items-center">
         {/* Header Tag */}
-        <span className="text-[11px] font-mono tracking-[0.3em] uppercase text-[#8A796C] mb-6">
+        <motion.span 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8 }}
+          className="text-[11px] font-mono tracking-[0.3em] uppercase text-[#8A796C] mb-6"
+        >
           CELEBRATION GALLERY
-        </span>
+        </motion.span>
 
         {/* Arch Image Frame */}
-        <div className="relative w-full max-w-md aspect-[3/4] rounded-t-[14rem] rounded-b-3xl overflow-hidden shadow-2xl border-4 border-white/80 bg-white">
+        <motion.div 
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.9, delay: 0.1 }}
+          className="relative w-full max-w-md aspect-[3/4] rounded-t-[14rem] rounded-b-3xl overflow-hidden shadow-2xl border-4 border-white/80 bg-white"
+        >
           <img src={mainImage} alt={project.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
           <div className="absolute inset-0 bg-black/10" />
-        </div>
+        </motion.div>
 
         {/* Names Over Arch Footer */}
-        <div className="-mt-12 relative z-10 bg-white/90 backdrop-blur-md px-8 py-6 rounded-3xl border border-[#E3DCD1] shadow-xl max-w-lg w-full space-y-2">
+        <motion.div 
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.9, delay: 0.2 }}
+          className="-mt-12 relative z-10 bg-white/90 backdrop-blur-md px-8 py-6 rounded-3xl border border-[#E3DCD1] shadow-xl max-w-lg w-full space-y-2"
+        >
           {showBrideGroom && (brideName || groomName) ? (
             <h1 className="text-3xl sm:text-5xl font-serif italic text-[#2C241E]">
               {brideName} &amp; {groomName}
@@ -329,7 +388,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
               "{quoteText}"
             </p>
           )}
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -346,7 +405,13 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
             </p>
           </div>
 
-          <div className="space-y-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 35 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.9, ease: [0.215, 0.61, 0.355, 1.0] }}
+            className="space-y-4"
+          >
             {showHashtagBadge && hashtag && (
               <span className="inline-block text-xs font-mono font-bold tracking-widest text-[#A28F81] uppercase">
                 {hashtag.startsWith('#') ? hashtag : `#${hashtag}`}
@@ -375,7 +440,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
                 "{quoteText}"
               </p>
             )}
-          </div>
+          </motion.div>
 
           <div className="pt-6 border-t border-[#E6E3DC] flex items-center justify-between text-xs font-mono text-[#88786C]">
             <div>
@@ -425,9 +490,10 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 md:px-12 z-10">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.8, ease: [0.215, 0.61, 0.355, 1.0] }}
           className="space-y-4 max-w-3xl p-8 sm:p-12 rounded-3xl bg-black/35 backdrop-blur-md border border-white/15 text-white shadow-2xl"
         >
           {showHashtagBadge && hashtag && (
