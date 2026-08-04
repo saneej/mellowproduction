@@ -18,13 +18,21 @@ import {
   MapPin, 
   Clock,
   Layers,
-  Wand2
+  Wand2,
+  Film,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  ExternalLink,
+  Video
 } from 'lucide-react';
-import { Project, LandingPageConfig } from '../../types/gallery';
+import { Project, LandingPageConfig, ReelItem } from '../../types/gallery';
 import { PRESET_FONTS, ensureFontLoaded } from '../../utils/fontUtils';
 import { ImageUploader } from '../common/ImageUploader';
 import { FontSelector } from '../common/FontSelector';
 import { ProjectHero } from '../gallery/ProjectHero';
+import { parseReelUrl, SAMPLE_REELS } from '../../utils/reelUtils';
 
 interface LandingPageEditorProps {
   project: Project;
@@ -60,6 +68,9 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
     heroOverlayOpacity: project.landingPageConfig?.heroOverlayOpacity ?? 0.4,
     bannerImage: project.landingPageConfig?.bannerImage || project.coverImage || '',
     subEventLayout: project.landingPageConfig?.subEventLayout || 'cards',
+    showReels: project.landingPageConfig?.showReels ?? false,
+    reels: project.landingPageConfig?.reels || [],
+    reelsSectionTitle: project.landingPageConfig?.reelsSectionTitle || 'Reels & Video Highlights',
   });
 
   const [titleFontFamily, setTitleFontFamily] = useState(project.titleFontFamily || 'default');
@@ -68,10 +79,68 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
   const [titleFontSize, setTitleFontSize] = useState<number>(project.titleFontSize || project.landingPageConfig?.titleFontSize || 100);
   const [subtitleFontSize, setSubtitleFontSize] = useState<number>(project.subtitleFontSize || project.landingPageConfig?.subtitleFontSize || 100);
 
-  const [activeTab, setActiveTab] = useState<'content' | 'style' | 'layout'>('content');
+  // New Reel Input States
+  const [newReelUrl, setNewReelUrl] = useState('');
+  const [newReelTitle, setNewReelTitle] = useState('');
+  const [newReelCaption, setNewReelCaption] = useState('');
+
+  const [activeTab, setActiveTab] = useState<'content' | 'style' | 'layout' | 'reels'>('content');
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Reel Helper Actions
+  const handleAddReel = () => {
+    if (!newReelUrl.trim()) return;
+    const parsed = parseReelUrl(newReelUrl);
+    const newReelItem: ReelItem = {
+      id: `reel-${Date.now()}`,
+      url: newReelUrl.trim(),
+      title: newReelTitle.trim() || 'Highlight Reel',
+      caption: newReelCaption.trim() || '',
+      source: parsed.source,
+    };
+    const updated = [...(cfg.reels || []), newReelItem];
+    updateCfg('reels', updated);
+    setNewReelUrl('');
+    setNewReelTitle('');
+    setNewReelCaption('');
+  };
+
+  const handleRemoveReel = (id: string) => {
+    const updated = (cfg.reels || []).filter(r => r.id !== id);
+    updateCfg('reels', updated);
+  };
+
+  const handleMoveReel = (index: number, direction: 'up' | 'down') => {
+    const list = [...(cfg.reels || [])];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= list.length) return;
+    const temp = list[index];
+    list[index] = list[targetIndex];
+    list[targetIndex] = temp;
+    updateCfg('reels', list);
+  };
+
+  const handleAddSampleReels = () => {
+    const sampleList: ReelItem[] = [
+      {
+        id: `reel-${Date.now()}-1`,
+        url: 'https://www.instagram.com/reel/C8X_sample1/',
+        title: 'Wedding Highlights Reel',
+        caption: 'Unforgettable moments under the starlight ✨',
+        source: 'instagram',
+      },
+      {
+        id: `reel-${Date.now()}-2`,
+        url: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+        title: 'First Dance & Celebration',
+        caption: 'Pure joy and celebration 🤍',
+        source: 'youtube',
+      },
+    ];
+    updateCfg('reels', [...(cfg.reels || []), ...sampleList]);
+  };
 
   // Sync state if project props change
   useEffect(() => {
@@ -222,36 +291,47 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
           <div className="flex border-b border-white/10 bg-black/40">
             <button
               onClick={() => setActiveTab('content')}
-              className={`flex-1 py-3 px-2 text-xs font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-3 px-1 text-[11px] font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1 transition-colors ${
                 activeTab === 'content'
                   ? 'border-brand-red text-brand-red bg-white/5'
                   : 'border-transparent text-white/50 hover:text-white'
               }`}
             >
-              <Heart size={14} />
-              <span>Couple & Info</span>
+              <Heart size={13} />
+              <span>Couple</span>
             </button>
             <button
               onClick={() => setActiveTab('style')}
-              className={`flex-1 py-3 px-2 text-xs font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-3 px-1 text-[11px] font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1 transition-colors ${
                 activeTab === 'style'
                   ? 'border-brand-red text-brand-red bg-white/5'
                   : 'border-transparent text-white/50 hover:text-white'
               }`}
             >
-              <Palette size={14} />
-              <span>Fonts & Style</span>
+              <Palette size={13} />
+              <span>Style</span>
             </button>
             <button
               onClick={() => setActiveTab('layout')}
-              className={`flex-1 py-3 px-2 text-xs font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+              className={`flex-1 py-3 px-1 text-[11px] font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1 transition-colors ${
                 activeTab === 'layout'
                   ? 'border-brand-red text-brand-red bg-white/5'
                   : 'border-transparent text-white/50 hover:text-white'
               }`}
             >
-              <Layout size={14} />
-              <span>Hero Layout</span>
+              <Layout size={13} />
+              <span>Hero</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('reels')}
+              className={`flex-1 py-3 px-1 text-[11px] font-mono font-bold uppercase border-b-2 flex items-center justify-center gap-1 transition-colors ${
+                activeTab === 'reels'
+                  ? 'border-brand-red text-brand-red bg-white/5'
+                  : 'border-transparent text-white/50 hover:text-white'
+              }`}
+            >
+              <Film size={13} className="text-rose-400" />
+              <span>Reels</span>
             </button>
           </div>
 
@@ -746,6 +826,194 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
                       <span>App Download Button</span>
                     </label>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: INSTAGRAM & YOUTUBE REELS TAB */}
+            {activeTab === 'reels' && (
+              <div className="space-y-5">
+                {/* Master Reels Checkbox */}
+                <div className="p-4 bg-black/60 rounded-2xl border border-white/10 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold uppercase text-white flex items-center gap-2">
+                      <Film size={15} className="text-rose-400" />
+                      Enable Client Reels Section
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={cfg.showReels ?? false}
+                        onChange={e => updateCfg('showReels', e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
+                    </label>
+                  </div>
+
+                  <p className="text-[11px] font-mono text-white/50 leading-relaxed">
+                    When enabled, clients can play embedded Instagram Reels and YouTube Shorts directly inside a dedicated 9:16 vertical Reels Tab &amp; player on their gallery landing page.
+                  </p>
+
+                  <div>
+                    <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
+                      Section Title
+                    </label>
+                    <input
+                      type="text"
+                      value={cfg.reelsSectionTitle || ''}
+                      onChange={e => updateCfg('reelsSectionTitle', e.target.value)}
+                      placeholder="e.g. Reels & Video Highlights"
+                      className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500 font-serif"
+                    />
+                  </div>
+                </div>
+
+                {/* Add New Reel Link Form */}
+                <div className="p-4 bg-black/60 rounded-2xl border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
+                      <Plus size={14} className="text-emerald-400" />
+                      Add Instagram / YouTube Reel
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleAddSampleReels}
+                      className="text-[10px] font-mono text-amber-300 hover:text-amber-200 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full"
+                    >
+                      + Add Sample Reels
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
+                      Instagram Reel / YouTube Shorts URL
+                    </label>
+                    <input
+                      type="text"
+                      value={newReelUrl}
+                      onChange={e => setNewReelUrl(e.target.value)}
+                      placeholder="https://www.instagram.com/reel/C123abc/ or YouTube link"
+                      className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-amber-200 font-mono focus:outline-none focus:border-rose-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
+                        Title (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={newReelTitle}
+                        onChange={e => setNewReelTitle(e.target.value)}
+                        placeholder="e.g. First Dance Reel"
+                        className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
+                        Caption (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={newReelCaption}
+                        onChange={e => setNewReelCaption(e.target.value)}
+                        placeholder="e.g. Magic under starlight"
+                        className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-rose-500"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleAddReel}
+                    disabled={!newReelUrl.trim()}
+                    className="w-full py-2.5 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Add Reel Link</span>
+                  </button>
+                </div>
+
+                {/* List of Configured Reels */}
+                <div className="p-4 bg-black/60 rounded-2xl border border-white/10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
+                      <Film size={14} className="text-amber-400" />
+                      Active Reels ({cfg.reels?.length || 0})
+                    </span>
+                  </div>
+
+                  {(!cfg.reels || cfg.reels.length === 0) ? (
+                    <div className="p-6 text-center border border-dashed border-white/10 rounded-xl space-y-2">
+                      <Video size={24} className="mx-auto text-white/30" />
+                      <p className="text-xs font-mono text-white/50">No reels added yet.</p>
+                      <button
+                        type="button"
+                        onClick={handleAddSampleReels}
+                        className="text-xs font-mono text-rose-400 hover:underline cursor-pointer"
+                      >
+                        Click to add sample test reels
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                      {cfg.reels.map((reel, idx) => {
+                        const parsed = parseReelUrl(reel.url);
+                        return (
+                          <div
+                            key={reel.id || idx}
+                            className="p-3 bg-zinc-950 border border-white/10 rounded-xl flex items-center justify-between gap-3 text-xs"
+                          >
+                            <div className="flex items-center gap-2 overflow-hidden flex-1">
+                              <span className="text-[10px] font-mono text-white/40 font-bold shrink-0">
+                                #{idx + 1}
+                              </span>
+                              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-extrabold uppercase shrink-0 ${
+                                parsed.source === 'instagram' ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white' : 'bg-red-600 text-white'
+                              }`}>
+                                {parsed.source}
+                              </span>
+                              <div className="overflow-hidden">
+                                <p className="text-white font-serif truncate text-xs">{reel.title || 'Untitled Reel'}</p>
+                                <p className="text-[10px] font-mono text-white/40 truncate">{reel.url}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleMoveReel(idx, 'up')}
+                                disabled={idx === 0}
+                                className="p-1 text-white/50 hover:text-white disabled:opacity-20 cursor-pointer"
+                                title="Move Up"
+                              >
+                                <ArrowUp size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleMoveReel(idx, 'down')}
+                                disabled={idx === (cfg.reels?.length || 0) - 1}
+                                className="p-1 text-white/50 hover:text-white disabled:opacity-20 cursor-pointer"
+                                title="Move Down"
+                              >
+                                <ArrowDown size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveReel(reel.id)}
+                                className="p-1 text-rose-400 hover:text-rose-300 cursor-pointer"
+                                title="Remove Reel"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

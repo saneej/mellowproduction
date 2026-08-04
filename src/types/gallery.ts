@@ -71,6 +71,15 @@ export interface SyncLog {
   status: 'completed' | 'failed' | 'partial';
 }
 
+export interface ReelItem {
+  id: string;
+  url: string;
+  title?: string;
+  caption?: string;
+  thumbnailUrl?: string;
+  source?: 'instagram' | 'youtube' | 'direct';
+}
+
 export interface LandingPageConfig {
   heroStyle?: 
     | 'editorial_magazine' | 'pic_time_editorial' | 'vogue_magazine'
@@ -98,6 +107,9 @@ export interface LandingPageConfig {
   showHashtagBadge?: boolean;
   showShareButton?: boolean;
   showAppButton?: boolean;
+  showReels?: boolean;
+  reels?: ReelItem[];
+  reelsSectionTitle?: string;
   galleryButtonStyle?: 'solid' | 'outline' | 'pill' | 'glass';
   heroOverlayOpacity?: number;
   bannerImage?: string;

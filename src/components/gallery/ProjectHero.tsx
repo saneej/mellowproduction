@@ -15,11 +15,14 @@ import {
   VolumeX,
   Sparkles,
   Bookmark,
-  BookOpen
+  BookOpen,
+  Film
 } from 'lucide-react';
 import { Project } from '../../types/gallery';
 import { ensureFontLoaded } from '../../utils/fontUtils';
 import { getDriveImageUrl } from '../../services/driveService';
+import { ReelsSection } from './ReelsSection';
+import { SAMPLE_REELS } from '../../utils/reelUtils';
 
 interface ProjectHeroProps {
   project: Project;
@@ -241,6 +244,22 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
 
       {/* FIXED TOP UTILITIES */}
       <div className="fixed top-6 right-6 z-[100] flex items-center gap-3">
+        {(cfg.showReels || (cfg.reels && cfg.reels.length > 0)) && (
+          <button
+            onClick={() => {
+              const el = document.getElementById('reels-section');
+              if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
+              isDark 
+                ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30' 
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-600 hover:bg-rose-500/20'
+            }`}
+          >
+            <Film size={13} className="text-rose-500" />
+            <span className="hidden sm:inline">Reels</span>
+          </button>
+        )}
         {showShareButton && (
           <button
             onClick={() => setShowShareModal(true)}
@@ -809,6 +828,16 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           ))}
         </div>
       </section>
+
+      {/* INSTAGRAM REELS SECTION */}
+      {(cfg.showReels || (cfg.reels && cfg.reels.length > 0)) && (
+        <ReelsSection
+          reels={cfg.reels && cfg.reels.length > 0 ? cfg.reels : SAMPLE_REELS}
+          title={cfg.reelsSectionTitle || 'Reels & Video Highlights'}
+          isDark={isDark}
+          hashtag={cfg.hashtag || project.hashtag || ''}
+        />
+      )}
 
       {/* FOOTER */}
       <footer className={`relative py-12 px-6 border-t ${borderTone} text-center z-20`}>
