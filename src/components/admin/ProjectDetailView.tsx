@@ -407,10 +407,19 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => setShowLandingPageEditor(true)}
-            className="py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-lg border border-amber-400/30"
+            className="py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-500 via-rose-500 to-purple-600 hover:from-amber-600 hover:to-purple-700 text-white text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-lg border border-amber-400/30 cursor-pointer"
           >
             <Wand2 size={16} className="animate-pulse text-amber-200" />
             <span>Landing Page Builder</span>
+          </button>
+
+          <button
+            onClick={() => setShowLandingPageEditor(true)}
+            className="py-2.5 px-4 rounded-2xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 text-xs font-bold uppercase flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+            title="Configure Instagram & YouTube Reels"
+          >
+            <Film size={16} className="text-rose-400" />
+            <span>Reels ({project.landingPageConfig?.reels?.length || 0})</span>
           </button>
 
           <button

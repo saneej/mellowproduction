@@ -157,21 +157,30 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6 text-white overflow-y-auto select-none">
-      <div className="w-full max-w-xl bg-zinc-950 border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl relative">
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+    <div 
+      className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 text-white select-none animate-fade-in"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="w-full max-w-xl bg-zinc-950 border border-white/10 rounded-3xl shadow-2xl relative max-h-[90vh] flex flex-col my-auto overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 pb-4 border-b border-white/10 shrink-0 bg-zinc-950/95 backdrop-blur-md z-20">
           <div className="flex items-center gap-3">
             <FolderPlus className="text-brand-red" size={24} />
             <h3 className="text-xl font-display font-extrabold uppercase tracking-tight">
               {initialProject ? "Edit Client Project" : "Create New Project"}
             </h3>
           </div>
-          <button onClick={onClose} className="p-2 text-white/50 hover:text-white transition-colors">
+          <button 
+            type="button" 
+            onClick={onClose} 
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-colors cursor-pointer"
+            title="Close modal"
+          >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-[11px] font-mono text-white/50 uppercase mb-1">Project Title</label>
@@ -431,18 +440,18 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             )}
           </div>
 
-          <div className="pt-4 flex justify-end gap-3">
+          <div className="pt-4 pb-2 border-t border-white/10 flex justify-end gap-3 sticky bottom-0 bg-zinc-950/95 backdrop-blur-md z-20">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/10 text-white font-mono text-xs uppercase"
+              className="px-5 py-2.5 rounded-xl border border-white/10 hover:bg-white/10 text-white font-mono text-xs uppercase cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 rounded-xl bg-brand-red text-white font-bold text-xs uppercase tracking-wider hover:bg-brand-red/90 transition-colors shadow-lg"
+              className="px-6 py-2.5 rounded-xl bg-brand-red text-white font-bold text-xs uppercase tracking-wider hover:bg-brand-red/90 transition-colors shadow-lg cursor-pointer"
             >
               {saving ? "Saving..." : initialProject ? "Save Changes" : "Create Project"}
             </button>

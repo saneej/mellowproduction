@@ -347,7 +347,10 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md font-mono text-white animate-fade-in overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md font-mono text-white animate-fade-in select-none"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       
       {showQrModal && createdProject ? (
         <ProjectQrModal
@@ -359,10 +362,10 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
           project={createdProject}
         />
       ) : (
-        <div className="bg-zinc-950 border border-white/10 rounded-3xl p-6 sm:p-8 max-w-4xl w-full shadow-2xl relative space-y-6 my-8">
+        <div className="bg-zinc-950 border border-white/10 rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl relative my-auto overflow-hidden">
           
           {/* Top Bar Header */}
-          <div className="flex items-center justify-between pb-6 border-b border-white/10">
+          <div className="flex items-center justify-between p-4 sm:p-6 pb-4 border-b border-white/10 shrink-0 bg-zinc-950/95 backdrop-blur-md z-20">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="p-1.5 rounded-lg bg-brand-red text-white">
@@ -378,40 +381,48 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+              className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all cursor-pointer shrink-0"
+              title="Close Wizard"
             >
               <X size={20} />
             </button>
           </div>
 
           {/* Progress Indicators */}
-          <div className="grid grid-cols-6 gap-2 pb-4">
-            {steps.map(step => {
-              const Icon = step.icon;
-              const isDone = step.num < currentStep;
-              const isCurrent = step.num === currentStep;
-              return (
-                <button
-                  key={step.num}
-                  onClick={() => step.num < currentStep && setCurrentStep(step.num)}
-                  disabled={step.num > currentStep}
-                  className={`p-2 rounded-2xl border text-center transition-all flex flex-col items-center gap-1 ${
-                    isCurrent
-                      ? "bg-brand-red border-brand-red text-white shadow-lg shadow-brand-red/20"
-                      : isDone
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
-                      : "bg-white/5 border-white/5 text-white/30 cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex items-center gap-1 text-[10px] uppercase font-bold">
-                    {isDone ? <Check size={12} /> : <span>0{step.num}</span>}
-                  </div>
-                  <span className="text-[10px] hidden sm:block truncate w-full">{step.title}</span>
-                </button>
-              );
-            })}
+          <div className="p-3 sm:p-4 border-b border-white/10 shrink-0 bg-black/40 overflow-x-auto">
+            <div className="grid grid-cols-6 gap-2 min-w-[500px]">
+              {steps.map(step => {
+                const Icon = step.icon;
+                const isDone = step.num < currentStep;
+                const isCurrent = step.num === currentStep;
+                return (
+                  <button
+                    key={step.num}
+                    type="button"
+                    onClick={() => step.num < currentStep && setCurrentStep(step.num)}
+                    disabled={step.num > currentStep}
+                    className={`p-2 rounded-2xl border text-center transition-all flex flex-col items-center gap-1 ${
+                      isCurrent
+                        ? "bg-brand-red border-brand-red text-white shadow-lg shadow-brand-red/20"
+                        : isDone
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 cursor-pointer"
+                        : "bg-white/5 border-white/5 text-white/30 cursor-not-allowed"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1 text-[10px] uppercase font-bold">
+                      {isDone ? <Check size={12} /> : <span>0{step.num}</span>}
+                    </div>
+                    <span className="text-[10px] truncate w-full">{step.title}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Scrollable Content Body */}
+          <div className="p-4 sm:p-8 overflow-y-auto flex-1 space-y-6 min-h-0">
 
           {/* STEP 1: EVENT DETAILS */}
           {currentStep === 1 && (
@@ -1196,8 +1207,10 @@ export const ProjectWizardModal: React.FC<ProjectWizardModalProps> = ({
             </div>
           )}
 
+          </div>
+
           {/* Wizard Footer Navigation */}
-          <div className="pt-6 border-t border-white/10 flex items-center justify-between gap-4">
+          <div className="p-4 sm:p-6 border-t border-white/10 shrink-0 bg-zinc-950/95 backdrop-blur-md z-20 flex items-center justify-between gap-4">
             <button
               type="button"
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
