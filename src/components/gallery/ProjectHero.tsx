@@ -16,9 +16,12 @@ import {
   Sparkles,
   Bookmark,
   BookOpen,
-  Film
+  Film,
+  FolderOpen,
+  Layers,
+  Grid
 } from 'lucide-react';
-import { Project } from '../../types/gallery';
+import { Project, EventFolder } from '../../types/gallery';
 import { ensureFontLoaded } from '../../utils/fontUtils';
 import { getDriveImageUrl } from '../../services/driveService';
 import { ReelsSection } from './ReelsSection';
@@ -30,6 +33,7 @@ interface ProjectHeroProps {
   currentCoverIndex: number;
   coverList: string[];
   setCurrentCoverIndex: (index: number) => void;
+  events?: EventFolder[];
 }
 
 export const ProjectHero: React.FC<ProjectHeroProps> = ({
@@ -38,6 +42,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   currentCoverIndex,
   coverList,
   setCurrentCoverIndex,
+  events = [],
 }) => {
   const cfg = project.landingPageConfig || {};
 
@@ -46,8 +51,15 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   const [showLoader, setShowLoader] = useState(true);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showAppModal, setShowAppModal] = useState(false);
+  const [showReelsModal, setShowReelsModal] = useState(false);
+  const [showCollectionsModal, setShowCollectionsModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [isHoveredCta, setIsHoveredCta] = useState(false);
+
+  // Safe Reels list and flags
+  const projectReels = cfg.reels || project.landingPageConfig?.reels || [];
+  const hasReels = Boolean(cfg.showReels || project.landingPageConfig?.showReels || projectReels.length > 0);
+  const reelsList = projectReels.length > 0 ? projectReels : SAMPLE_REELS;
 
   // Parallax Scroll Y position emulation (using lightweight passive scroll listener)
   const [scrollY, setScrollY] = useState(0);
@@ -145,14 +157,9 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   const img2 = collageImages[2] || fallbackCollage[2];
   const img3 = collageImages[3] || fallbackCollage[3];
 
-  // Scroll dispatcher to step into the actual gallery collection
+  // Trigger Explore Collections Popup Modal
   const scrollToCollections = () => {
-    const target = document.getElementById('gallery-content');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: window.innerHeight * 1.1, behavior: 'smooth' });
-    }
+    setShowCollectionsModal(true);
   };
 
   const handleCopyLink = () => {
@@ -243,27 +250,40 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
       </AnimatePresence>
 
       {/* FIXED TOP UTILITIES */}
-      <div className="fixed top-6 right-6 z-[100] flex items-center gap-3">
-        {(cfg.showReels || (cfg.reels && cfg.reels.length > 0)) && (
+      <div className="fixed top-6 right-6 z-[100] flex items-center gap-2 sm:gap-3 flex-wrap justify-end max-w-[90vw]">
+        {hasReels && (
           <button
-            onClick={() => {
-              const el = document.getElementById('reels-section');
-              if (el) el.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
+            type="button"
+            onClick={() => setShowReelsModal(true)}
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-md ${
               isDark 
-                ? 'bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500/30' 
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-600 hover:bg-rose-500/20'
+                ? 'bg-rose-500/25 border-rose-500/50 text-rose-300 hover:bg-rose-500/35' 
+                : 'bg-rose-500/15 border-rose-500/40 text-rose-600 hover:bg-rose-500/25'
             }`}
           >
-            <Film size={13} className="text-rose-500" />
-            <span className="hidden sm:inline">Reels</span>
+            <Film size={13} className="text-rose-500 animate-pulse" />
+            <span className="inline">Reels ({reelsList.length})</span>
           </button>
         )}
+
+        <button
+          type="button"
+          onClick={() => setShowCollectionsModal(true)}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-md ${
+            isDark 
+              ? 'bg-amber-500/20 border-amber-500/40 text-amber-300 hover:bg-amber-500/30' 
+              : 'bg-stone-900/10 border-stone-900/30 text-stone-800 hover:bg-stone-900/20'
+          }`}
+        >
+          <FolderOpen size={13} className="text-amber-500" />
+          <span className="hidden sm:inline">Explore Collections</span>
+        </button>
+
         {showShareButton && (
           <button
+            type="button"
             onClick={() => setShowShareModal(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
               isDark 
                 ? 'bg-black/50 border-white/10 text-stone-200 hover:bg-black/80 hover:border-amber-500/50' 
                 : 'bg-white/65 border-stone-200/80 text-stone-800 hover:bg-white/90 hover:border-stone-400'
@@ -275,8 +295,9 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
         )}
         {showAppButton && (
           <button
+            type="button"
             onClick={() => setShowAppModal(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
+            className={`flex items-center gap-2 px-3.5 py-2 rounded-full border text-[11px] font-mono tracking-widest uppercase transition-all duration-300 backdrop-blur-md cursor-pointer hover:scale-105 shadow-sm ${
               isDark 
                 ? 'bg-black/50 border-white/10 text-stone-200 hover:bg-black/80 hover:border-amber-500/50' 
                 : 'bg-white/65 border-stone-200/80 text-stone-800 hover:bg-white/90 hover:border-stone-400'
@@ -983,6 +1004,184 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
                     }`}
                   >
                     Got It
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* REELS POPUP MODAL */}
+      <AnimatePresence>
+        {showReelsModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6 select-none">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowReelsModal(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-5xl rounded-3xl border border-stone-800 bg-zinc-950 text-stone-100 shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col my-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 sm:p-6 pb-4 border-b border-white/10 shrink-0 bg-black/60 backdrop-blur-md z-20">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                    <span className="text-[10px] font-mono tracking-[0.25em] text-rose-400 font-extrabold uppercase">
+                      ✦ INSTAGRAM & YOUTUBE REELS ✦
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-serif font-light tracking-tight text-white">
+                    {cfg.reelsSectionTitle || 'Reels & Video Highlights'}
+                  </h3>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowReelsModal(false)}
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all cursor-pointer shrink-0"
+                  title="Close Reels"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-8">
+                <ReelsSection
+                  reels={reelsList}
+                  title={cfg.reelsSectionTitle || 'Reels & Video Highlights'}
+                  isDark={true}
+                  hashtag={cfg.hashtag || project.hashtag || ''}
+                />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* EXPLORE COLLECTIONS POPUP MODAL */}
+      <AnimatePresence>
+        {showCollectionsModal && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6 select-none">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCollectionsModal(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative w-full max-w-4xl rounded-3xl border border-stone-800 bg-zinc-950 text-stone-100 shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col my-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 sm:p-6 pb-4 border-b border-white/10 shrink-0 bg-black/60 backdrop-blur-md z-20">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="text-[10px] font-mono tracking-[0.25em] text-amber-400 font-extrabold uppercase">
+                      ✦ OFFICIAL MEDIA SUITE ✦
+                    </span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-serif font-light tracking-tight text-white">
+                    Explore Gallery Collections
+                  </h3>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowCollectionsModal(false)}
+                  className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all cursor-pointer shrink-0"
+                  title="Close Collections"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6">
+                <p className="text-xs text-stone-300 font-mono leading-relaxed">
+                  Select a collection or event folder to jump directly into its high-resolution media gallery.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {(events && events.length > 0 ? events : [
+                    { id: 'all-photos', name: project.title || 'Official Gallery', coverImage: mainImage, fileCount: 150, category: 'Main Suite' },
+                    { id: 'ceremony', name: 'Ceremony & Highlights', coverImage: coverList[1] || mainImage, fileCount: 45, category: 'Series 01' },
+                    { id: 'portraits', name: 'Fine Art Portraits', coverImage: coverList[2] || mainImage, fileCount: 35, category: 'Series 02' },
+                    { id: 'reception', name: 'Evening & Party', coverImage: coverList[3] || mainImage, fileCount: 60, category: 'Series 03' },
+                  ]).map((item: any, idx: number) => {
+                    const coverUrl = item.coverImage ? getDriveImageUrl(item.coverImage, 600) : mainImage;
+                    return (
+                      <div
+                        key={item.id || idx}
+                        onClick={() => {
+                          setShowCollectionsModal(false);
+                          const el = document.getElementById(item.id ? `event-${item.id}` : 'gallery-content');
+                          if (el) {
+                            el.scrollIntoView({ behavior: 'smooth' });
+                          } else {
+                            const target = document.getElementById('gallery-content');
+                            if (target) target.scrollIntoView({ behavior: 'smooth' });
+                          }
+                        }}
+                        className="group relative bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all cursor-pointer shadow-lg hover:scale-[1.02] flex flex-col"
+                      >
+                        <div className="aspect-[4/3] relative overflow-hidden bg-black/50">
+                          <img
+                            src={coverUrl}
+                            alt={item.name}
+                            className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                          <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-black/60 backdrop-blur-md text-amber-300 border border-amber-400/30 uppercase tracking-widest">
+                            {item.category || `Series 0${idx + 1}`}
+                          </span>
+                        </div>
+
+                        <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                          <div>
+                            <h4 className="text-base font-serif text-white group-hover:text-amber-300 transition-colors">
+                              {item.name}
+                            </h4>
+                            <p className="text-[11px] font-mono text-stone-400 mt-1">
+                              {item.fileCount || item.photoCount || 24} Photos Loaded
+                            </p>
+                          </div>
+
+                          <div className="pt-2 flex items-center justify-between text-xs font-mono font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+                            <span>OPEN COLLECTION</span>
+                            <ChevronRight size={14} />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="pt-4 border-t border-white/10 text-center">
+                  <button
+                    onClick={() => {
+                      setShowCollectionsModal(false);
+                      const target = document.getElementById('gallery-content');
+                      if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-mono text-xs font-extrabold uppercase tracking-widest transition-all cursor-pointer shadow-lg hover:scale-105"
+                  >
+                    View Full Gallery Index →
                   </button>
                 </div>
               </div>

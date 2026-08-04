@@ -249,6 +249,7 @@ export const ProjectPage: React.FC = () => {
         currentCoverIndex={currentCoverIndex}
         coverList={coverList}
         setCurrentCoverIndex={setCurrentCoverIndex}
+        events={events}
       />
 
       <main id="gallery-content" className="max-w-7xl mx-auto px-6 pt-16 pb-20 space-y-16 relative z-10">

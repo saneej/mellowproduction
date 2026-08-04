@@ -68,7 +68,7 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
     heroOverlayOpacity: project.landingPageConfig?.heroOverlayOpacity ?? 0.4,
     bannerImage: project.landingPageConfig?.bannerImage || project.coverImage || '',
     subEventLayout: project.landingPageConfig?.subEventLayout || 'cards',
-    showReels: project.landingPageConfig?.showReels ?? false,
+    showReels: project.landingPageConfig?.showReels ?? ((project.landingPageConfig?.reels && project.landingPageConfig.reels.length > 0) ? true : false),
     reels: project.landingPageConfig?.reels || [],
     reelsSectionTitle: project.landingPageConfig?.reelsSectionTitle || 'Reels & Video Highlights',
   });
@@ -101,7 +101,7 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
       source: parsed.source,
     };
     const updated = [...(cfg.reels || []), newReelItem];
-    updateCfg('reels', updated);
+    setCfg(prev => ({ ...prev, reels: updated, showReels: true }));
     setNewReelUrl('');
     setNewReelTitle('');
     setNewReelCaption('');
@@ -139,7 +139,7 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
         source: 'youtube',
       },
     ];
-    updateCfg('reels', [...(cfg.reels || []), ...sampleList]);
+    setCfg(prev => ({ ...prev, reels: [...(prev.reels || []), ...sampleList], showReels: true }));
   };
 
   // Sync state if project props change

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Sparkles, FolderPlus, Lock, Film, Plus, Trash2 } from "lucide-react";
 import { Project, EventCategory, ReelItem } from "../../types/gallery";
 import { extractDriveFileId } from "../../services/driveService";
@@ -56,6 +56,52 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
   const [newReelTitle, setNewReelTitle] = useState("");
   const [newReelCaption, setNewReelCaption] = useState("");
 
+  // Synchronize form state whenever modal opens or initialProject changes
+  useEffect(() => {
+    if (isOpen) {
+      if (initialProject) {
+        setTitle(initialProject.title || "");
+        setSlug(initialProject.slug || "");
+        setSlugIsCustom(Boolean(initialProject.slug));
+        setClientName(initialProject.clientName || "");
+        setClientEmail(initialProject.clientEmail || "");
+        setCategory((initialProject.category as EventCategory) || "wedding");
+        setDate(initialProject.date || new Date().toISOString().split("T")[0]);
+        setCoverInput(initialProject.coverImage || "");
+        setTitleFontFamily(initialProject.titleFontFamily || "default");
+        setCustomTitleFontUrl(initialProject.customTitleFontUrl);
+        setCustomTitleFontName(initialProject.customTitleFontName);
+        setTitleFontSize(initialProject.titleFontSize || 100);
+        setIsPinProtected(initialProject.isPinProtected ?? true);
+        setPin(initialProject.pin || "");
+
+        const cfg = initialProject.landingPageConfig;
+        const projectReels = cfg?.reels || [];
+        setReels(projectReels);
+        setShowReels(cfg?.showReels ?? (projectReels.length > 0));
+        setReelsSectionTitle(cfg?.reelsSectionTitle || "Reels & Video Highlights");
+      } else {
+        setTitle("");
+        setSlug("");
+        setSlugIsCustom(false);
+        setClientName("");
+        setClientEmail("");
+        setCategory("wedding");
+        setDate(new Date().toISOString().split("T")[0]);
+        setCoverInput("");
+        setTitleFontFamily("default");
+        setCustomTitleFontUrl(undefined);
+        setCustomTitleFontName(undefined);
+        setTitleFontSize(100);
+        setIsPinProtected(true);
+        setPin("");
+        setShowReels(false);
+        setReels([]);
+        setReelsSectionTitle("Reels & Video Highlights");
+      }
+    }
+  }, [isOpen, initialProject]);
+
   const handleAddReel = () => {
     if (!newReelUrl.trim()) return;
     const parsed = parseReelUrl(newReelUrl);
@@ -67,6 +113,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       source: parsed.source,
     };
     setReels(prev => [...prev, newReelItem]);
+    setShowReels(true);
     setNewReelUrl("");
     setNewReelTitle("");
     setNewReelCaption("");
@@ -94,6 +141,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
       },
     ];
     setReels(prev => [...prev, ...sampleList]);
+    setShowReels(true);
   };
 
   if (!isOpen) return null;
