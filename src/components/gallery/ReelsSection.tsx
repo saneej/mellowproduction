@@ -110,8 +110,17 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
             >
               {/* Vertical 9:16 Smartphone Container */}
               <div className="relative aspect-[9/16] w-full bg-stone-950 overflow-hidden">
-                {/* Embed or Thumbnail */}
-                {parsed.embedUrl ? (
+                {/* Video element or Embed iframe */}
+                {parsed.source === 'video' ? (
+                  <video
+                    src={parsed.embedUrl}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
+                ) : parsed.embedUrl ? (
                   <iframe
                     src={parsed.embedUrl}
                     title={reel.title || `Reel ${idx + 1}`}
@@ -237,9 +246,18 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
                 </div>
               </div>
 
-              {/* Main Embed Video Player Frame */}
+              {/* Main Embed / Video Player Frame */}
               <div className="relative w-full h-full bg-black flex items-center justify-center overflow-hidden">
-                {parsedCurrent.embedUrl ? (
+                {parsedCurrent.source === 'video' ? (
+                  <video
+                    src={parsedCurrent.embedUrl}
+                    controls
+                    autoPlay
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                  />
+                ) : parsedCurrent.embedUrl ? (
                   <iframe
                     src={parsedCurrent.embedUrl}
                     title={currentReel.title || `Reel ${activeReelIndex + 1}`}
@@ -257,7 +275,7 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-full text-xs font-mono"
                     >
-                      <span>Open on {parsedCurrent.source === 'instagram' ? 'Instagram' : 'YouTube'}</span>
+                      <span>Open Video Source</span>
                       <ExternalLink size={12} />
                     </a>
                   </div>

@@ -1,14 +1,14 @@
 export interface ParsedReel {
   embedUrl: string;
-  source: 'instagram' | 'youtube' | 'direct';
+  source: 'instagram' | 'youtube' | 'direct' | 'video';
   videoId?: string;
   thumbnailUrl?: string;
   originalUrl: string;
 }
 
 /**
- * Parses Instagram Reel, Instagram Post, YouTube Shorts, or YouTube Video URLs
- * into standard embeddable iframe URLs.
+ * Parses Instagram Reel, Instagram Post, YouTube Shorts, YouTube Video,
+ * Google Drive Video, or Direct MP4/Video URLs into standard embeddable format.
  */
 export function parseReelUrl(inputUrl: string): ParsedReel {
   if (!inputUrl) {
@@ -21,7 +21,29 @@ export function parseReelUrl(inputUrl: string): ParsedReel {
 
   const url = inputUrl.trim();
 
-  // 1. Instagram Reel or Post
+  // 1. Direct Video File (.mp4, .mov, .webm, blob)
+  const isDirectVideo = /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url) || url.startsWith('blob:');
+  if (isDirectVideo) {
+    return {
+      embedUrl: url,
+      source: 'video',
+      originalUrl: url,
+    };
+  }
+
+  // 2. Google Drive Video
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([A-Za-z0-9_-]+)/i);
+  if (driveMatch && driveMatch[1]) {
+    const fileId = driveMatch[1];
+    return {
+      embedUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+      source: 'direct',
+      videoId: fileId,
+      originalUrl: url,
+    };
+  }
+
+  // 3. Instagram Reel or Post
   // e.g. https://www.instagram.com/reel/C123456789/
   // e.g. https://www.instagram.com/p/C123456789/
   // e.g. https://instagram.com/reels/C123456789/
@@ -29,7 +51,7 @@ export function parseReelUrl(inputUrl: string): ParsedReel {
   if (igMatch && igMatch[1]) {
     const code = igMatch[1];
     return {
-      embedUrl: `https://www.instagram.com/reel/${code}/embed/captioned/`,
+      embedUrl: `https://www.instagram.com/reel/${code}/embed/`,
       source: 'instagram',
       videoId: code,
       thumbnailUrl: undefined,
@@ -37,7 +59,7 @@ export function parseReelUrl(inputUrl: string): ParsedReel {
     };
   }
 
-  // 2. YouTube Shorts or standard YouTube Video
+  // 4. YouTube Shorts or standard YouTube Video
   // e.g. https://www.youtube.com/shorts/VIDEO_ID
   // e.g. https://youtu.be/VIDEO_ID
   // e.g. https://www.youtube.com/watch?v=VIDEO_ID
@@ -53,7 +75,7 @@ export function parseReelUrl(inputUrl: string): ParsedReel {
     };
   }
 
-  // 3. Fallback direct MP4 or external embed link
+  // 5. Fallback direct link
   return {
     embedUrl: url,
     source: 'direct',

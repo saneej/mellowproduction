@@ -887,13 +887,13 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({
 
                   <div>
                     <label className="block text-[10px] font-mono text-white/50 uppercase mb-1">
-                      Instagram Reel / YouTube Shorts URL
+                      Reel URL (Instagram Reel, MP4 Video, Drive Video, or YouTube Short)
                     </label>
                     <input
                       type="text"
                       value={newReelUrl}
                       onChange={e => setNewReelUrl(e.target.value)}
-                      placeholder="https://www.instagram.com/reel/C123abc/ or YouTube link"
+                      placeholder="Instagram Reel, MP4 Video, Drive Video, or YouTube link"
                       className="w-full bg-black border border-white/15 rounded-xl px-3 py-2 text-xs text-amber-200 font-mono focus:outline-none focus:border-rose-500"
                     />
                   </div>

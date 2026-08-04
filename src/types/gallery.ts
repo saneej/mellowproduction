@@ -77,7 +77,7 @@ export interface ReelItem {
   title?: string;
   caption?: string;
   thumbnailUrl?: string;
-  source?: 'instagram' | 'youtube' | 'direct';
+  source?: 'instagram' | 'youtube' | 'direct' | 'video';
 }
 
 export interface LandingPageConfig {
