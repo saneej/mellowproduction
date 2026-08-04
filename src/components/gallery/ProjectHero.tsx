@@ -39,7 +39,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
   coverList,
   setCurrentCoverIndex,
 }) => {
-  const cfg = project.landingPageConfig;
+  const cfg = project.landingPageConfig || {};
 
   // Custom states
   const [loadingProgress, setLoadingProgress] = useState(0);
