@@ -254,10 +254,11 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     setShowAddFolderModal(true);
   };
 
-  const handleAddFolderSubmit = async (folderData: { name: string; driveFolderId: string; apiKey?: string; coverImage?: string }) => {
+  const handleAddFolderSubmit = async (folderData: { name: string; driveFolderId: string; parentId?: string | null; apiKey?: string; coverImage?: string }) => {
     const rawName = folderData.name || "Sub Event";
     const cleanDriveId = extractDriveFolderId(folderData.driveFolderId || "");
     const slug = rawName.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || `event-${Date.now()}`;
+    const targetParentId = folderData.parentId !== undefined ? folderData.parentId : (activeParentFolderId || null);
 
     const newEvt = await createEvent({
       projectId: project.id,
@@ -267,7 +268,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       driveFolderId: cleanDriveId,
       order: events.length + 1,
       isPublished: true,
-      parentId: activeParentFolderId || null,
+      parentId: targetParentId,
     });
 
     const newFolderConfig: DriveFolderConfig = {
@@ -297,12 +298,13 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
     loadProjectData();
   };
 
-  const handleEditFolderSubmit = async (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string; coverImage?: string }) => {
+  const handleEditFolderSubmit = async (updatedData: { name: string; driveFolderId: string; parentId?: string | null; order: number; apiKey?: string; coverImage?: string }) => {
     if (!project || !editingFolder) return;
 
     const rawName = updatedData.name || "Sub Event";
     const cleanDriveId = extractDriveFolderId(updatedData.driveFolderId || "");
     const slug = rawName.toLowerCase().trim().replace(/[^\w\s-]/g, "").replace(/[\s_-]+/g, "-") || `event-${Date.now()}`;
+    const targetParentId = updatedData.parentId !== undefined ? updatedData.parentId : editingFolder.parentId;
 
     try {
       // 1. Update the event folder document in Firestore & local events cache
@@ -310,6 +312,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         title: rawName,
         slug,
         driveFolderId: cleanDriveId,
+        parentId: targetParentId,
         order: updatedData.order,
         coverImage: updatedData.coverImage,
       });
@@ -739,82 +742,120 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map(evt => (
-              <div key={evt.id} className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden p-5 space-y-4 shadow-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FolderPlus size={18} className="text-brand-red" />
-                    <h3 className="text-base font-bold text-white uppercase">{evt.title}</h3>
+            {events.map(evt => {
+              const parentFolder = evt.parentId ? events.find(p => p.id === evt.parentId) : null;
+              const childSubFolders = events.filter(c => c.parentId === evt.id);
+
+              return (
+                <div key={evt.id} className={`bg-zinc-950 border rounded-3xl overflow-hidden p-5 space-y-4 shadow-xl transition-all ${
+                  evt.parentId ? "border-brand-red/30 bg-zinc-950/80 pl-6" : "border-white/10"
+                }`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <FolderPlus size={18} className={evt.parentId ? "text-amber-400" : "text-brand-red"} />
+                      <div>
+                        <h3 className="text-base font-bold text-white uppercase flex items-center gap-2">
+                          <span>{evt.title}</span>
+                          {evt.parentId && (
+                            <span className="text-[10px] font-mono text-amber-400 font-semibold lowercase">
+                              (sub-folder)
+                            </span>
+                          )}
+                        </h3>
+                        {parentFolder && (
+                          <div className="text-[10px] font-mono text-white/50 flex items-center gap-1">
+                            <span>Nested inside:</span>
+                            <span className="text-brand-red font-bold uppercase">{parentFolder.title}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/60 uppercase shrink-0">
+                      Order #{evt.order}
+                    </span>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-[10px] text-white/60 uppercase">
-                    Order #{evt.order}
-                  </span>
-                </div>
-                
-                {evt.coverImage && (
-                  <div className="w-full aspect-video rounded-xl overflow-hidden border border-white/10 bg-black">
-                    <img 
-                      src={evt.coverImage.startsWith('http') ? evt.coverImage : `https://drive.google.com/thumbnail?id=${evt.coverImage}&sz=w600`}
-                      alt="Cover preview"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover opacity-80"
-                    />
+
+                  {childSubFolders.length > 0 && (
+                    <div className="p-2.5 bg-black/60 border border-white/10 rounded-2xl space-y-1">
+                      <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider block">
+                        Nested Sub-folders ({childSubFolders.length}):
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 pt-0.5">
+                        {childSubFolders.map(child => (
+                          <span key={child.id} className="px-2 py-0.5 rounded-lg bg-white/10 text-[10px] font-mono font-bold text-amber-300">
+                            └─ {child.title}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {evt.coverImage && (
+                    <div className="w-full aspect-video rounded-xl overflow-hidden border border-white/10 bg-black">
+                      <img 
+                        src={evt.coverImage.startsWith('http') ? evt.coverImage : `https://drive.google.com/thumbnail?id=${evt.coverImage}&sz=w600`}
+                        alt="Cover preview"
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover opacity-80"
+                      />
+                    </div>
+                  )}
+
+                  <div className="text-xs text-white/50 space-y-1">
+                    <div>Drive Folder ID: <span className="text-white font-mono">{evt.driveFolderId || "Not Linked"}</span></div>
+                    <div>Media Items: <span className="text-white">{evt.mediaCount || 0}</span></div>
                   </div>
-                )}
 
-                <div className="text-xs text-white/50 space-y-1">
-                  <div>Drive Folder ID: <span className="text-white font-mono">{evt.driveFolderId || "Not Linked"}</span></div>
-                  <div>Media Items: <span className="text-white">{evt.mediaCount || 0}</span></div>
+                  <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-1.5 text-xs">
+                    <button
+                      onClick={() => {
+                        setEditingFolder(evt);
+                        setShowEditFolderModal(true);
+                      }}
+                      className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
+                    >
+                      <Edit3 size={13} /> Edit
+                    </button>
+
+                    <button
+                      onClick={() => setSyncingEventId(evt.id)}
+                      className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
+                    >
+                      <HardDrive size={13} /> GDrive
+                    </button>
+
+                    <a
+                      href={`${window.location.origin}/projects/${projectSlug}/${evt.slug || evt.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1 transition-colors"
+                    >
+                      <ExternalLink size={13} /> View
+                    </a>
+
+                    <button
+                      onClick={() => handleAddSubEvent(evt.id)}
+                      className="py-1.5 px-2 rounded-xl bg-brand-red/20 text-brand-red hover:bg-brand-red/30 font-bold flex items-center gap-1 transition-colors"
+                      title={`Add nested sub-folder under ${evt.title}`}
+                    >
+                      <Plus size={13} /> + Sub
+                    </button>
+
+                    <button
+                      onClick={async () => {
+                        if (window.confirm(`Delete event folder "${evt.title}"?`)) {
+                          await deleteEvent(evt.id);
+                          loadProjectData();
+                        }
+                      }}
+                      className="p-1.5 text-red-400 hover:text-red-300 transition-colors"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
                 </div>
-
-                <div className="pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-1.5 text-xs">
-                  <button
-                    onClick={() => {
-                      setEditingFolder(evt);
-                      setShowEditFolderModal(true);
-                    }}
-                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
-                  >
-                    <Edit3 size={13} /> Edit
-                  </button>
-
-                  <button
-                    onClick={() => setSyncingEventId(evt.id)}
-                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red font-bold flex items-center gap-1 transition-colors"
-                  >
-                    <HardDrive size={13} /> GDrive
-                  </button>
-
-                  <a
-                    href={`${window.location.origin}/projects/${projectSlug}/${evt.slug || evt.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1 transition-colors"
-                  >
-                    <ExternalLink size={13} /> View
-                  </a>
-
-                  <button
-                    onClick={() => handleAddSubEvent(evt.id)}
-                    className="py-1.5 px-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 font-bold flex items-center gap-1 transition-colors"
-                  >
-                    <Plus size={13} /> Nested
-                  </button>
-
-                  <button
-                    onClick={async () => {
-                      if (window.confirm(`Delete event folder "${evt.title}"?`)) {
-                        await deleteEvent(evt.id);
-                        loadProjectData();
-                      }
-                    }}
-                    className="p-1.5 text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -1127,7 +1168,12 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       {/* ADD FOLDER MODAL */}
       <AddFolderModal
         isOpen={showAddFolderModal}
-        onClose={() => setShowAddFolderModal(false)}
+        existingFolders={events}
+        defaultParentId={activeParentFolderId}
+        onClose={() => {
+          setShowAddFolderModal(false);
+          setActiveParentFolderId(null);
+        }}
         onAddFolder={handleAddFolderSubmit}
       />
 
@@ -1135,6 +1181,7 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
       <EditFolderModal
         isOpen={showEditFolderModal}
         folder={editingFolder}
+        existingFolders={events}
         currentApiKey={getEditingFolderApiKey()}
         onClose={() => {
           setShowEditFolderModal(false);
@@ -1153,20 +1200,24 @@ export const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                 setShowLandingPageEditor(false);
                 loadProjectData();
               }}
-              onSave={async (updatedConfig) => {
+              onSave={async (updatedData) => {
                 try {
-                  await updateProject(project.id, {
-                    landingPageConfig: updatedConfig,
-                    brideName: updatedConfig.brideName || project.brideName,
-                    groomName: updatedConfig.groomName || project.groomName,
-                    hashtag: updatedConfig.hashtag || project.hashtag,
-                  });
-                  setProject({
+                  const finalCfg = updatedData.landingPageConfig
+                    ? (updatedData.landingPageConfig.landingPageConfig ? updatedData.landingPageConfig.landingPageConfig : updatedData.landingPageConfig)
+                    : updatedData;
+
+                  const cleanPayload = {
+                    ...updatedData,
+                    landingPageConfig: finalCfg,
+                    brideName: updatedData.brideName || project.brideName,
+                    groomName: updatedData.groomName || project.groomName,
+                    hashtag: updatedData.hashtag || project.hashtag,
+                  };
+
+                  const updatedProj = await updateProject(project.id, cleanPayload);
+                  setProject(updatedProj || {
                     ...project,
-                    landingPageConfig: updatedConfig,
-                    brideName: updatedConfig.brideName || project.brideName,
-                    groomName: updatedConfig.groomName || project.groomName,
-                    hashtag: updatedConfig.hashtag || project.hashtag,
+                    ...cleanPayload,
                   });
                 } catch (err: any) {
                   alert("Failed to save page configuration: " + err.message);

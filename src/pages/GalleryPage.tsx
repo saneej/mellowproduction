@@ -21,7 +21,8 @@ import {
   CheckSquare,
   AlignJustify,
   LayoutTemplate,
-  MonitorPlay
+  MonitorPlay,
+  FolderPlus
 } from "lucide-react";
 import JSZip from "jszip";
 import { GalleryHeader } from "../components/common/Header";
@@ -37,7 +38,7 @@ import { GalleryHero } from "../components/gallery/GalleryHero";
 import { ShareModal } from "../components/gallery/ShareModal";
 import { MultiSelectionBar } from "../components/gallery/MultiSelectionBar";
 import { Breadcrumbs } from "../components/common/Breadcrumbs";
-import { getProjectBySlug, getEventBySlug, getMediaByEvent, getSortedMedia, logDownload, incrementProjectViews, saveLiveFavorites, getLiveFavorites } from "../services/dbService";
+import { getProjectBySlug, getEventBySlug, getMediaByEvent, getEventsByProject, getSortedMedia, logDownload, incrementProjectViews, saveLiveFavorites, getLiveFavorites } from "../services/dbService";
 import { Project, EventFolder, MediaItem, AccessCode } from "../types/gallery";
 import { getThemeStyles } from "../lib/themes";
 import { getDriveDownloadUrl, getDriveImageUrl } from "../services/driveService";
@@ -100,6 +101,8 @@ export const GalleryPage: React.FC = () => {
   // Lazy loading pagination
   const [visibleCount, setVisibleCount] = useState(36);
 
+  const [allProjectEvents, setAllProjectEvents] = useState<EventFolder[]>([]);
+
   useEffect(() => {
     localStorage.setItem("mellow_gallery_mode", galleryMode);
   }, [galleryMode]);
@@ -114,6 +117,10 @@ export const GalleryPage: React.FC = () => {
         return;
       }
       setProject(proj);
+
+      // Fetch all project sub-events/folders for nested navigation
+      const allEvts = await getEventsByProject(proj.id);
+      setAllProjectEvents(allEvts || []);
       incrementProjectViews(proj.id);
 
       // Check PIN Protection or saved device token
@@ -496,10 +503,79 @@ export const GalleryPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-6 pt-6 space-y-8">
         
         {/* Breadcrumb Navigation */}
-        <Breadcrumbs items={[
-          { label: project.title, url: `/projects/${projectSlug}` },
-          { label: eventFolder.title }
-        ]} />
+        {(() => {
+          const parentFolder = eventFolder?.parentId
+            ? allProjectEvents.find(p => p.id === eventFolder.parentId)
+            : null;
+
+          const breadcrumbItems: { label: string; url?: string }[] = [
+            { label: project.title, url: `/projects/${projectSlug}` },
+          ];
+
+          if (parentFolder) {
+            breadcrumbItems.push({
+              label: parentFolder.title,
+              url: `/projects/${projectSlug}/${parentFolder.slug || parentFolder.id}`,
+            });
+          }
+
+          breadcrumbItems.push({ label: eventFolder.title });
+
+          return <Breadcrumbs items={breadcrumbItems} />;
+        })()}
+
+        {/* Nested Sub-Folders Navigation Pill Bar */}
+        {(() => {
+          const activeParentId = eventFolder?.parentId || eventFolder?.id;
+          const rootFolder = eventFolder?.parentId
+            ? allProjectEvents.find(p => p.id === eventFolder.parentId)
+            : eventFolder;
+
+          const siblingSubFolders = allProjectEvents.filter(
+            c => c.parentId === activeParentId
+          );
+
+          if (!rootFolder && siblingSubFolders.length === 0) return null;
+
+          return (
+            <div className={`p-3 rounded-2xl border flex flex-wrap items-center gap-2 shadow-sm ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+              <div className="flex items-center gap-1.5 px-2 text-[11px] font-mono uppercase tracking-wider font-extrabold text-amber-500 shrink-0">
+                <FolderPlus size={14} />
+                <span>Categories:</span>
+              </div>
+
+              {rootFolder && (
+                <Link
+                  to={`/projects/${projectSlug}/${rootFolder.slug || rootFolder.id}`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-1 ${
+                    eventFolder.id === rootFolder.id
+                      ? "bg-brand-red text-white shadow-md font-extrabold scale-105"
+                      : "bg-white/10 hover:bg-white/20 text-white/80"
+                  }`}
+                >
+                  <span>📁 {rootFolder.title} (Main)</span>
+                </Link>
+              )}
+
+              {siblingSubFolders.map(subEvt => {
+                const isActive = subEvt.id === eventFolder.id;
+                return (
+                  <Link
+                    key={subEvt.id}
+                    to={`/projects/${projectSlug}/${subEvt.slug || subEvt.id}`}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-1 ${
+                      isActive
+                        ? "bg-brand-red text-white shadow-md font-extrabold scale-105"
+                        : "bg-white/10 hover:bg-white/20 text-white/80"
+                    }`}
+                  >
+                    <span>└─ {subEvt.title}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          );
+        })()}
 
         {/* Hero Section */}
         <GalleryHero

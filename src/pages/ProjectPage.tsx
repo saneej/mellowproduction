@@ -281,8 +281,10 @@ export const ProjectPage: React.FC = () => {
 
           {subEventLayout === 'editorial_list' ? (
             <div className="space-y-4 max-w-3xl mx-auto">
-              {events.map((evt, idx) => {
+              {events.filter(e => !e.parentId).map((evt, idx) => {
                 const displayIndex = String(idx + 1).padStart(2, "0");
+                const childFolders = events.filter(c => c.parentId === evt.id);
+
                 return (
                   <motion.div
                     key={evt.id}
@@ -290,6 +292,7 @@ export const ProjectPage: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-30px" }}
                     transition={{ delay: idx * 0.08, duration: 0.6, ease: [0.215, 0.61, 0.355, 1.0] }}
+                    className="space-y-2"
                   >
                     <Link
                       to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
@@ -318,7 +321,7 @@ export const ProjectPage: React.FC = () => {
                             {evt.title}
                           </h3>
                           <span className={`text-[10px] font-mono tracking-widest uppercase ${themeStyles.textMuted}`}>
-                            Collection
+                            {childFolders.length > 0 ? `${childFolders.length} Sub-Categories` : 'Collection'}
                           </span>
                         </div>
                       </div>
@@ -326,6 +329,23 @@ export const ProjectPage: React.FC = () => {
                         EXPLORE <span>→</span>
                       </div>
                     </Link>
+
+                    {childFolders.length > 0 && (
+                      <div className="pl-14 pr-4 flex flex-wrap gap-2 items-center">
+                        <span className={`text-[10px] font-mono uppercase tracking-wider font-extrabold ${themeStyles.textMuted}`}>
+                          Sub-folders:
+                        </span>
+                        {childFolders.map(child => (
+                          <Link
+                            key={child.id}
+                            to={`/projects/${projectSlug}/${child.slug || child.id}`}
+                            className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1"
+                          >
+                            <span>└─ {child.title}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
@@ -336,8 +356,10 @@ export const ProjectPage: React.FC = () => {
                 ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4' 
                 : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'
             }`}>
-              {events.map((evt, idx) => {
+              {events.filter(e => !e.parentId).map((evt, idx) => {
                 const displayIndex = String(idx + 1).padStart(2, "0");
+                const childFolders = events.filter(c => c.parentId === evt.id);
+
                 return (
                   <motion.div
                     key={evt.id}
@@ -345,6 +367,7 @@ export const ProjectPage: React.FC = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-30px" }}
                     transition={{ delay: idx * 0.08, duration: 0.6, ease: [0.215, 0.61, 0.355, 1.0] }}
+                    className="space-y-3"
                   >
                     <Link
                       to={`/projects/${projectSlug}/${evt.slug || evt.id}`}
@@ -384,6 +407,20 @@ export const ProjectPage: React.FC = () => {
                         </div>
                       </div>
                     </Link>
+
+                    {childFolders.length > 0 && (
+                      <div className="px-1 pt-1 flex flex-wrap gap-1.5 items-center">
+                        {childFolders.map(child => (
+                          <Link
+                            key={child.id}
+                            to={`/projects/${projectSlug}/${child.slug || child.id}`}
+                            className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1"
+                          >
+                            <span>└─ {child.title}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}

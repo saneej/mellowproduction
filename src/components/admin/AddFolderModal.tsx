@@ -1,23 +1,35 @@
-import React, { useState } from "react";
-import { X, FolderPlus, RefreshCw } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, FolderPlus, RefreshCw, Layers } from "lucide-react";
 import { ImageUploader } from "../common/ImageUploader";
+import { EventFolder } from "../../types/gallery";
 
 interface AddFolderModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddFolder: (folder: { name: string; driveFolderId: string; apiKey?: string; coverImage?: string }) => void;
+  onAddFolder: (folder: { name: string; driveFolderId: string; parentId?: string | null; apiKey?: string; coverImage?: string }) => void;
+  existingFolders?: EventFolder[];
+  defaultParentId?: string | null;
 }
 
 export const AddFolderModal: React.FC<AddFolderModalProps> = ({
   isOpen,
   onClose,
   onAddFolder,
+  existingFolders = [],
+  defaultParentId = null,
 }) => {
   const [name, setName] = useState("");
   const [driveFolderId, setDriveFolderId] = useState("");
+  const [parentId, setParentId] = useState<string>(defaultParentId || "");
   const [apiKey, setApiKey] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setParentId(defaultParentId || "");
+    }
+  }, [isOpen, defaultParentId]);
 
   if (!isOpen) return null;
 
@@ -28,6 +40,7 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
     onAddFolder({
       name: name.trim(),
       driveFolderId: driveFolderId.trim(),
+      parentId: parentId || null,
       apiKey: apiKey.trim() || undefined,
       coverImage: coverImage.trim() || undefined,
     });
@@ -42,8 +55,8 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
           <div className="flex items-center gap-3">
             <FolderPlus className="text-brand-red" size={24} />
             <div>
-              <h3 className="text-xl font-display font-extrabold uppercase tracking-tight">Add Folder</h3>
-              <p className="text-xs font-mono text-white/50">Folder Name, Google Folder ID & API Key</p>
+              <h3 className="text-xl font-display font-extrabold uppercase tracking-tight">Add Folder / Sub-Folder</h3>
+              <p className="text-xs font-mono text-white/50">Create parent event or nested sub-folder</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-white/50 hover:text-white transition-colors">
@@ -61,9 +74,31 @@ export const AddFolderModal: React.FC<AddFolderModalProps> = ({
               required
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. Nikah Ceremony / Main Event Folder"
+              placeholder="e.g. Nikah, Function, Couple, Single..."
               className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
             />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Parent Event / Category</span>
+              <span className="text-[10px] text-brand-red lowercase font-bold">Nikah → Function / Couple / Single</span>
+            </label>
+            <select
+              value={parentId}
+              onChange={e => setParentId(e.target.value)}
+              className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-brand-red transition-colors"
+            >
+              <option value="">None (Top-Level Event Folder)</option>
+              {existingFolders.map(folder => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.parentId ? `└─ Sub-folder: ${folder.title}` : `📁 Main Category: ${folder.title}`}
+                </option>
+              ))}
+            </select>
+            <p className="text-[10px] font-mono text-white/40 mt-1">
+              Select a parent folder to nest this inside (e.g. Nikah → Couple).
+            </p>
           </div>
 
           <div>

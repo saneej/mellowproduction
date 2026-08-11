@@ -173,6 +173,17 @@ export const ensureProjectSlug = (p: Project): Project => {
       .replace(/^-+|-+$/g, "");
     p.slug = clean || p.id || `proj-${Date.now()}`;
   }
+
+  // Flatten nested landingPageConfig if accidentally created by past updates
+  if (p.landingPageConfig) {
+    let cfg: any = p.landingPageConfig;
+    while (cfg && cfg.landingPageConfig) {
+      cfg = { ...cfg, ...cfg.landingPageConfig };
+    }
+    delete cfg.landingPageConfig;
+    p.landingPageConfig = cfg;
+  }
+
   return p;
 };
 

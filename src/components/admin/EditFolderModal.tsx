@@ -6,20 +6,23 @@ import { ImageUploader } from "../common/ImageUploader";
 interface EditFolderModalProps {
   isOpen: boolean;
   folder: EventFolder | null;
+  existingFolders?: EventFolder[];
   currentApiKey?: string;
   onClose: () => void;
-  onSave: (updatedData: { name: string; driveFolderId: string; order: number; apiKey?: string; coverImage?: string }) => void;
+  onSave: (updatedData: { name: string; driveFolderId: string; parentId?: string | null; order: number; apiKey?: string; coverImage?: string }) => void;
 }
 
 export const EditFolderModal: React.FC<EditFolderModalProps> = ({
   isOpen,
   folder,
+  existingFolders = [],
   currentApiKey = "",
   onClose,
   onSave,
 }) => {
   const [name, setName] = useState("");
   const [driveFolderId, setDriveFolderId] = useState("");
+  const [parentId, setParentId] = useState<string>("");
   const [order, setOrder] = useState(1);
   const [apiKey, setApiKey] = useState("");
   const [coverImage, setCoverImage] = useState("");
@@ -29,6 +32,7 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
     if (folder) {
       setName(folder.title || "");
       setDriveFolderId(folder.driveFolderId || "");
+      setParentId(folder.parentId || "");
       setOrder(folder.order || 1);
       setApiKey(currentApiKey);
       setCoverImage(folder.coverImage || "");
@@ -45,6 +49,7 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
     onSave({
       name: name.trim(),
       driveFolderId: driveFolderId.trim(),
+      parentId: parentId || null,
       order: Number(order) || 1,
       apiKey: apiKey.trim() || undefined,
       coverImage: coverImage.trim() || undefined,
@@ -52,6 +57,8 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
     setIsSubmitting(false);
     onClose();
   };
+
+  const potentialParents = existingFolders.filter(f => f.id !== folder.id);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-6 text-white select-none">
@@ -79,9 +86,31 @@ export const EditFolderModal: React.FC<EditFolderModalProps> = ({
               required
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. Nikah Ceremony / Stage Highlights"
+              placeholder="e.g. Nikah, Function, Couple, Single..."
               className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono placeholder:text-white/30 focus:outline-none focus:border-brand-red transition-colors"
             />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-mono text-white/60 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Parent Event / Category</span>
+              <span className="text-[10px] text-brand-red lowercase font-bold">e.g. Nikah → Function</span>
+            </label>
+            <select
+              value={parentId}
+              onChange={e => setParentId(e.target.value)}
+              className="w-full bg-black border border-white/15 rounded-2xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-brand-red transition-colors"
+            >
+              <option value="">None (Top-Level Event Folder)</option>
+              {potentialParents.map(f => (
+                <option key={f.id} value={f.id}>
+                  {f.parentId ? `└─ Sub-folder: ${f.title}` : `📁 Main Category: ${f.title}`}
+                </option>
+              ))}
+            </select>
+            <p className="text-[10px] font-mono text-white/40 mt-1">
+              Move this folder into a parent folder (e.g. nest under Nikah).
+            </p>
           </div>
 
           <div>

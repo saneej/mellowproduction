@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Film, 
@@ -7,6 +7,8 @@ import {
   X, 
   ChevronLeft, 
   ChevronRight, 
+  ChevronUp,
+  ChevronDown,
   Share2, 
   Heart, 
   Sparkles,
@@ -33,6 +35,10 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
   const [activeReelIndex, setActiveReelIndex] = useState<number | null>(null);
   const [likedReels, setLikedReels] = useState<Record<string, boolean>>({});
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [slideDirection, setSlideDirection] = useState<'down' | 'up'>('down');
+
+  const isWheelLockedRef = useRef(false);
+  const touchStartYRef = useRef<number | null>(null);
 
   if (!reels || reels.length === 0) return null;
 
@@ -42,14 +48,69 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
   const handleNext = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (activeReelIndex === null) return;
+    setSlideDirection('down');
     setActiveReelIndex((activeReelIndex + 1) % reels.length);
   };
 
   const handlePrev = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (activeReelIndex === null) return;
+    setSlideDirection('up');
     setActiveReelIndex((activeReelIndex - 1 + reels.length) % reels.length);
   };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    if (activeReelIndex === null || reels.length <= 1) return;
+    if (isWheelLockedRef.current) return;
+    if (Math.abs(e.deltaY) < 15) return;
+
+    isWheelLockedRef.current = true;
+    if (e.deltaY > 0) {
+      handleNext();
+    } else {
+      handlePrev();
+    }
+
+    setTimeout(() => {
+      isWheelLockedRef.current = false;
+    }, 400);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartYRef.current === null || activeReelIndex === null || reels.length <= 1) return;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffY = touchStartYRef.current - touchEndY;
+
+    if (diffY > 35) {
+      handleNext();
+    } else if (diffY < -35) {
+      handlePrev();
+    }
+    touchStartYRef.current = null;
+  };
+
+  useEffect(() => {
+    if (activeReelIndex === null) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        setSlideDirection('down');
+        setActiveReelIndex(prev => (prev !== null ? (prev + 1) % reels.length : 0));
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        setSlideDirection('up');
+        setActiveReelIndex(prev => (prev !== null ? (prev - 1 + reels.length) % reels.length : 0));
+      } else if (e.key === 'Escape') {
+        setActiveReelIndex(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeReelIndex, reels.length]);
 
   const toggleLike = (reelId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,6 +128,32 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
   const cardBg = isDark ? 'bg-stone-900/60' : 'bg-white/90';
   const textPrimary = isDark ? 'text-stone-100' : 'text-stone-900';
   const textMuted = isDark ? 'text-stone-400' : 'text-stone-500';
+
+  const slideVariants = {
+    initial: (direction: 'down' | 'up') => ({
+      y: direction === 'down' ? 280 : -280,
+      opacity: 0,
+      scale: 0.95,
+    }),
+    animate: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        y: { type: 'spring', stiffness: 320, damping: 32 },
+        opacity: { duration: 0.2 },
+      },
+    },
+    exit: (direction: 'down' | 'up') => ({
+      y: direction === 'down' ? -280 : 280,
+      opacity: 0,
+      scale: 0.95,
+      transition: {
+        y: { type: 'spring', stiffness: 320, damping: 32 },
+        opacity: { duration: 0.2 },
+      },
+    }),
+  };
 
   return (
     <section id="reels-section" className="relative py-16 sm:py-24 px-6 sm:px-12 max-w-7xl mx-auto z-20">
@@ -197,10 +284,15 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
         })}
       </div>
 
-      {/* FULL-SCREEN INSTAGRAM REEL MODAL PLAYER */}
-      <AnimatePresence>
+      {/* FULL-SCREEN INSTAGRAM REEL MODAL PLAYER WITH VERTICAL SCROLL FEED */}
+      <AnimatePresence mode="wait">
         {activeReelIndex !== null && currentReel && parsedCurrent && (
-          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-6 overflow-hidden">
+          <div 
+            className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-6 overflow-hidden select-none"
+            onWheel={handleWheel}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             {/* Backdrop Blur */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -210,20 +302,24 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
               className="absolute inset-0 bg-black/90 backdrop-blur-md"
             />
 
-            {/* Reel Smartphone Modal Container */}
+            {/* Reel Smartphone Modal Container with Vertical Animation */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
+              key={activeReelIndex}
+              custom={slideDirection}
+              variants={slideVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
               className="relative w-full max-w-md h-[92vh] max-h-[820px] bg-black rounded-3xl border border-white/15 overflow-hidden shadow-2xl z-10 flex flex-col justify-between"
             >
               {/* Header Bar */}
               <div className="absolute top-0 inset-x-0 z-30 p-4 bg-gradient-to-b from-black/90 via-black/50 to-transparent flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
-                  <span className="text-[10px] font-mono font-bold tracking-widest text-white uppercase">
-                    REEL {activeReelIndex + 1} OF {reels.length}
+                  <span className="text-[10px] font-mono font-bold tracking-widest text-white uppercase flex items-center gap-1.5">
+                    <span>REEL {activeReelIndex + 1} OF {reels.length}</span>
+                    <span className="text-white/40">•</span>
+                    <span className="text-amber-400 font-mono text-[9px] uppercase">SWIPE ↕</span>
                   </span>
                 </div>
 
@@ -326,25 +422,47 @@ export const ReelsSection: React.FC<ReelsSectionProps> = ({
                 </div>
               </div>
 
-              {/* Prev / Next Navigation Arrows */}
+              {/* Vertical Scroll Sidebar Controls & Arrows */}
               {reels.length > 1 && (
-                <>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 bg-black/60 backdrop-blur-md border border-white/15 p-2 rounded-full shadow-2xl">
+                  {/* Up Arrow for Previous Reel */}
                   <button
                     onClick={handlePrev}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-full bg-black/60 text-white border border-white/20 backdrop-blur-md hover:bg-black hover:scale-110 transition-all"
-                    title="Previous Reel"
+                    className="p-2 rounded-full bg-white/10 hover:bg-rose-600 text-white transition-all transform hover:scale-110 active:scale-95"
+                    title="Previous Reel (Scroll Up)"
                   >
-                    <ChevronLeft size={18} />
+                    <ChevronUp size={18} />
                   </button>
 
+                  {/* Vertical Reel Indicators */}
+                  <div className="flex flex-col gap-1.5 py-1 items-center">
+                    {reels.map((_, dotIdx) => (
+                      <button
+                        key={dotIdx}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSlideDirection(dotIdx > activeReelIndex ? 'down' : 'up');
+                          setActiveReelIndex(dotIdx);
+                        }}
+                        className={`w-1.5 rounded-full transition-all ${
+                          dotIdx === activeReelIndex
+                            ? 'h-4 bg-rose-500'
+                            : 'h-1.5 bg-white/30 hover:bg-white/60'
+                        }`}
+                        title={`Go to Reel ${dotIdx + 1}`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Down Arrow for Next Reel */}
                   <button
                     onClick={handleNext}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-full bg-black/60 text-white border border-white/20 backdrop-blur-md hover:bg-black hover:scale-110 transition-all"
-                    title="Next Reel"
+                    className="p-2 rounded-full bg-white/10 hover:bg-rose-600 text-white transition-all transform hover:scale-110 active:scale-95 animate-bounce"
+                    title="Next Reel (Scroll Down)"
                   >
-                    <ChevronRight size={18} />
+                    <ChevronDown size={18} />
                   </button>
-                </>
+                </div>
               )}
             </motion.div>
           </div>
