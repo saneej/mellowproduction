@@ -504,20 +504,32 @@ export const GalleryPage: React.FC = () => {
         
         {/* Breadcrumb Navigation */}
         {(() => {
-          const parentFolder = eventFolder?.parentId
-            ? allProjectEvents.find(p => p.id === eventFolder.parentId)
-            : null;
+          const getAncestors = (folder: EventFolder | null): EventFolder[] => {
+            const list: EventFolder[] = [];
+            let current = folder;
+            while (current && current.parentId) {
+              const p = allProjectEvents.find(item => item.id === current?.parentId);
+              if (p && !list.some(x => x.id === p.id)) {
+                list.unshift(p);
+                current = p;
+              } else {
+                break;
+              }
+            }
+            return list;
+          };
 
+          const ancestors = getAncestors(eventFolder);
           const breadcrumbItems: { label: string; url?: string }[] = [
             { label: project.title, url: `/projects/${projectSlug}` },
           ];
 
-          if (parentFolder) {
+          ancestors.forEach(anc => {
             breadcrumbItems.push({
-              label: parentFolder.title,
-              url: `/projects/${projectSlug}/${parentFolder.slug || parentFolder.id}`,
+              label: anc.title,
+              url: `/projects/${projectSlug}/${anc.slug || anc.id}`,
             });
-          }
+          });
 
           breadcrumbItems.push({ label: eventFolder.title });
 
@@ -526,16 +538,31 @@ export const GalleryPage: React.FC = () => {
 
         {/* Nested Sub-Folders Navigation Pill Bar */}
         {(() => {
-          const activeParentId = eventFolder?.parentId || eventFolder?.id;
-          const rootFolder = eventFolder?.parentId
-            ? allProjectEvents.find(p => p.id === eventFolder.parentId)
-            : eventFolder;
+          const getAncestors = (folder: EventFolder | null): EventFolder[] => {
+            const list: EventFolder[] = [];
+            let current = folder;
+            while (current && current.parentId) {
+              const p = allProjectEvents.find(item => item.id === current?.parentId);
+              if (p && !list.some(x => x.id === p.id)) {
+                list.unshift(p);
+                current = p;
+              } else {
+                break;
+              }
+            }
+            return list;
+          };
 
-          const siblingSubFolders = allProjectEvents.filter(
-            c => c.parentId === activeParentId
-          );
+          const ancestors = getAncestors(eventFolder);
+          const rootFolder = ancestors.length > 0 ? ancestors[0] : (eventFolder.parentId ? allProjectEvents.find(p => p.id === eventFolder.parentId) : eventFolder);
+          const parentFolder = eventFolder.parentId ? allProjectEvents.find(p => p.id === eventFolder.parentId) : null;
 
-          if (!rootFolder && siblingSubFolders.length === 0) return null;
+          const directChildren = allProjectEvents.filter(c => c.parentId === eventFolder.id);
+          const siblings = eventFolder.parentId
+            ? allProjectEvents.filter(c => c.parentId === eventFolder.parentId)
+            : allProjectEvents.filter(c => !c.parentId);
+
+          if (!rootFolder && siblings.length === 0 && directChildren.length === 0) return null;
 
           return (
             <div className={`p-3 rounded-2xl border flex flex-wrap items-center gap-2 shadow-sm ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
@@ -544,20 +571,25 @@ export const GalleryPage: React.FC = () => {
                 <span>Categories:</span>
               </div>
 
-              {rootFolder && (
+              {rootFolder && rootFolder.id !== eventFolder.id && (
                 <Link
                   to={`/projects/${projectSlug}/${rootFolder.slug || rootFolder.id}`}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all flex items-center gap-1 ${
-                    eventFolder.id === rootFolder.id
-                      ? "bg-brand-red text-white shadow-md font-extrabold scale-105"
-                      : "bg-white/10 hover:bg-white/20 text-white/80"
-                  }`}
+                  className="px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all bg-white/10 hover:bg-white/20 text-white/80"
                 >
                   <span>📁 {rootFolder.title} (Main)</span>
                 </Link>
               )}
 
-              {siblingSubFolders.map(subEvt => {
+              {parentFolder && parentFolder.id !== rootFolder?.id && (
+                <Link
+                  to={`/projects/${projectSlug}/${parentFolder.slug || parentFolder.id}`}
+                  className="px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all bg-white/10 hover:bg-white/20 text-white/80"
+                >
+                  <span>📁 {parentFolder.title} (Parent)</span>
+                </Link>
+              )}
+
+              {siblings.map(subEvt => {
                 const isActive = subEvt.id === eventFolder.id;
                 return (
                   <Link
@@ -569,10 +601,27 @@ export const GalleryPage: React.FC = () => {
                         : "bg-white/10 hover:bg-white/20 text-white/80"
                     }`}
                   >
-                    <span>└─ {subEvt.title}</span>
+                    <span>{subEvt.parentId ? "└─" : "📁"} {subEvt.title}</span>
                   </Link>
                 );
               })}
+
+              {directChildren.length > 0 && (
+                <div className="w-full flex flex-wrap items-center gap-2 pt-2 mt-1 border-t border-white/10">
+                  <span className="text-[10px] font-mono uppercase text-amber-400 font-extrabold px-1">
+                    Sub-Events inside {eventFolder.title}:
+                  </span>
+                  {directChildren.map(child => (
+                    <Link
+                      key={child.id}
+                      to={`/projects/${projectSlug}/${child.slug || child.id}`}
+                      className="px-3 py-1 rounded-xl text-xs font-mono font-bold uppercase transition-all bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/30 flex items-center gap-1"
+                    >
+                      <span>└─ {child.title}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}
@@ -592,6 +641,73 @@ export const GalleryPage: React.FC = () => {
             setIsCinematicSlideshowOpen(true);
           }}
         />
+
+        {/* Sub-Events / Sub-Folders Card Grid (if current folder has child sub-events) */}
+        {(() => {
+          const directChildren = allProjectEvents.filter(c => c.parentId === eventFolder.id);
+          if (directChildren.length === 0) return null;
+
+          return (
+            <div className={`p-6 sm:p-8 rounded-3xl border space-y-5 shadow-xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <FolderPlus size={22} />
+                  </div>
+                  <div>
+                    <h3 className={`text-base sm:text-lg font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
+                      Sub-Events & Sub-Folders ({directChildren.length})
+                    </h3>
+                    <p className={`text-xs font-mono ${themeStyles.textMuted}`}>
+                      Browse nested photo & video collections inside {eventFolder.title}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-amber-500 font-extrabold uppercase hidden sm:inline">
+                  Nested Collections ↓
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {directChildren.map(subEvt => {
+                  const subSubFolders = allProjectEvents.filter(c => c.parentId === subEvt.id);
+                  return (
+                    <Link
+                      key={subEvt.id}
+                      to={`/projects/${projectSlug}/${subEvt.slug || subEvt.id}`}
+                      className={`group p-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 ${themeStyles.borderColor} bg-black/10 hover:bg-black/30 hover:border-amber-500/50 shadow-sm hover:shadow-md`}
+                    >
+                      <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
+                        <img
+                          src={
+                            subEvt.coverImage 
+                              ? getDriveImageUrl(subEvt.coverImage, 300) 
+                              : eventFolder.coverImage 
+                                ? getDriveImageUrl(eventFolder.coverImage, 300) 
+                                : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=300"
+                          }
+                          alt={subEvt.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`text-sm font-bold uppercase tracking-tight truncate ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:text-amber-400 transition-colors`}>
+                          {subEvt.title}
+                        </h4>
+                        <p className="text-[11px] font-mono text-amber-400/80 font-semibold mt-0.5">
+                          {subSubFolders.length > 0 
+                            ? `${subSubFolders.length} Sub-Sub Folders` 
+                            : `View Collection →`}
+                        </p>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Gallery Toolbar: Search, Filters, Layout Switcher */}
         <div className={`border p-4 sm:p-6 space-y-4 shadow-lg rounded-2xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>

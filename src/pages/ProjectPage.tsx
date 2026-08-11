@@ -335,15 +335,28 @@ export const ProjectPage: React.FC = () => {
                         <span className={`text-[10px] font-mono uppercase tracking-wider font-extrabold ${themeStyles.textMuted}`}>
                           Sub-folders:
                         </span>
-                        {childFolders.map(child => (
-                          <Link
-                            key={child.id}
-                            to={`/projects/${projectSlug}/${child.slug || child.id}`}
-                            className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1"
-                          >
-                            <span>└─ {child.title}</span>
-                          </Link>
-                        ))}
+                        {childFolders.map(child => {
+                          const subSubFolders = events.filter(s => s.parentId === child.id);
+                          return (
+                            <React.Fragment key={child.id}>
+                              <Link
+                                to={`/projects/${projectSlug}/${child.slug || child.id}`}
+                                className="px-3 py-1 rounded-full text-[11px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1"
+                              >
+                                <span>└─ {child.title}</span>
+                              </Link>
+                              {subSubFolders.map(subSub => (
+                                <Link
+                                  key={subSub.id}
+                                  to={`/projects/${projectSlug}/${subSub.slug || subSub.id}`}
+                                  className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center gap-1"
+                                >
+                                  <span>└─└─ {subSub.title}</span>
+                                </Link>
+                              ))}
+                            </React.Fragment>
+                          );
+                        })}
                       </div>
                     )}
                   </motion.div>
@@ -410,15 +423,28 @@ export const ProjectPage: React.FC = () => {
 
                     {childFolders.length > 0 && (
                       <div className="px-1 pt-1 flex flex-wrap gap-1.5 items-center">
-                        {childFolders.map(child => (
-                          <Link
-                            key={child.id}
-                            to={`/projects/${projectSlug}/${child.slug || child.id}`}
-                            className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1"
-                          >
-                            <span>└─ {child.title}</span>
-                          </Link>
-                        ))}
+                        {childFolders.map(child => {
+                          const subSubFolders = events.filter(s => s.parentId === child.id);
+                          return (
+                            <React.Fragment key={child.id}>
+                              <Link
+                                to={`/projects/${projectSlug}/${child.slug || child.id}`}
+                                className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 hover:bg-amber-500/20 transition-all flex items-center gap-1"
+                              >
+                                <span>└─ {child.title}</span>
+                              </Link>
+                              {subSubFolders.map(subSub => (
+                                <Link
+                                  key={subSub.id}
+                                  to={`/projects/${projectSlug}/${subSub.slug || subSub.id}`}
+                                  className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all flex items-center gap-1"
+                                >
+                                  <span>└─└─ {subSub.title}</span>
+                                </Link>
+                              ))}
+                            </React.Fragment>
+                          );
+                        })}
                       </div>
                     )}
                   </motion.div>
