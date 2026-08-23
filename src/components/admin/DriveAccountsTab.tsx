@@ -13,7 +13,6 @@ export const DriveAccountsTab: React.FC = () => {
   const [editingAccount, setEditingAccount] = useState<DriveAccount | null>(null);
   const [newEmail, setNewEmail] = useState("");
   const [newName, setNewName] = useState("");
-  const [newApiKey, setNewApiKey] = useState("");
   const [testingId, setTestingId] = useState<string | null>(null);
 
   const loadDriveAccounts = async () => {
@@ -35,7 +34,6 @@ export const DriveAccountsTab: React.FC = () => {
       await updateDriveAccount(editingAccount.id, {
         name: newName,
         email: newEmail,
-        apiKey: newApiKey || undefined,
       });
       setEditingAccount(null);
     } else {
@@ -44,7 +42,6 @@ export const DriveAccountsTab: React.FC = () => {
 
     setNewEmail("");
     setNewName("");
-    setNewApiKey("");
     setIsAddOpen(false);
     loadDriveAccounts();
   };
@@ -110,7 +107,6 @@ export const DriveAccountsTab: React.FC = () => {
               setEditingAccount(null);
               setNewName("");
               setNewEmail("");
-              setNewApiKey("");
               setIsAddOpen(true);
             }}
             className="py-3 px-5 rounded-2xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-brand-red/90 transition-all shadow-xl"
@@ -199,7 +195,6 @@ export const DriveAccountsTab: React.FC = () => {
                     setEditingAccount(account);
                     setNewName(account.name);
                     setNewEmail(account.email);
-                    setNewApiKey(account.apiKey || "");
                     setIsAddOpen(true);
                   }}
                   className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white transition-colors"
@@ -260,16 +255,8 @@ export const DriveAccountsTab: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] text-white/60 mb-1">Google Drive API Key (Optional)</label>
-                <input
-                  type="password"
-                  value={newApiKey}
-                  onChange={e => setNewApiKey(e.target.value)}
-                  placeholder="AIzaSy..."
-                  className="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-brand-red"
-                />
-                <p className="text-[10px] text-white/40 mt-1">Stored securely on server. Never exposed to browser clients.</p>
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px]">
+                🚀 Zero API keys required! Just login with Google to browse and link your folders instantly.
               </div>
 
               <div className="pt-4 flex items-center gap-3">

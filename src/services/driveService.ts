@@ -68,11 +68,12 @@ export const syncDriveFolder = async (
   folderId: string,
   apiKey?: string
 ): Promise<Partial<MediaItem>[]> => {
+  const accessToken = localStorage.getItem("google_drive_access_token") || undefined;
   try {
     const response = await fetch("/api/drive/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ projectId, eventId, folderId, apiKey })
+      body: JSON.stringify({ projectId, eventId, folderId, apiKey, accessToken })
     });
 
     if (response.ok) {
@@ -94,8 +95,17 @@ export const syncDriveFolder = async (
     }
 
     try {
-      const driveUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100&key=${activeApiKey}`;
-      const driveRes = await fetch(driveUrl);
+      const q = `'${folderId}' in parents and trashed=false`;
+      const driveUrl = accessToken
+        ? `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100`
+        : `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100&key=${activeApiKey}`;
+
+      const headers: Record<string, string> = {};
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+
+      const driveRes = await fetch(driveUrl, { headers });
       if (!driveRes.ok) {
         throw new Error(`Google Drive API returned status ${driveRes.status}`);
       }

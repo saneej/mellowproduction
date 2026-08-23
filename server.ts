@@ -142,7 +142,7 @@ async function startServer() {
 
   // Google Drive Sync Proxy
   app.post("/api/drive/sync", async (req, res) => {
-    const { folderId, apiKey, projectId, eventId } = req.body || {};
+    const { folderId, apiKey, accessToken, projectId, eventId } = req.body || {};
 
     if (!folderId) {
       return res.status(400).json({ error: "Missing folderId" });
@@ -153,14 +153,39 @@ async function startServer() {
     try {
       let files: any[] = [];
 
-      // If Google Drive API key is available
-      if (activeApiKey) {
+      // 1. If OAuth Access Token is provided, use it
+      if (accessToken) {
         let pageToken = "";
         let pageCount = 0;
         do {
           pageCount++;
           const pageQuery: string = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "";
-          const driveApiUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+trashed=false&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100${pageQuery}&key=${activeApiKey}`;
+          const q = `'${folderId}' in parents and trashed=false`;
+          const driveApiUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100${pageQuery}`;
+          const response = await fetch(driveApiUrl, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const pageFiles = data.files || [];
+            files = files.concat(pageFiles);
+            pageToken = data.nextPageToken || "";
+          } else {
+            console.warn("Drive OAuth sync warning:", response.status, await response.text());
+            break;
+          }
+        } while (pageToken && pageCount < 10);
+      }
+
+      // 2. If Google Drive API key is available
+      if (files.length === 0 && activeApiKey) {
+        let pageToken = "";
+        let pageCount = 0;
+        do {
+          pageCount++;
+          const pageQuery: string = pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "";
+          const q = `'${folderId}' in parents and trashed=false`;
+          const driveApiUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100${pageQuery}&key=${activeApiKey}`;
           const response = await fetch(driveApiUrl);
           if (response.ok) {
             const data = await response.json();
@@ -174,7 +199,7 @@ async function startServer() {
         } while (pageToken && pageCount < 10);
       }
 
-      // Fallback or public web page parse if API key yielded no results
+      // 3. Fallback or public web page parse if API key / token yielded no results
       if (files.length === 0) {
         const folderWebUrl = `https://drive.google.com/drive/folders/${folderId}`;
         const pageRes = await fetch(folderWebUrl, {
@@ -202,8 +227,8 @@ async function startServer() {
         }
       }
 
-      // Fallback sample photos if empty (for demo folders)
-      if (files.length === 0) {
+      // Only fallback to demo photos if folderId is default demo folder
+      if (files.length === 0 && (folderId === "default_demo_folder_id" || !folderId)) {
         const demoPhotos = [
           { id: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600", name: "Mellow_Wedding_Highlights_01.jpg", mime: "image/jpeg" },
           { id: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1600", name: "Mellow_Nikah_Ceremony_02.jpg", mime: "image/jpeg" },
