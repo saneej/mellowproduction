@@ -22,9 +22,7 @@ import {
   AlignJustify,
   LayoutTemplate,
   MonitorPlay,
-  FolderPlus,
-  ArrowUp,
-  ArrowDown
+  FolderPlus
 } from "lucide-react";
 import JSZip from "jszip";
 import { GalleryHeader } from "../components/common/Header";
@@ -628,396 +626,358 @@ export const GalleryPage: React.FC = () => {
           );
         })()}
 
-        {/* Subfolders Grid or Direct Images Gallery */}
+        {/* Hero Section */}
+        <GalleryHero
+          project={project}
+          event={eventFolder}
+          photoCount={mediaItems.filter(m => !m.isVideo).length}
+          videoCount={mediaItems.filter(m => m.isVideo).length}
+          favoriteCount={favoritedIds.size}
+          onDownloadAll={handleDownloadAll}
+          onShareClick={() => setIsShareModalOpen(true)}
+          onShowQrClick={() => setIsShareModalOpen(true)}
+          onPlaySlideshow={() => {
+            setCinematicStartIndex(0);
+            setIsCinematicSlideshowOpen(true);
+          }}
+        />
+
+        {/* Sub-Events / Sub-Folders Card Grid (if current folder has child sub-events) */}
         {(() => {
           const directChildren = allProjectEvents.filter(c => c.parentId === eventFolder.id);
-          return directChildren.length > 0;
-        })() ? (
-          <div className="space-y-12 py-4">
-            {/* Main Folder Hero Header */}
-            <div className="relative rounded-3xl overflow-hidden aspect-[21/9] sm:aspect-[3/1] bg-zinc-900 border border-white/10 shadow-2xl flex items-center justify-center p-8 text-center">
-              <div className="absolute inset-0">
-                <img
-                  src={eventFolder.coverImage ? getDriveImageUrl(eventFolder.coverImage, 1600) : project.coverImage ? getDriveImageUrl(project.coverImage, 1600) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600"}
-                  alt={eventFolder.title}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover opacity-40 scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20" />
-              </div>
-              <div className="relative z-10 space-y-3 max-w-2xl mx-auto">
-                <span className="text-[10px] font-mono uppercase tracking-[0.3em] font-extrabold text-amber-400 block">
-                  ✦ Collection Folder ✦
-                </span>
-                <h1 className="text-3xl sm:text-5xl font-display font-extrabold uppercase tracking-tight text-white">
-                  {eventFolder.title}
-                </h1>
-                <p className="text-xs font-mono text-zinc-300">
-                  This folder contains {allProjectEvents.filter(c => c.parentId === eventFolder.id).length} sub-collections. Select any category below to explore its photos and videos.
-                </p>
-              </div>
-            </div>
+          if (directChildren.length === 0) return null;
 
-            {/* Subfolders Grid */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <h3 className={`text-xl uppercase tracking-tight font-display ${themeStyles.text}`}>
-                  Sub-Folders & Collections ({allProjectEvents.filter(c => c.parentId === eventFolder.id).length})
-                </h3>
-                <span className={`text-xs font-mono uppercase ${themeStyles.textMuted}`}>
-                  Click to open collection
+          return (
+            <div className={`p-6 sm:p-8 rounded-3xl border space-y-5 shadow-xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <FolderPlus size={22} />
+                  </div>
+                  <div>
+                    <h3 className={`text-base sm:text-lg font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
+                      Sub-Events & Sub-Folders ({directChildren.length})
+                    </h3>
+                    <p className={`text-xs font-mono ${themeStyles.textMuted}`}>
+                      Browse nested photo & video collections inside {eventFolder.title}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs font-mono text-amber-500 font-extrabold uppercase hidden sm:inline">
+                  Nested Collections ↓
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {allProjectEvents.filter(c => c.parentId === eventFolder.id).map((subEvt, idx) => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {directChildren.map(subEvt => {
                   const subSubFolders = allProjectEvents.filter(c => c.parentId === subEvt.id);
-                  const displayIndex = String(idx + 1).padStart(2, "0");
                   return (
-                    <motion.div
+                    <Link
                       key={subEvt.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: idx * 0.08, duration: 0.6 }}
+                      to={`/projects/${projectSlug}/${subEvt.slug || subEvt.id}`}
+                      className={`group p-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 ${themeStyles.borderColor} bg-black/10 hover:bg-black/30 hover:border-amber-500/50 shadow-sm hover:shadow-md`}
                     >
-                      <Link
-                        to={`/projects/${projectSlug}/${subEvt.slug || subEvt.id}`}
-                        className="group block space-y-4"
-                      >
-                        <div className={`aspect-[3/2] rounded-2xl overflow-hidden relative shadow-sm border ${themeStyles.borderColor} ${project.theme === 'dark_luxury' ? 'bg-zinc-900' : 'bg-white'}`}>
-                          <img
-                            src={
-                              subEvt.coverImage 
-                                ? getDriveImageUrl(subEvt.coverImage, 800) 
-                                : eventFolder.coverImage 
-                                  ? getDriveImageUrl(eventFolder.coverImage, 800) 
-                                  : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"
-                            }
-                            alt={subEvt.title}
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-500" />
-                        </div>
-
-                        <div className="px-1 flex items-baseline justify-between">
-                          <div className="space-y-1">
-                            <span className={`text-[10px] font-mono tracking-widest block font-extrabold ${themeStyles.textMuted}`}>
-                              {displayIndex} — {subSubFolders.length > 0 ? `${subSubFolders.length} SUB-FOLDERS` : 'COLLECTION'}
-                            </span>
-                            <h4 className={`text-lg uppercase tracking-tight transition-colors duration-300 ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:opacity-75`}>
-                              {subEvt.title}
-                            </h4>
-                          </div>
-                          <div className={`text-[10px] font-mono tracking-widest transition-colors duration-300 font-extrabold flex items-center gap-1 ${themeStyles.textMuted} group-hover:opacity-75`}>
-                            EXPLORE <span>→</span>
-                          </div>
-                        </div>
-                      </Link>
-                    </motion.div>
+                      <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
+                        <img
+                          src={
+                            subEvt.coverImage 
+                              ? getDriveImageUrl(subEvt.coverImage, 300) 
+                              : eventFolder.coverImage 
+                                ? getDriveImageUrl(eventFolder.coverImage, 300) 
+                                : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=300"
+                          }
+                          alt={subEvt.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className={`text-sm font-bold uppercase tracking-tight truncate ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:text-amber-400 transition-colors`}>
+                          {subEvt.title}
+                        </h4>
+                        <p className="text-[11px] font-mono text-amber-400/80 font-semibold mt-0.5">
+                          {subSubFolders.length > 0 
+                            ? `${subSubFolders.length} Sub-Sub Folders` 
+                            : `View Collection →`}
+                        </p>
+                      </div>
+                    </Link>
                   );
                 })}
               </div>
             </div>
+          );
+        })()}
+
+        {/* Gallery Toolbar: Search, Filters, Layout Switcher */}
+        <div className={`border p-4 sm:p-6 space-y-4 shadow-lg rounded-2xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            
+            {/* Instant Search Bar */}
+            <div className="relative flex-1 max-w-md">
+              <Search size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${themeStyles.accentText}`} />
+              <input
+                type="text"
+                placeholder="Search gallery files..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} placeholder:${themeStyles.textMuted}`}
+              />
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+              <button
+                onClick={() => setFilter("all")}
+                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border ${
+                  filter === "all" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                }`}
+              >
+                All ({mediaItems.length})
+              </button>
+              <button
+                onClick={() => setFilter("photos")}
+                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
+                  filter === "photos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                }`}
+              >
+                <ImageIcon size={14} /> Photos ({mediaItems.filter(m => !m.isVideo).length})
+              </button>
+              <button
+                onClick={() => setFilter("videos")}
+                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
+                  filter === "videos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                }`}
+              >
+                <VideoIcon size={14} /> Videos ({mediaItems.filter(m => m.isVideo).length})
+              </button>
+              <button
+                onClick={() => setFilter("favorites")}
+                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
+                  filter === "favorites" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                }`}
+              >
+                <Heart size={14} className={favoritedIds.size > 0 ? "fill-current" : ""} /> Favorites ({favoritedIds.size})
+              </button>
+
+              {favoritedIds.size > 0 && (
+                <button
+                  onClick={() => setIsFavoritesDrawerOpen(true)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse cursor-pointer"
+                >
+                  <CheckSquare size={14} />
+                  <span>Submit Selection ({favoritedIds.size})</span>
+                </button>
+              )}
+            </div>
+
+          </div>
+
+          {/* Sub-bar: Layout Mode Switcher & Sort Options */}
+          <div className={`flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs font-mono ${themeStyles.borderColor}`}>
+            
+            {/* View Layout Options */}
+            <div className={`flex flex-wrap items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
+              <button
+                onClick={() => setGalleryMode("grid")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "grid" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid size={15} />
+                <span className="hidden lg:inline">Grid</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("masonry")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "masonry" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Masonry View"
+              >
+                <Layers size={15} />
+                <span className="hidden lg:inline">Masonry</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("justified")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "justified" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Justified View"
+              >
+                <AlignJustify size={15} />
+                <span className="hidden lg:inline">Justified</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("collage")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "collage" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Collage View"
+              >
+                <LayoutTemplate size={15} />
+                <span className="hidden lg:inline">Collage</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("carousel")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "carousel" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Carousel View"
+              >
+                <MonitorPlay size={15} />
+                <span className="hidden lg:inline">Carousel</span>
+              </button>
+              <button
+                onClick={() => setGalleryMode("timeline")}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  galleryMode === "timeline" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                }`}
+                title="Timeline View"
+              >
+                <Clock size={15} />
+                <span className="hidden lg:inline">Timeline</span>
+              </button>
+            </div>
+
+            {/* Column Count & Select Mode */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsSelectMode(!isSelectMode)}
+                className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
+                  isSelectMode ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                }`}
+              >
+                <CheckSquare size={14} />
+                <span>{isSelectMode ? "Exit Select Mode" : "Select Multiple"}</span>
+              </button>
+
+              {galleryMode === "grid" && (
+                <div className={`hidden sm:flex items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
+                  {[2, 3, 4, 5].map((cols) => (
+                    <button
+                      key={cols}
+                      onClick={() => setLayoutCols(cols as any)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors ${
+                        layoutCols === cols ? `${themeStyles.accent} font-bold` : `${themeStyles.textMuted} hover:opacity-80`
+                      }`}
+                    >
+                      {cols}C
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Sorting */}
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className={`rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 border ${themeStyles.borderColor} ${themeStyles.text}`}
+              >
+                <option value="manual">Sort: Original</option>
+                <option value="file_name">Sort: Name</option>
+                <option value="date_created">Sort: Date</option>
+                <option value="file_size">Sort: Size</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Media Grid Rendering */}
+        {filteredMedia.length === 0 ? (
+          <div className={`py-24 text-center space-y-3 border rounded-3xl p-8 shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+            <ImageIcon size={40} className={`mx-auto opacity-30 ${themeStyles.accentText}`} />
+            <h3 className={`text-lg uppercase ${themeStyles.fontDisplay} ${themeStyles.text}`}>No Assets Found</h3>
+            <p className={`text-xs font-mono ${themeStyles.textMuted}`}>Try clearing search query or category filters.</p>
+          </div>
+        ) : galleryMode === "timeline" ? (
+          /* Timeline Chronological Grouping */
+          <div className="space-y-12">
+            {Object.entries(timelineGroups).map(([dateStr, items]: [string, MediaItem[]]) => (
+              <div key={dateStr} className="space-y-4">
+                <div className={`flex items-center gap-3 border-b pb-2 ${themeStyles.borderColor}`}>
+                  <Clock size={16} className={themeStyles.accentText} />
+                  <h3 className={`text-lg uppercase ${themeStyles.fontDisplay} ${themeStyles.text}`}>{dateStr}</h3>
+                  <span className={`text-xs font-mono ${themeStyles.textMuted}`}>({items.length} items)</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {items.map((item, idx) => (
+                    <div key={item.id} className="relative group">
+                      {isSelectMode && (
+                        <div 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleItemSelection(item.id);
+                          }}
+                          className={`absolute top-3 left-3 z-30 w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}
+                        >
+                          {selectedIds.has(item.id) && <div className={`w-4 h-4 rounded ${themeStyles.accent}`} />}
+                        </div>
+                      )}
+                      <ProgressiveImage
+                        theme={project.theme}
+                        item={item}
+                        isFavorited={favoritedIds.has(item.id)}
+                        onToggleFavorite={toggleFavorite}
+                        onClick={() => {
+                          if (isSelectMode) {
+                            toggleItemSelection(item.id);
+                          } else if (item.isVideo) {
+                            setActiveVideoItem(item);
+                          } else {
+                            setLightboxIndex(filteredMedia.findIndex(m => m.id === item.id));
+                          }
+                        }}
+                        onDownload={handleDownloadSingle}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
-          <>
-            {/* Hero Section */}
-            <GalleryHero
-              project={project}
-              event={eventFolder}
-              photoCount={mediaItems.filter(m => !m.isVideo).length}
-              videoCount={mediaItems.filter(m => m.isVideo).length}
-              favoriteCount={favoritedIds.size}
-              onDownloadAll={handleDownloadAll}
-              onShareClick={() => setIsShareModalOpen(true)}
-              onShowQrClick={() => setIsShareModalOpen(true)}
-              onPlaySlideshow={() => {
-                setCinematicStartIndex(0);
-                setIsCinematicSlideshowOpen(true);
-              }}
-            />
-
-            {/* Gallery Toolbar: Search, Filters, Layout Switcher */}
-            <div className={`border p-4 sm:p-6 space-y-4 shadow-lg rounded-2xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                
-                {/* Instant Search Bar */}
-                <div className="relative flex-1 max-w-md">
-                  <Search size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${themeStyles.accentText}`} />
-                  <input
-                    type="text"
-                    placeholder="Search gallery files..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} placeholder:${themeStyles.textMuted}`}
+          /* Dynamic Layouts */
+          <div className="space-y-8">
+            <div className={layoutStyles.wrapper}>
+              {visibleMedia.map((item, idx) => (
+                <div 
+                  key={item.id} 
+                  className={layoutStyles.getItemClass ? layoutStyles.getItemClass(idx) : layoutStyles.item}
+                >
+                  {isSelectMode && (
+                    <div 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleItemSelection(item.id);
+                      }}
+                      className={`absolute top-3 left-3 z-30 w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}
+                    >
+                      {selectedIds.has(item.id) && <div className={`w-4 h-4 rounded ${themeStyles.accent}`} />}
+                    </div>
+                  )}
+                  <ProgressiveImage
+                    theme={project.theme}
+                    item={item}
+                    isFavorited={favoritedIds.has(item.id)}
+                    onToggleFavorite={toggleFavorite}
+                    className={galleryMode === 'collage' ? '!aspect-auto h-full w-full object-cover' : undefined}
+                    onClick={() => {
+                      if (isSelectMode) {
+                        toggleItemSelection(item.id);
+                      } else if (item.isVideo) {
+                        setActiveVideoItem(item);
+                      } else {
+                        setLightboxIndex(filteredMedia.findIndex(m => m.id === item.id));
+                      }
+                    }}
+                    onDownload={handleDownloadSingle}
                   />
                 </div>
-
-                {/* Filter Pills */}
-                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
-                  <button
-                    onClick={() => setFilter("all")}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border ${
-                      filter === "all" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                    }`}
-                  >
-                    All ({mediaItems.length})
-                  </button>
-                  <button
-                    onClick={() => setFilter("photos")}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                      filter === "photos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                    }`}
-                  >
-                    <ImageIcon size={14} /> Photos ({mediaItems.filter(m => !m.isVideo).length})
-                  </button>
-                  <button
-                    onClick={() => setFilter("videos")}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                      filter === "videos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                    }`}
-                  >
-                    <VideoIcon size={14} /> Videos ({mediaItems.filter(m => m.isVideo).length})
-                  </button>
-                  <button
-                    onClick={() => setFilter("favorites")}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                      filter === "favorites" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                    }`}
-                  >
-                    <Heart size={14} className={favoritedIds.size > 0 ? "fill-current" : ""} /> Favorites ({favoritedIds.size})
-                  </button>
-
-                  {favoritedIds.size > 0 && (
-                    <button
-                      onClick={() => setIsFavoritesDrawerOpen(true)}
-                      className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse cursor-pointer"
-                    >
-                      <CheckSquare size={14} />
-                      <span>Submit Selection ({favoritedIds.size})</span>
-                    </button>
-                  )}
-                </div>
-
-              </div>
-
-              {/* Sub-bar: Layout Mode Switcher & Sort Options */}
-              <div className={`flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs font-mono ${themeStyles.borderColor}`}>
-                
-                {/* View Layout Options */}
-                <div className={`flex flex-wrap items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
-                  <button
-                    onClick={() => setGalleryMode("grid")}
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                      galleryMode === "grid" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                    }`}
-                    title="Grid View"
-                  >
-                    <LayoutGrid size={15} />
-                    <span className="hidden lg:inline">Grid</span>
-                  </button>
-                  <button
-                    onClick={() => setGalleryMode("masonry")}
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                      galleryMode === "masonry" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                    }`}
-                    title="Masonry View"
-                  >
-                    <Layers size={15} />
-                    <span className="hidden lg:inline">Masonry</span>
-                  </button>
-                  <button
-                    onClick={() => setGalleryMode("justified")}
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                      galleryMode === "justified" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                    }`}
-                    title="Justified View"
-                  >
-                    <AlignJustify size={15} />
-                    <span className="hidden lg:inline">Justified</span>
-                  </button>
-                  <button
-                    onClick={() => setGalleryMode("collage")}
-                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                      galleryMode === "collage" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                    }`}
-                    title="Collage View"
-                  >
-                    <LayoutTemplate size={15} />
-                    <span className="hidden lg:inline">Collage</span>
-                  </button>
-                </div>
-
-                {/* Sort Dropdown */}
-                <div className="flex items-center gap-2">
-                  <span className={themeStyles.textMuted}>Sort:</span>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as any)}
-                    className={`bg-black/5 border rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none ${themeStyles.borderColor} ${themeStyles.text}`}
-                  >
-                    <option value="date" className="bg-zinc-900 text-white">Date Captured</option>
-                    <option value="name" className="bg-zinc-900 text-white">File Name</option>
-                    <option value="size" className="bg-zinc-900 text-white">File Size</option>
-                  </select>
-                  <button
-                    onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
-                    className={`p-2 rounded-xl border bg-black/5 hover:opacity-80 transition-all ${themeStyles.borderColor} ${themeStyles.text}`}
-                    title="Toggle Sort Order"
-                  >
-                    {sortOrder === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
-                  </button>
-                </div>
-
-                {/* Layout Column Counter */}
-                {galleryMode === 'grid' && (
-                  <div className="flex items-center gap-1.5">
-                    <span className={themeStyles.textMuted}>Columns:</span>
-                    {[3, 4, 5].map(cols => (
-                      <button
-                        key={cols}
-                        onClick={() => setLayoutCols(cols)}
-                        className={`w-7 h-7 rounded-lg text-xs font-mono font-bold transition-all border ${
-                          layoutCols === cols ? `${themeStyles.accent} border-transparent shadow-xs` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                        }`}
-                      >
-                        {cols}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              ))}
             </div>
-
-            {/* Media Display Area */}
-            {mediaItems.length === 0 ? (
-              <div className={`p-16 rounded-3xl border text-center space-y-4 ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
-                <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center mx-auto">
-                  <ImageIcon size={32} />
-                </div>
-                <h3 className={`text-xl font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
-                  No Media Assets Found
-                </h3>
-                <p className={`text-xs font-mono max-w-md mx-auto ${themeStyles.textMuted}`}>
-                  This folder does not currently contain any photos or videos, or synchronization is still in progress.
-                </p>
-                {eventFolder.driveFolderId && (
-                  <button
-                    onClick={() => window.open(`https://drive.google.com/drive/folders/${eventFolder.driveFolderId}`, "_blank")}
-                    className="py-2.5 px-6 rounded-full bg-brand-red text-white text-xs font-bold uppercase tracking-wider shadow-md hover:bg-brand-red/90 transition-all"
-                  >
-                    Open Google Drive Folder
-                  </button>
-                )}
-              </div>
-            ) : filteredMedia.length === 0 ? (
-              <div className={`p-16 rounded-3xl border text-center space-y-4 ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
-                <Search size={32} className={`mx-auto ${themeStyles.textMuted}`} />
-                <h3 className={`text-xl font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
-                  No Matching Assets
-                </h3>
-                <p className={`text-xs font-mono ${themeStyles.textMuted}`}>
-                  No items match your active search or filter criteria.
-                </p>
-                <button
-                  onClick={() => { setSearchQuery(""); setFilter("all"); }}
-                  className="py-2.5 px-6 rounded-full bg-zinc-800 text-white text-xs font-mono uppercase font-bold tracking-wider hover:bg-zinc-700 transition-all"
-                >
-                  Reset Filters
-                </button>
-              </div>
-            ) : galleryMode === 'timeline' ? (
-              <div className="space-y-12">
-                {Object.entries(timelineGroups).map(([dateKey, itemsRaw]) => {
-                  const items = itemsRaw as MediaItem[];
-                  return (
-                    <div key={dateKey} className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-px flex-1 bg-white/10" />
-                        <span className={`text-xs font-mono uppercase tracking-widest px-4 py-1.5 rounded-full border ${themeStyles.cardBg} ${themeStyles.borderColor} ${themeStyles.accentText} font-bold`}>
-                          {dateKey}
-                        </span>
-                        <div className="h-px flex-1 bg-white/10" />
-                      </div>
-
-                      <div className={layoutStyles.wrapper}>
-                        {items.map((item, idx) => (
-                          <div key={item.id} className={layoutStyles.item}>
-                            {isSelectMode && (
-                              <div 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleItemSelection(item.id);
-                                }}
-                                className={`absolute top-3 left-3 z-30 w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}
-                              >
-                                {selectedIds.has(item.id) && <div className={`w-4 h-4 rounded ${themeStyles.accent}`} />}
-                              </div>
-                            )}
-                            <ProgressiveImage
-                              theme={project.theme}
-                              item={item}
-                              isFavorited={favoritedIds.has(item.id)}
-                              onToggleFavorite={toggleFavorite}
-                              onClick={() => {
-                                if (isSelectMode) {
-                                  toggleItemSelection(item.id);
-                                } else if (item.isVideo) {
-                                  setActiveVideoItem(item);
-                                } else {
-                                  setLightboxIndex(filteredMedia.findIndex(m => m.id === item.id));
-                                }
-                              }}
-                              onDownload={handleDownloadSingle}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className={layoutStyles.wrapper}>
-                {visibleMedia.map((item, idx) => (
-                  <div 
-                    key={item.id} 
-                    className={layoutStyles.getItemClass ? layoutStyles.getItemClass(idx) : layoutStyles.item}
-                  >
-                    {isSelectMode && (
-                      <div 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleItemSelection(item.id);
-                        }}
-                        className={`absolute top-3 left-3 z-30 w-7 h-7 rounded-lg border flex items-center justify-center cursor-pointer shadow-md ${themeStyles.cardBg} ${themeStyles.borderColor}`}
-                      >
-                        {selectedIds.has(item.id) && <div className={`w-4 h-4 rounded ${themeStyles.accent}`} />}
-                      </div>
-                    )}
-                    <ProgressiveImage
-                      theme={project.theme}
-                      item={item}
-                      isFavorited={favoritedIds.has(item.id)}
-                      onToggleFavorite={toggleFavorite}
-                      onDownload={handleDownloadSingle}
-                      className={galleryMode === 'collage' ? '!aspect-auto h-full w-full object-cover' : undefined}
-                      onClick={() => {
-                        if (isSelectMode) {
-                          toggleItemSelection(item.id);
-                        } else if (item.isVideo) {
-                          setActiveVideoItem(item);
-                        } else {
-                          setLightboxIndex(filteredMedia.findIndex(m => m.id === item.id));
-                        }
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Pagination / Load More Sentinel */}
             {visibleCount < filteredMedia.length && (
@@ -1030,11 +990,8 @@ export const GalleryPage: React.FC = () => {
                 </button>
               </div>
             )}
-          </>
+          </div>
         )}
-
-
-
 
       </main>
 

@@ -37,7 +37,7 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     ? "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
     : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800";
 
-  const tiny = item.tinyThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 100) : item.thumbnailUrl || fallbackImg);
+  const tiny = item.tinyThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 200) : item.thumbnailUrl || fallbackImg);
 
   const [currentSrc, setCurrentSrc] = useState<string>(tiny);
   const [loadStage, setLoadStage] = useState<'tiny' | 'small' | 'hd' | 'original'>('tiny');
@@ -56,7 +56,7 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           observer.disconnect();
         }
       },
-      { rootMargin: "400px" }
+      { rootMargin: "300px" }
     );
     if (containerRef.current) {
       observer.observe(containerRef.current);
@@ -74,9 +74,9 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   useEffect(() => {
     if (!isInView) return;
 
-    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 600) : item.thumbnailUrl || fallbackImg);
-    const hd = item.hdUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 1600) : item.fullUrl || small);
-    const original = item.originalUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2560) : item.fullUrl || hd);
+    const small = item.smallThumbnailUrl || item.mediumThumbnailUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 1600) : item.thumbnailUrl || fallbackImg);
+    const hd = item.hdUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 2560) : item.fullUrl || small);
+    const original = item.originalUrl || (item.driveFileId ? getDriveImageUrl(item.driveFileId, 3840) : item.fullUrl || hd);
 
     const imgSmall = new Image();
     imgSmall.src = small;

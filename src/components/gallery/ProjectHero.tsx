@@ -807,7 +807,48 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({
           (Consistent Elegant Delivery across all presets)
           ========================================== */}
       
+      {/* SECTION: ASYMMETRIC DETAILS GRID & ALBUM PREVIEW */}
+      <section className="relative py-24 px-6 sm:px-12 max-w-7xl mx-auto z-20">
+        <div className="flex flex-col md:flex-row items-baseline justify-between border-b pb-6 border-stone-200/50 dark:border-stone-800 mb-12">
+          <span className={`text-[10px] font-mono tracking-[0.3em] font-black uppercase ${isDark ? 'text-amber-500' : 'text-stone-800'}`}>
+            ✦ SHOT SERIES HIGHLIGHTS ✦
+          </span>
+          <span className={`text-[11px] font-mono text-stone-400`}>
+            {coverList.length} ARCHIVES LOADED
+          </span>
+        </div>
 
+        {/* 3-Image Horizontal highlights */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {collageImages.slice(1, 4).map((img, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1, duration: 0.8 }}
+              className={`group cursor-pointer rounded-2xl overflow-hidden border ${borderTone} shadow-md relative`}
+            >
+              <div className="aspect-[3/2] overflow-hidden">
+                <img
+                  src={getDriveImageUrl(img, 600)}
+                  alt={`Highlight Series ${idx + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              <div className="p-4 bg-white/50 dark:bg-black/40 backdrop-blur-md flex justify-between items-center border-t border-stone-200/20">
+                <span className={`text-[10px] font-mono tracking-widest uppercase font-bold ${textPrimary}`}>
+                  SERIES {String(idx + 1).padStart(2, '0')}
+                </span>
+                <span className={`text-[9px] font-mono tracking-widest ${textMuted} uppercase`}>
+                  FINE ART PORTRAIT
+                </span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
 
       {/* INSTAGRAM REELS SECTION */}
       {(cfg.showReels || (cfg.reels && cfg.reels.length > 0)) && (

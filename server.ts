@@ -227,25 +227,7 @@ async function startServer() {
         }
       }
 
-      // Only fallback to demo photos if folderId is default demo folder
-      if (files.length === 0 && (folderId === "default_demo_folder_id" || !folderId)) {
-        const demoPhotos = [
-          { id: "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1600", name: "Mellow_Wedding_Highlights_01.jpg", mime: "image/jpeg" },
-          { id: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=1600", name: "Mellow_Nikah_Ceremony_02.jpg", mime: "image/jpeg" },
-          { id: "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=1600", name: "Mellow_Reception_Stage_03.jpg", mime: "image/jpeg" },
-          { id: "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1600", name: "Mellow_Bride_Groom_Portrait.jpg", mime: "image/jpeg" },
-          { id: "https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=1600", name: "Mellow_Outdoor_Sunset_05.jpg", mime: "image/jpeg" },
-          { id: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", name: "Mellow_Teaser_Video.mp4", mime: "video/mp4" }
-        ];
 
-        demoPhotos.forEach(dp => {
-          files.push({
-            id: dp.id,
-            name: dp.name,
-            mimeType: dp.mime
-          });
-        });
-      }
 
       // Map to MediaItem structure
       const items = files.map((f, idx) => {
