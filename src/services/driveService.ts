@@ -88,30 +88,61 @@ export const syncDriveFolder = async (
   } catch (error) {
     console.warn("Backend sync failed or unavailable, trying client-side direct Drive API fallback:", error);
     
-    const activeApiKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_DRIVE_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
-    if (!activeApiKey) {
-      console.error("Direct Google Drive client fallback failed: No API key available.");
-      return [];
-    }
+    const activeApiKey = apiKey || (import.meta as any).env?.VITE_GOOGLE_DRIVE_API_KEY || (import.meta as any).env?.VITE_GOOGLE_API_KEY;
 
     try {
-      const q = `'${folderId}' in parents and trashed=false`;
-      const driveUrl = accessToken
-        ? `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100`
-        : `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100&key=${activeApiKey}`;
+      let files: any[] = [];
 
-      const headers: Record<string, string> = {};
-      if (accessToken) {
-        headers["Authorization"] = `Bearer ${accessToken}`;
+      if (accessToken || activeApiKey) {
+        const q = `'${folderId}' in parents and trashed=false`;
+        const driveUrl = accessToken
+          ? `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100`
+          : `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,size,createdTime,modifiedTime,imageMediaMetadata,videoMediaMetadata)&pageSize=100&key=${activeApiKey}`;
+
+        const headers: Record<string, string> = {};
+        if (accessToken) {
+          headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+
+        const driveRes = await fetch(driveUrl, { headers });
+        if (driveRes.ok) {
+          const data = await driveRes.json();
+          files = data.files || [];
+        }
       }
 
-      const driveRes = await fetch(driveUrl, { headers });
-      if (!driveRes.ok) {
-        throw new Error(`Google Drive API returned status ${driveRes.status}`);
-      }
+      if (files.length === 0) {
+        try {
+          const embedUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
+          const pageRes = await fetch(embedUrl);
+          if (pageRes.ok) {
+            const html = await pageRes.text();
+            const fileIdMatches = html.match(/\/file\/d\/([a-zA-Z0-9_-]{25,50})|id=([a-zA-Z0-9_-]{25,50})|lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]{25,50})/g) || [];
+            const extractedIds = new Set<string>();
 
-      const data = await driveRes.json();
-      const files = data.files || [];
+            fileIdMatches.forEach(m => {
+              const subMatch = m.match(/([a-zA-Z0-9_-]{25,50})/g);
+              if (subMatch) {
+                subMatch.forEach(id => {
+                  if (id !== folderId && id.length >= 25) {
+                    extractedIds.add(id);
+                  }
+                });
+              }
+            });
+
+            extractedIds.forEach((id, idx) => {
+              files.push({
+                id,
+                name: `Drive_Photo_${idx + 1}.jpg`,
+                mimeType: "image/jpeg"
+              });
+            });
+          }
+        } catch (e) {
+          console.warn("Client embedded folder fetch warning:", e);
+        }
+      }
 
       return files.map((f: any, idx: number) => {
         const nameLower = (f.name || "").toLowerCase();

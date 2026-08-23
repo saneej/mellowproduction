@@ -148,7 +148,7 @@ async function startServer() {
       return res.status(400).json({ error: "Missing folderId" });
     }
 
-    const activeApiKey = apiKey || process.env.GOOGLE_DRIVE_API_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+    const activeApiKey = apiKey || process.env.GOOGLE_DRIVE_API_KEY || process.env.GOOGLE_API_KEY;
 
     try {
       let files: any[] = [];
@@ -199,31 +199,39 @@ async function startServer() {
         } while (pageToken && pageCount < 10);
       }
 
-      // 3. Fallback or public web page parse if API key / token yielded no results
+      // 3. Fallback to public embedded folder scrape if API key / token yielded no results
       if (files.length === 0) {
-        const folderWebUrl = `https://drive.google.com/drive/folders/${folderId}`;
-        const pageRes = await fetch(folderWebUrl, {
-          headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
-        });
-        if (pageRes.ok) {
-          const text = await pageRes.text();
-          const matches = text.match(/\["([a-zA-Z0-9_-]{25,50})",\["([a-zA-Z0-9_.-]+)"/g) || [];
-          const extractedIds = new Set<string>();
-
-          matches.forEach(m => {
-            const idMatch = m.match(/\["([a-zA-Z0-9_-]{25,50})"/);
-            if (idMatch && idMatch[1] && idMatch[1] !== folderId) {
-              extractedIds.add(idMatch[1]);
-            }
+        try {
+          const embedUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
+          const pageRes = await fetch(embedUrl, {
+            headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
           });
+          if (pageRes.ok) {
+            const html = await pageRes.text();
+            const fileIdMatches = html.match(/\/file\/d\/([a-zA-Z0-9_-]{25,50})|id=([a-zA-Z0-9_-]{25,50})|lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]{25,50})/g) || [];
+            const extractedIds = new Set<string>();
 
-          extractedIds.forEach(id => {
-            files.push({
-              id,
-              name: `Photo_${id.slice(0, 6)}.jpg`,
-              mimeType: "image/jpeg"
+            fileIdMatches.forEach(m => {
+              const subMatch = m.match(/([a-zA-Z0-9_-]{25,50})/g);
+              if (subMatch) {
+                subMatch.forEach(id => {
+                  if (id !== folderId && id.length >= 25) {
+                    extractedIds.add(id);
+                  }
+                });
+              }
             });
-          });
+
+            extractedIds.forEach((id, idx) => {
+              files.push({
+                id,
+                name: `Drive_Photo_${idx + 1}.jpg`,
+                mimeType: "image/jpeg"
+              });
+            });
+          }
+        } catch (embedErr) {
+          console.warn("Embedded folder scrape warning:", embedErr);
         }
       }
 
