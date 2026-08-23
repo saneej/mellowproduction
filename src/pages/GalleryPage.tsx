@@ -642,247 +642,250 @@ export const GalleryPage: React.FC = () => {
           }}
         />
 
-        {/* Sub-Events / Sub-Folders Card Grid (if current folder has child sub-events) */}
+        {/* Sub-Folders Grid (if subfolders exist) or Gallery Toolbar (if no subfolders) */}
         {(() => {
           const directChildren = allProjectEvents.filter(c => c.parentId === eventFolder.id);
-          if (directChildren.length === 0) return null;
+
+          if (directChildren.length > 0) {
+            return (
+              <div className={`p-6 sm:p-8 rounded-3xl border space-y-5 shadow-xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                      <FolderPlus size={22} />
+                    </div>
+                    <div>
+                      <h3 className={`text-base sm:text-lg font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
+                        Collections & Sub-Folders ({directChildren.length})
+                      </h3>
+                      <p className={`text-xs font-mono ${themeStyles.textMuted}`}>
+                        Browse nested photo & video collections inside {eventFolder.title}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono text-amber-500 font-extrabold uppercase hidden sm:inline">
+                    Nested Collections ↓
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {directChildren.map(subEvt => {
+                    const subSubFolders = allProjectEvents.filter(c => c.parentId === subEvt.id);
+                    return (
+                      <Link
+                        key={subEvt.id}
+                        to={`/projects/${projectSlug}/${subEvt.slug || subEvt.id}`}
+                        className={`group p-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 ${themeStyles.borderColor} bg-black/10 hover:bg-black/30 hover:border-amber-500/50 shadow-sm hover:shadow-md`}
+                      >
+                        <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
+                          <img
+                            src={
+                              subEvt.coverImage 
+                                ? getDriveImageUrl(subEvt.coverImage, 300) 
+                                : eventFolder.coverImage 
+                                  ? getDriveImageUrl(eventFolder.coverImage, 300) 
+                                  : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=300"
+                            }
+                            alt={subEvt.title}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className={`text-sm font-bold uppercase tracking-tight truncate ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:text-amber-400 transition-colors`}>
+                            {subEvt.title}
+                          </h4>
+                          <p className="text-[11px] font-mono text-amber-400/80 font-semibold mt-0.5">
+                            {subSubFolders.length > 0 
+                              ? `${subSubFolders.length} Sub-Sub Folders` 
+                              : `View Collection →`}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          }
 
           return (
-            <div className={`p-6 sm:p-8 rounded-3xl border space-y-5 shadow-xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                    <FolderPlus size={22} />
-                  </div>
-                  <div>
-                    <h3 className={`text-base sm:text-lg font-bold uppercase tracking-tight ${themeStyles.fontDisplay} ${themeStyles.text}`}>
-                      Sub-Events & Sub-Folders ({directChildren.length})
-                    </h3>
-                    <p className={`text-xs font-mono ${themeStyles.textMuted}`}>
-                      Browse nested photo & video collections inside {eventFolder.title}
-                    </p>
-                  </div>
+            /* Gallery Toolbar: Search, Filters, Layout Switcher */
+            <div className={`border p-4 sm:p-6 space-y-4 shadow-lg rounded-2xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                
+                {/* Instant Search Bar */}
+                <div className="relative flex-1 max-w-md">
+                  <Search size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${themeStyles.accentText}`} />
+                  <input
+                    type="text"
+                    placeholder="Search gallery files..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} placeholder:${themeStyles.textMuted}`}
+                  />
                 </div>
-                <span className="text-xs font-mono text-amber-500 font-extrabold uppercase hidden sm:inline">
-                  Nested Collections ↓
-                </span>
+
+                {/* Filter Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+                  <button
+                    onClick={() => setFilter("all")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border ${
+                      filter === "all" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                    }`}
+                  >
+                    All ({mediaItems.length})
+                  </button>
+                  <button
+                    onClick={() => setFilter("photos")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
+                      filter === "photos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                    }`}
+                  >
+                    <ImageIcon size={14} /> Photos ({mediaItems.filter(m => !m.isVideo).length})
+                  </button>
+                  <button
+                    onClick={() => setFilter("videos")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
+                      filter === "videos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                    }`}
+                  >
+                    <VideoIcon size={14} /> Videos ({mediaItems.filter(m => m.isVideo).length})
+                  </button>
+                  <button
+                    onClick={() => setFilter("favorites")}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
+                      filter === "favorites" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                    }`}
+                  >
+                    <Heart size={14} className={favoritedIds.size > 0 ? "fill-current" : ""} /> Favorites ({favoritedIds.size})
+                  </button>
+
+                  {favoritedIds.size > 0 && (
+                    <button
+                      onClick={() => setIsFavoritesDrawerOpen(true)}
+                      className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse cursor-pointer"
+                    >
+                      <CheckSquare size={14} />
+                      <span>Submit Selection ({favoritedIds.size})</span>
+                    </button>
+                  )}
+                </div>
+
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {directChildren.map(subEvt => {
-                  const subSubFolders = allProjectEvents.filter(c => c.parentId === subEvt.id);
-                  return (
-                    <Link
-                      key={subEvt.id}
-                      to={`/projects/${projectSlug}/${subEvt.slug || subEvt.id}`}
-                      className={`group p-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 ${themeStyles.borderColor} bg-black/10 hover:bg-black/30 hover:border-amber-500/50 shadow-sm hover:shadow-md`}
-                    >
-                      <div className="w-16 h-14 rounded-xl overflow-hidden shrink-0 bg-zinc-800 border border-white/10">
-                        <img
-                          src={
-                            subEvt.coverImage 
-                              ? getDriveImageUrl(subEvt.coverImage, 300) 
-                              : eventFolder.coverImage 
-                                ? getDriveImageUrl(eventFolder.coverImage, 300) 
-                                : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=300"
-                          }
-                          alt={subEvt.title}
-                          referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className={`text-sm font-bold uppercase tracking-tight truncate ${themeStyles.fontDisplay} ${themeStyles.text} group-hover:text-amber-400 transition-colors`}>
-                          {subEvt.title}
-                        </h4>
-                        <p className="text-[11px] font-mono text-amber-400/80 font-semibold mt-0.5">
-                          {subSubFolders.length > 0 
-                            ? `${subSubFolders.length} Sub-Sub Folders` 
-                            : `View Collection →`}
-                        </p>
-                      </div>
-                    </Link>
-                  );
-                })}
+              {/* Sub-bar: Layout Mode Switcher & Sort Options */}
+              <div className={`flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs font-mono ${themeStyles.borderColor}`}>
+                
+                {/* View Layout Options */}
+                <div className={`flex flex-wrap items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
+                  <button
+                    onClick={() => setGalleryMode("grid")}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                      galleryMode === "grid" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                    }`}
+                    title="Grid View"
+                  >
+                    <LayoutGrid size={15} />
+                    <span className="hidden lg:inline">Grid</span>
+                  </button>
+                  <button
+                    onClick={() => setGalleryMode("masonry")}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                      galleryMode === "masonry" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                    }`}
+                    title="Masonry View"
+                  >
+                    <Layers size={15} />
+                    <span className="hidden lg:inline">Masonry</span>
+                  </button>
+                  <button
+                    onClick={() => setGalleryMode("justified")}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                      galleryMode === "justified" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                    }`}
+                    title="Justified View"
+                  >
+                    <AlignJustify size={15} />
+                    <span className="hidden lg:inline">Justified</span>
+                  </button>
+                  <button
+                    onClick={() => setGalleryMode("collage")}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                      galleryMode === "collage" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                    }`}
+                    title="Collage View"
+                  >
+                    <LayoutTemplate size={15} />
+                    <span className="hidden lg:inline">Collage</span>
+                  </button>
+                  <button
+                    onClick={() => setGalleryMode("carousel")}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                      galleryMode === "carousel" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                    }`}
+                    title="Carousel View"
+                  >
+                    <MonitorPlay size={15} />
+                    <span className="hidden lg:inline">Carousel</span>
+                  </button>
+                  <button
+                    onClick={() => setGalleryMode("timeline")}
+                    className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                      galleryMode === "timeline" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
+                    }`}
+                    title="Timeline View"
+                  >
+                    <Clock size={15} />
+                    <span className="hidden lg:inline">Timeline</span>
+                  </button>
+                </div>
+
+                {/* Column Count & Select Mode */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setIsSelectMode(!isSelectMode)}
+                    className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
+                      isSelectMode ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
+                    }`}
+                  >
+                    <CheckSquare size={14} />
+                    <span>{isSelectMode ? "Exit Select Mode" : "Select Multiple"}</span>
+                  </button>
+
+                  {galleryMode === "grid" && (
+                    <div className={`hidden sm:flex items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
+                      {[2, 3, 4, 5].map((cols) => (
+                        <button
+                          key={cols}
+                          onClick={() => setLayoutCols(cols as any)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors ${
+                            layoutCols === cols ? `${themeStyles.accent} font-bold` : `${themeStyles.textMuted} hover:opacity-80`
+                          }`}
+                        >
+                          {cols}C
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Sorting */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    className={`rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 border ${themeStyles.borderColor} ${themeStyles.text}`}
+                  >
+                    <option value="manual">Sort: Original</option>
+                    <option value="file_name">Sort: Name</option>
+                    <option value="date_created">Sort: Date</option>
+                    <option value="file_size">Sort: Size</option>
+                  </select>
+                </div>
+
               </div>
             </div>
           );
         })()}
-
-        {/* Gallery Toolbar: Search, Filters, Layout Switcher */}
-        <div className={`border p-4 sm:p-6 space-y-4 shadow-lg rounded-2xl ${themeStyles.cardBg} ${themeStyles.borderColor}`}>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            
-            {/* Instant Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search size={16} className={`absolute left-3.5 top-1/2 -translate-y-1/2 ${themeStyles.accentText}`} />
-              <input
-                type="text"
-                placeholder="Search gallery files..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full border rounded-xl pl-10 pr-4 py-2.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} placeholder:${themeStyles.textMuted}`}
-              />
-            </div>
-
-            {/* Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
-              <button
-                onClick={() => setFilter("all")}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border ${
-                  filter === "all" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                }`}
-              >
-                All ({mediaItems.length})
-              </button>
-              <button
-                onClick={() => setFilter("photos")}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                  filter === "photos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                }`}
-              >
-                <ImageIcon size={14} /> Photos ({mediaItems.filter(m => !m.isVideo).length})
-              </button>
-              <button
-                onClick={() => setFilter("videos")}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                  filter === "videos" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                }`}
-              >
-                <VideoIcon size={14} /> Videos ({mediaItems.filter(m => m.isVideo).length})
-              </button>
-              <button
-                onClick={() => setFilter("favorites")}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border flex items-center gap-1.5 ${
-                  filter === "favorites" ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                }`}
-              >
-                <Heart size={14} className={favoritedIds.size > 0 ? "fill-current" : ""} /> Favorites ({favoritedIds.size})
-              </button>
-
-              {favoritedIds.size > 0 && (
-                <button
-                  onClick={() => setIsFavoritesDrawerOpen(true)}
-                  className="px-3.5 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all border bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700 font-bold flex items-center gap-1.5 shadow-md animate-pulse cursor-pointer"
-                >
-                  <CheckSquare size={14} />
-                  <span>Submit Selection ({favoritedIds.size})</span>
-                </button>
-              )}
-            </div>
-
-          </div>
-
-          {/* Sub-bar: Layout Mode Switcher & Sort Options */}
-          <div className={`flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs font-mono ${themeStyles.borderColor}`}>
-            
-            {/* View Layout Options */}
-            <div className={`flex flex-wrap items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
-              <button
-                onClick={() => setGalleryMode("grid")}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "grid" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                }`}
-                title="Grid View"
-              >
-                <LayoutGrid size={15} />
-                <span className="hidden lg:inline">Grid</span>
-              </button>
-              <button
-                onClick={() => setGalleryMode("masonry")}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "masonry" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                }`}
-                title="Masonry View"
-              >
-                <Layers size={15} />
-                <span className="hidden lg:inline">Masonry</span>
-              </button>
-              <button
-                onClick={() => setGalleryMode("justified")}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "justified" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                }`}
-                title="Justified View"
-              >
-                <AlignJustify size={15} />
-                <span className="hidden lg:inline">Justified</span>
-              </button>
-              <button
-                onClick={() => setGalleryMode("collage")}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "collage" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                }`}
-                title="Collage View"
-              >
-                <LayoutTemplate size={15} />
-                <span className="hidden lg:inline">Collage</span>
-              </button>
-              <button
-                onClick={() => setGalleryMode("carousel")}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "carousel" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                }`}
-                title="Carousel View"
-              >
-                <MonitorPlay size={15} />
-                <span className="hidden lg:inline">Carousel</span>
-              </button>
-              <button
-                onClick={() => setGalleryMode("timeline")}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  galleryMode === "timeline" ? `${themeStyles.accent} font-bold shadow-xs` : `${themeStyles.textMuted} hover:opacity-80`
-                }`}
-                title="Timeline View"
-              >
-                <Clock size={15} />
-                <span className="hidden lg:inline">Timeline</span>
-              </button>
-            </div>
-
-            {/* Column Count & Select Mode */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setIsSelectMode(!isSelectMode)}
-                className={`px-3 py-1.5 rounded-xl border flex items-center gap-1.5 transition-all ${
-                  isSelectMode ? `${themeStyles.accent} shadow-sm font-bold` : `bg-black/5 ${themeStyles.borderColor} ${themeStyles.text} hover:opacity-80`
-                }`}
-              >
-                <CheckSquare size={14} />
-                <span>{isSelectMode ? "Exit Select Mode" : "Select Multiple"}</span>
-              </button>
-
-              {galleryMode === "grid" && (
-                <div className={`hidden sm:flex items-center gap-1 p-1 rounded-xl bg-black/5 border ${themeStyles.borderColor}`}>
-                  {[2, 3, 4, 5].map((cols) => (
-                    <button
-                      key={cols}
-                      onClick={() => setLayoutCols(cols as any)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] transition-colors ${
-                        layoutCols === cols ? `${themeStyles.accent} font-bold` : `${themeStyles.textMuted} hover:opacity-80`
-                      }`}
-                    >
-                      {cols}C
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Sorting */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-mono focus:outline-none focus:border-zinc-500 bg-black/5 border ${themeStyles.borderColor} ${themeStyles.text}`}
-              >
-                <option value="manual">Sort: Original</option>
-                <option value="file_name">Sort: Name</option>
-                <option value="date_created">Sort: Date</option>
-                <option value="file_size">Sort: Size</option>
-              </select>
-            </div>
-
-          </div>
-        </div>
 
         {/* Media Grid Rendering */}
         {filteredMedia.length === 0 ? (
