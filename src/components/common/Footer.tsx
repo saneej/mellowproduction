@@ -27,17 +27,31 @@ export const Footer: React.FC<{ compact?: boolean }> = ({ compact = false }) => 
         </div>
 
         {/* Center/Right Credit: developed by saneejified */}
-        <div className="flex items-center gap-2 text-zinc-600 text-xs">
-          <span>Developed by</span>
-          <a 
-            href="https://instagram.com/heysaneej" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 font-bold text-zinc-900 hover:text-white hover:bg-brand-red transition-all px-3 py-1 rounded-full bg-brand-red/5 border border-brand-red/15 hover:border-brand-red group shadow-xs"
+        <div className="flex items-center gap-6">
+          <Link
+            to="/privacy"
+            className="text-xs text-zinc-500 hover:text-brand-red transition-colors font-bold uppercase tracking-wider"
           >
-            <Instagram size={13} className="text-brand-red group-hover:text-white group-hover:scale-110 transition-transform" />
-            <span>saneejified</span>
-          </a>
+            Privacy Policy
+          </Link>
+          <Link
+            to="/terms"
+            className="text-xs text-zinc-500 hover:text-brand-red transition-colors font-bold uppercase tracking-wider"
+          >
+            Terms of Service
+          </Link>
+          <div className="flex items-center gap-2 text-zinc-600 text-xs">
+            <span>Developed by</span>
+            <a 
+              href="https://instagram.com/heysaneej" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-bold text-zinc-900 hover:text-white hover:bg-brand-red transition-all px-3 py-1 rounded-full bg-brand-red/5 border border-brand-red/15 hover:border-brand-red group shadow-xs"
+            >
+              <Instagram size={13} className="text-brand-red group-hover:text-white group-hover:scale-110 transition-transform" />
+              <span>saneejified</span>
+            </a>
+          </div>
         </div>
 
       </div>

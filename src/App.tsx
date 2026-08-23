@@ -918,6 +918,12 @@ const Footer = () => {
           >
             Industry Insights
           </a>
+          <Link
+            to="/privacy"
+            className="text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity font-bold"
+          >
+            Privacy Policy
+          </Link>
         </div>
         
         <div className="flex gap-8">
@@ -1060,6 +1066,8 @@ import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { ProjectsLandingPage } from "./pages/ProjectsLandingPage";
 import { ProjectPage } from "./pages/ProjectPage";
 import { GalleryPage } from "./pages/GalleryPage";
+import { PrivacyPolicyPage } from "./pages/PrivacyPolicyPage";
+import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 
 export default function App() {
@@ -1089,6 +1097,8 @@ export default function App() {
               <Route path="/projects" element={<ProjectsLandingPage />} />
               <Route path="/projects/:projectSlug" element={<ProjectPage />} />
               <Route path="/projects/:projectSlug/:eventSlug" element={<GalleryPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
+              <Route path="/terms" element={<TermsOfServicePage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </BrowserRouter>
