@@ -213,25 +213,21 @@ export const AdminDashboardPage: React.FC = () => {
   const unreadNotifsCount = notifs.filter(n => !n.isRead).length;
 
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-brand-red selection:text-white flex flex-col justify-between">
+    <div className="min-h-screen bg-[#070709] text-white selection:bg-brand-red selection:text-white flex flex-col justify-between">
       <div>
-        <GalleryHeader title="Admin Control Center" />
+        <SidebarNav 
+          activeTab={activeTab} 
+          setActiveTab={(tab) => {
+            setSelectedProjectId(null);
+            setActiveTab(tab);
+          }} 
+          unreadNotifsCount={unreadNotifsCount} 
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        />
 
-        <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-80px)] flex flex-col lg:flex-row">
-          
-          {/* Collapsible / Responsive Sidebar */}
-          <SidebarNav 
-            activeTab={activeTab} 
-            setActiveTab={(tab) => {
-              setSelectedProjectId(null);
-              setActiveTab(tab);
-            }} 
-            unreadNotifsCount={unreadNotifsCount} 
-            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
-          />
-
+        <div className="max-w-[1700px] mx-auto min-h-[calc(100vh-140px)]">
           {/* Main Dashboard Content Area */}
-          <main className="flex-1 p-6 md:p-10 space-y-8 bg-black/40 overflow-x-hidden">
+          <main className="p-6 md:p-10 space-y-8">
             
             {/* SINGLE PROJECT DETAILED VIEW MODE */}
             {selectedProjectId ? (
@@ -282,30 +278,30 @@ export const AdminDashboardPage: React.FC = () => {
 
                     {/* Metrics Bar */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-1 shadow-xl">
-                        <div className="text-[11px] font-mono text-white/40 uppercase">Total Projects</div>
+                      <div className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-1 hover:border-white/10 transition-colors">
+                        <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Total Projects</div>
                         <div className="text-3xl font-display font-extrabold text-white">{projects.length}</div>
                         <div className="text-[10px] font-mono text-emerald-400">Active galleries</div>
                       </div>
 
-                      <div className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-1 shadow-xl">
-                        <div className="text-[11px] font-mono text-white/40 uppercase">Total Sub-Events</div>
+                      <div className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-1 hover:border-white/10 transition-colors">
+                        <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Sub-Events</div>
                         <div className="text-3xl font-display font-extrabold text-brand-red">
                           {projects.reduce((acc, p) => acc + (p.eventCount || 1), 0)}
                         </div>
                         <div className="text-[10px] font-mono text-white/40">Weddings, Nikah, Receptions</div>
                       </div>
 
-                      <div className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-1 shadow-xl">
-                        <div className="text-[11px] font-mono text-white/40 uppercase">Client Favorites</div>
+                      <div className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-1 hover:border-white/10 transition-colors">
+                        <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Client Favorites</div>
                         <div className="text-3xl font-display font-extrabold text-pink-500">{allFavorites.length}</div>
                         <div className="text-[10px] font-mono text-white/40">Selection lists received</div>
                       </div>
 
-                      <div className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-1 shadow-xl">
-                        <div className="text-[11px] font-mono text-white/40 uppercase">Drive Status</div>
+                      <div className="p-5 rounded-2xl bg-zinc-900/40 border border-white/5 space-y-1 hover:border-white/10 transition-colors">
+                        <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">Drive Status</div>
                         <div className="text-sm font-bold font-mono text-emerald-400 flex items-center gap-1.5 mt-2">
-                          <HardDrive size={16} /> Active & Connected
+                          <HardDrive size={16} /> Connected
                         </div>
                       </div>
                     </div>
@@ -313,7 +309,7 @@ export const AdminDashboardPage: React.FC = () => {
                     {/* Recent Projects Preview */}
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-mono uppercase tracking-widest text-white/80">Recent Project Galleries</h3>
+                        <h3 className="text-xs font-mono uppercase tracking-widest text-white/60">Recent Project Galleries</h3>
                         <button 
                           onClick={() => setActiveTab("projects")}
                           className="text-xs font-mono text-brand-red hover:underline"
@@ -323,29 +319,29 @@ export const AdminDashboardPage: React.FC = () => {
                       </div>
 
                       {projects.length === 0 ? (
-                        <div className="p-8 bg-zinc-950 border border-dashed border-white/20 rounded-3xl text-center space-y-4">
-                          <FolderPlus className="mx-auto text-white/40" size={40} />
+                        <div className="p-8 bg-zinc-900/30 border border-dashed border-white/10 rounded-2xl text-center space-y-4">
+                          <FolderPlus className="mx-auto text-white/40" size={36} />
                           <div>
-                            <h4 className="text-lg font-bold text-white uppercase">No Projects Yet</h4>
+                            <h4 className="text-base font-bold text-white uppercase tracking-wider">No Projects Yet</h4>
                             <p className="text-xs font-mono text-white/50 mt-1">Start by creating your first client photography gallery.</p>
                           </div>
                           {canEditProjects && (
                             <button
                               onClick={() => setIsWizardOpen(true)}
-                              className="py-2.5 px-5 rounded-2xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 hover:bg-brand-red/90 transition-all shadow-lg"
+                              className="py-2.5 px-5 rounded-xl bg-brand-red text-white font-mono text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 hover:bg-brand-red/90 transition-all"
                             >
-                              <Plus size={16} />
+                              <Plus size={15} />
                               <span>Create Project</span>
                             </button>
                           )}
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                           {projects.slice(0, 3).map(p => (
                             <div 
                               key={p.id} 
                               onClick={() => setSelectedProjectId(p.id)}
-                              className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-xl hover:border-brand-red/50 cursor-pointer transition-all group"
+                              className="bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden hover:border-brand-red/40 hover:bg-zinc-900/70 cursor-pointer transition-all group"
                             >
                               <img 
                                 src={p.coverImage ? getDriveImageUrl(p.coverImage, 800) : "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800"} 
@@ -353,8 +349,8 @@ export const AdminDashboardPage: React.FC = () => {
                                 className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500"
                               />
                               <div className="p-4 space-y-1">
-                                <div className="font-bold text-white text-base truncate group-hover:text-brand-red transition-colors">{p.title}</div>
-                                <div className="text-xs font-mono text-white/50">{p.date || p.category || "Gallery"}</div>
+                                <div className="font-bold text-white text-sm truncate group-hover:text-brand-red transition-colors">{p.title}</div>
+                                <div className="text-[11px] font-mono text-white/40">{p.date || p.category || "Gallery"}</div>
                               </div>
                             </div>
                           ))}
@@ -363,14 +359,14 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
 
                     {/* Activity Logs */}
-                    <div className="pt-6 border-t border-white/10 space-y-3">
-                      <h3 className="text-sm font-mono uppercase tracking-widest text-white/80">Recent Activity Logs</h3>
-                      <div className="bg-zinc-950 border border-white/10 rounded-2xl p-4 space-y-2 max-h-48 overflow-y-auto font-mono text-xs">
+                    <div className="pt-6 border-t border-white/5 space-y-3">
+                      <h3 className="text-xs font-mono uppercase tracking-widest text-white/60">Recent Activity Logs</h3>
+                      <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 space-y-2 max-h-48 overflow-y-auto font-mono text-xs">
                         {logs.map(log => (
-                          <div key={log.id} className="flex items-center justify-between py-1 border-b border-white/5 text-white/70">
-                            <span className="text-brand-red font-bold">{log.type}</span>
-                            <span className="truncate max-w-sm">{log.description}</span>
-                            <span className="text-white/40">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                          <div key={log.id} className="flex items-center justify-between py-1.5 border-b border-white/5 text-white/70">
+                            <span className="text-brand-red font-bold text-[10px] uppercase">{log.type}</span>
+                            <span className="truncate max-w-sm text-white/80">{log.description}</span>
+                            <span className="text-white/30 text-[10px]">{new Date(log.timestamp).toLocaleTimeString()}</span>
                           </div>
                         ))}
                       </div>
@@ -462,11 +458,11 @@ export const AdminDashboardPage: React.FC = () => {
                         )}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {filteredProjects.map(project => {
                           const isChecked = selectedProjectIds.includes(project.id);
                           return (
-                            <div key={project.id} className="bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden flex flex-col justify-between shadow-xl relative group">
+                            <div key={project.id} className="bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-brand-red/40 hover:bg-zinc-900/70 transition-all relative group">
                               
                               {/* Checkbox for bulk action */}
                               <div className="absolute top-3 left-3 z-20">
@@ -494,7 +490,7 @@ export const AdminDashboardPage: React.FC = () => {
                                     alt={project.title}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                   />
-                                  <span className="absolute top-3 left-10 px-3 py-1 bg-black/80 rounded-full text-[10px] font-mono uppercase text-white border border-white/10">
+                                  <span className="absolute top-3 left-10 px-2.5 py-0.5 bg-black/80 rounded-md text-[10px] font-mono uppercase text-white border border-white/10">
                                     {project.category}
                                   </span>
                                   {project.isPinProtected && (
@@ -504,39 +500,39 @@ export const AdminDashboardPage: React.FC = () => {
                                   )}
                                 </div>
 
-                                <div className="p-5 space-y-2">
+                                <div className="p-4 space-y-1">
                                   <h3 
                                     onClick={() => setSelectedProjectId(project.id)}
-                                    className="text-lg font-display font-extrabold uppercase text-white truncate cursor-pointer hover:text-brand-red transition-colors"
+                                    className="text-base font-display font-bold uppercase text-white truncate cursor-pointer hover:text-brand-red transition-colors"
                                   >
                                     {project.title}
                                   </h3>
-                                  <div className="flex items-center justify-between text-xs font-mono text-white/60">
-                                    <span>Category: <strong className="text-white">{project.category || "Gallery"}</strong></span>
+                                  <div className="flex items-center justify-between text-[11px] font-mono text-white/40">
+                                    <span>Category: <strong className="text-white/80">{project.category || "Gallery"}</strong></span>
                                     <span>{project.date}</span>
                                   </div>
                                 </div>
                               </div>
 
-                              <div className="p-4 bg-black/60 border-t border-white/10 flex items-center justify-between gap-2">
+                              <div className="p-3 bg-black/30 border-t border-white/5 flex items-center justify-between gap-2">
                                 <div className="flex items-center gap-1">
                                   <button
                                     onClick={() => setSelectedProjectId(project.id)}
-                                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80"
+                                    className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 transition-colors"
                                     title="Manage Project"
                                   >
                                     <Sliders size={15} />
                                   </button>
                                   <button
                                     onClick={() => setQrModalProject(project)}
-                                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80"
+                                    className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 transition-colors"
                                     title="QR Code"
                                   >
                                     <QrCode size={15} />
                                   </button>
                                   <button
                                     onClick={() => setSyncingEvent({ projectId: project.id, eventId: `event-${project.id}-main`, title: project.title })}
-                                    className="p-2 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red"
+                                    className="p-1.5 rounded-xl bg-white/5 hover:bg-brand-red/20 text-white/80 hover:text-brand-red transition-colors"
                                     title="Configure Google Drive"
                                   >
                                     <HardDrive size={15} />
@@ -546,7 +542,7 @@ export const AdminDashboardPage: React.FC = () => {
                                 <div className="flex items-center gap-1">
                                   <button
                                     onClick={() => setViewingFavoritesProj({ id: project.id, title: project.title })}
-                                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80"
+                                    className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 transition-colors"
                                     title="View Favorites"
                                   >
                                     <Heart size={15} />
@@ -554,7 +550,7 @@ export const AdminDashboardPage: React.FC = () => {
                                   {canDeleteProjects && (
                                     <button
                                       onClick={() => handleDeleteProject(project.id, project.title)}
-                                      className="p-2 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-400"
+                                      className="p-1.5 rounded-xl bg-white/5 hover:bg-red-500/20 text-white/60 hover:text-red-400 transition-colors"
                                       title="Delete"
                                     >
                                       <Trash2 size={15} />

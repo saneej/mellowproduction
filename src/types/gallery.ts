@@ -277,6 +277,13 @@ export interface AdminNotification {
   link?: string;
 }
 
+export interface ClientLogo {
+  id: string;
+  name: string;
+  logoUrl: string;
+  websiteUrl?: string;
+}
+
 export interface AdminSettings {
   brandTitle: string;
   websiteLogoUrl?: string;
@@ -292,5 +299,6 @@ export interface AdminSettings {
   sessionTimeoutMinutes: number;
   autoSyncDrive: boolean;
   syncIntervalHours: number;
+  clients?: ClientLogo[];
 }
 

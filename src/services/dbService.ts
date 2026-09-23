@@ -100,7 +100,14 @@ const INITIAL_SETTINGS: AdminSettings = {
   accentColor: "#FFFFFF",
   sessionTimeoutMinutes: 120,
   autoSyncDrive: true,
-  syncIntervalHours: 6
+  syncIntervalHours: 6,
+  clients: [
+    { id: "c1", name: "Vogue", logoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200", websiteUrl: "#" },
+    { id: "c2", name: "Netflix", logoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200", websiteUrl: "#" },
+    { id: "c3", name: "Sony Music", logoUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=200", websiteUrl: "#" },
+    { id: "c4", name: "Harper's Bazaar", logoUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200", websiteUrl: "#" },
+    { id: "c5", name: "GQ Magazine", logoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200", websiteUrl: "#" }
+  ]
 };
 
 // Local In-Memory Fallback Cache

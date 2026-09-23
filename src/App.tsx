@@ -14,8 +14,40 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import React, { useState, useRef, useEffect } from "react";
+import { getAdminSettings } from "./services/dbService";
 
 // --- Components ---
+
+const ClientMarquee = () => {
+  const [clients, setClients] = useState<{ id: string; name: string; logoUrl: string; websiteUrl?: string }[]>([]);
+
+  useEffect(() => {
+    getAdminSettings().then(settings => {
+      if (settings?.clients) {
+        setClients(settings.clients);
+      }
+    });
+  }, []);
+
+  if (clients.length === 0) return null;
+
+  return (
+    <div className="py-12 bg-transparent overflow-hidden relative z-20">
+      <div className="flex items-center gap-16 animate-marquee whitespace-nowrap">
+        {[...clients, ...clients, ...clients, ...clients].map((client, index) => (
+          <div key={`${client.id}-${index}`} className="opacity-50 hover:opacity-100 transition-all duration-300 shrink-0 px-8">
+            <img 
+              src={client.logoUrl} 
+              alt={client.name} 
+              className="h-8 max-w-[130px] object-contain brightness-0 invert opacity-90"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const AnimatedStroke = ({ 
   className = "", 
@@ -910,14 +942,7 @@ const Footer = () => {
             <Lock size={11} />
             <span>Admin</span>
           </Link>
-          <a 
-            href="https://www.premiumbeat.com/blog/category/video-production/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity font-bold"
-          >
-            Industry Insights
-          </a>
+
           <Link
             to="/privacy"
             className="text-[10px] uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity font-bold"
@@ -1007,6 +1032,7 @@ export function MainWebsite() {
 
       <Navbar />
       <Hero />
+      <ClientMarquee />
       <About />
       <Story />
       <Services />

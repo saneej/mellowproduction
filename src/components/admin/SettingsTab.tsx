@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Settings, Save, ShieldCheck, Palette, Bell, CheckCircle2 } from "lucide-react";
+import { Settings, Save, ShieldCheck, Palette, Bell, CheckCircle2, Plus, Trash2, Building2, FileUp } from "lucide-react";
 import { getAdminSettings, updateAdminSettings } from "../../services/dbService";
 import { AdminSettings } from "../../types/gallery";
 
@@ -7,6 +7,10 @@ export const SettingsTab: React.FC = () => {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const [newClientName, setNewClientName] = useState("");
+  const [newClientLogoUrl, setNewClientLogoUrl] = useState("");
+  const [newClientWebsite, setNewClientWebsite] = useState("");
 
   useEffect(() => {
     getAdminSettings().then(setSettings);
@@ -24,6 +28,39 @@ export const SettingsTab: React.FC = () => {
     setTimeout(() => setSuccess(false), 3000);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (uploadEvent) => {
+      if (uploadEvent.target?.result) {
+        setNewClientLogoUrl(uploadEvent.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddClient = () => {
+    if (!newClientName || !newClientLogoUrl || !settings) return;
+    const newClient = {
+      id: `client-${Date.now()}`,
+      name: newClientName,
+      logoUrl: newClientLogoUrl,
+      websiteUrl: newClientWebsite || "#"
+    };
+    const clients = [...(settings.clients || []), newClient];
+    setSettings({ ...settings, clients });
+    setNewClientName("");
+    setNewClientLogoUrl("");
+    setNewClientWebsite("");
+  };
+
+  const handleDeleteClient = (id: string) => {
+    if (!settings) return;
+    const clients = (settings.clients || []).filter(c => c.id !== id);
+    setSettings({ ...settings, clients });
+  };
+
   if (!settings) return <div className="p-12 text-center font-mono text-xs text-white/50">Loading settings...</div>;
 
   return (
@@ -38,7 +75,7 @@ export const SettingsTab: React.FC = () => {
             </h2>
           </div>
           <p className="text-xs text-white/50">
-            Brand identity, gallery default behaviors, theme appearance, and security policies
+            Brand identity, gallery default behaviors, scrolling client strip logos, and security policies
           </p>
         </div>
 
@@ -129,6 +166,77 @@ export const SettingsTab: React.FC = () => {
                 className="w-4 h-4 accent-brand-red"
               />
             </label>
+          </div>
+        </div>
+
+        {/* Client Logos Manager */}
+        <div className="p-6 rounded-3xl bg-zinc-950 border border-white/10 space-y-4 shadow-xl md:col-span-2">
+          <div className="flex items-center gap-2 text-white font-bold uppercase text-sm border-b border-white/10 pb-3">
+            <Building2 size={16} className="text-brand-red" />
+            <span>Scrolling Clients & Partner Logos (Infinity Marquee)</span>
+          </div>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input
+                type="text"
+                placeholder="Client / Brand Name"
+                value={newClientName}
+                onChange={e => setNewClientName(e.target.value)}
+                className="bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-red"
+              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Logo URL or Upload Image"
+                  value={newClientLogoUrl}
+                  onChange={e => setNewClientLogoUrl(e.target.value)}
+                  className="flex-1 bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-red truncate"
+                />
+                <label className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white cursor-pointer flex items-center gap-1.5 shrink-0">
+                  <FileUp size={15} />
+                  <span>Upload</span>
+                  <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Website URL (Optional)"
+                  value={newClientWebsite}
+                  onChange={e => setNewClientWebsite(e.target.value)}
+                  className="flex-1 bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-brand-red"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddClient}
+                  className="px-4 py-2.5 bg-brand-red text-white font-bold rounded-xl flex items-center gap-1 hover:bg-brand-red/90 transition-all shrink-0"
+                >
+                  <Plus size={16} />
+                  <span>Add</span>
+                </button>
+              </div>
+            </div>
+
+            {/* List of current clients */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+              {(settings.clients || []).map(client => (
+                <div key={client.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
+                  <div className="flex items-center gap-2.5 truncate">
+                    <img src={client.logoUrl} alt={client.name} className="w-8 h-8 rounded-full object-cover border border-white/10 shrink-0" />
+                    <span className="text-white font-bold truncate">{client.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteClient(client.id)}
+                    className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors shrink-0"
+                    title="Remove Client"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
