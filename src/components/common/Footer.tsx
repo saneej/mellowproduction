@@ -41,9 +41,9 @@ export const Footer: React.FC<{ compact?: boolean }> = ({ compact = false }) => 
             Terms of Service
           </Link>
           <div className="flex items-center gap-2 text-zinc-600 text-xs">
-            <span>Developed by</span>
+            <span>Designed & Developed by</span>
             <a 
-              href="https://instagram.com/heysaneej" 
+              href="https://saneejified.me" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 font-bold text-zinc-900 hover:text-white hover:bg-brand-red transition-all px-3 py-1 rounded-full bg-brand-red/5 border border-brand-red/15 hover:border-brand-red group shadow-xs"

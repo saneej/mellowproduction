@@ -1,6 +1,6 @@
 {
   "name": "Mellow Production | Photography & Client Gallery System",
-  "description": "Mellow Production: Kerala's top video & photography studio with integrated client gallery platform, Google Drive media sync, and Firebase database.",
+  "description": "Mellow Production: Kerala's top video & photography studio with integrated client gallery platform, Google Drive media sync, and Firebase database. Designed and developed by Saneejified (https://saneejified.me).",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

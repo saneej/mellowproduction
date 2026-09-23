@@ -1,5 +1,7 @@
 # Mellow Production Architecture & Development Manual
 
+> **Designed and Developed by [Saneejified](https://saneejified.me)**
+
 ## Overview
 **Mellow Production Studio & Client Galleries** is a commercial-grade, full-stack React and Firebase application built for high-end photography and video production studios.
 
